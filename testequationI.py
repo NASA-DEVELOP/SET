@@ -28,3 +28,25 @@
 # Rs = h + Rt where h is the orbital height of NPP from the Earth's surface
 # D is the distance from the source to the site
 
+import numpy
+from numpy import *
+
+# Input Variables
+lat = 30*pi/180 # Latitude variable, converted to radians for trig
+D = 100.0 # Distance variable, km
+
+
+# Constants
+R_equator = 6378.1370 # km (a)
+R_polar = 6356.7523142 # km (b)
+h_NPP = 824 # km
+
+# Equations
+R_T = (R_polar*R_equator**2)/((R_equator*cos(lat))**2+(R_polar*sin(lat))**2)
+print R_T
+
+R_S = R_T + h_NPP
+print R_S
+
+s_dummy = sqrt(R_T**2 + (R_T + R_S)**2 - 2*R_T*(R_T + R_S)*cos(D/R_T))
+print s_dummy
