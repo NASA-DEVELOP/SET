@@ -31,9 +31,6 @@ class BrightP2P(object):
 	def set_radius_curvature(self):
 		self.R_T = (self.R_polar*self.R_equator**2)/((self.R_equator*cos(self.lat0))**2+(self.R_polar*sin(self.lat0))**2)
 
-	def set_distance(self, D):
-		self.D = D
-
 	def set_zenith(self, z):
 		self.z = z
 
@@ -44,22 +41,21 @@ class BrightP2P(object):
 		self.del_u = del_u
 
 	def get_latsource(self, lat_C):
-		self.lat_C = lat_C
+		self.lat_C = lat_C*pi/180
 
 	def get_longsource(self, long_C):
-		self.long_C = long_C
+		self.long_C = long_C*pi/180
 
 	def get_latsite(self, lat_O):
-		self.lat_O = lat_O
+		self.lat_O = lat_O*pi/180
 
 	def get_longsite(self, long_O):	
-		self.long_O = longO
+		self.long_O = long_O*pi/180
 
 	def get_distance(self):
 		# calculate distance to suplant D_OC given lat and longs of source and site
 		# Haversine equation source https://en.wikipedia.org/wiki/Haversine_formula
-		avg_radius = 6371
-		self.dist = 2*R_teton*arcsin(sqrt(sin((lat_O-lat_C)/2)**2 + cos(lat_C)*cos(lat_O)sin((long_C-long_O)/2)**2))
+		self.dist = 2*self.R_teton*arcsin(sqrt(sin((self.lat_O-self.lat_C)/2)**2 + cos(self.lat_C)*cos(self.lat_O)*sin((self.long_C-self.long_O)/2)**2))
 
 	def get_lat_dd(self):
 		return self.lat0*180/pi
@@ -81,10 +77,6 @@ p2p = BrightP2P(1.0)
 p2p.set_lat(43.5*pi/180) # degrees
 print 'Latitude (deg): {}'.format(p2p.get_lat_dd())
 
-# D, Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
-p2p.set_distance(150.0) # km
-print 'D, Distance source to site O-C (km): {}'.format(p2p.D)
-
 # z, Zenith angle site, REF 2, Fig. 6, p. 648
 p2p.set_zenith(0.0) # deg
 print 'z, Site zenith (deg): {}'.format(p2p.get_z_deg())
@@ -102,24 +94,24 @@ p2p.set_del_u(0.02) #km
 print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
 
 # latitude of site
-p2p.get_latsite() # degrees
-print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+p2p.get_latsite(43.9047) # degrees
+print 'latitude, gets the latitude of site pixel, dummy lat for now (radians): {}'.format(p2p.del_u)
 
 # latitude of source
-p2p.get_latsource() # degrees
-print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+p2p.get_latsource(43.4799) # degrees
+print 'latitude,  gets the latitude of source pixel, dummy lat for now (radians): {}'.format(p2p.del_u)
 
 # longitude of site
-p2p.get_longsite() #degrees
-print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+p2p.get_longsite(110.6408) #degrees
+print 'longitude,  gets the longitude of site pixel, dummy lat for now (radians): {}'.format(p2p.del_u)
 
 # longitude of source
-p2p.get_longsource() #degrees
-print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+p2p.get_longsource(110.7624) #degrees
+print 'longitude,  gets the longitude of source pixel, dummy lat for now (radians): {}'.format(p2p.del_u)
 
-# Distance between source and site
+# Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
 p2p.get_distance() #km
-print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+print 'distance,  gets the distance between source and site, dummy distance for now (km): {}'.format(p2p.del_u)
 
 
 
@@ -303,7 +295,7 @@ def fsum(p2p):
 	
 	# Unpack point-to-point variables
 	lat = p2p.lat0
-	D_OC = p2p.D
+	D_OC = p2p.dist
 	zen = p2p.z
 	beta = p2p.beta
 	R_T = p2p.R_T
@@ -480,7 +472,6 @@ def fsum(p2p):
 		S_u = S_d*D_S
 		
 		df_prop = S_u*ksi1*del_u
-		print(df_prop)
 		# integrand of propogation function, REF 2, Eq. 3, p. 644
 		total_sum = df_prop + total_sum
 		u_OQ += del_u
