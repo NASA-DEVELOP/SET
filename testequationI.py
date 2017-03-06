@@ -1,4 +1,4 @@
-# changes in d_del are giving much to big of differences in total_sum (factor of 10). Will need to check equations/outlier variables.
+# finsih distance function, figure out degree radians conversion, which variable needs which units.
 
 # REFERENCES
 # (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A. Rybnikova
@@ -10,12 +10,16 @@
 import numpy
 from numpy import *
 
+
 class BrightP2P(object):
 	# Earth ellipse semi-major orbit, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
 	R_equator = 6378.1370 # km (a)
 
 	# Earth ellipse semi-minor axis, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
 	R_polar = 6356.7523142 # km (b)
+
+	# Earth radius at latitude 43.7904 (grand teton)
+	R_teton = 6367.941 # km  (c)
 
 	def __init__(self, K_am):
 		# K - Parameter for relative importance of aerosols to molecules, REF 1, p. 10
@@ -39,6 +43,24 @@ class BrightP2P(object):
 	def set_del_u(self, del_u):
 		self.del_u = del_u
 
+	def get_latsource(self, lat_C):
+		self.lat_C = lat_C
+
+	def get_longsource(self, long_C):
+		self.long_C = long_C
+
+	def get_latsite(self, lat_O):
+		self.lat_O = lat_O
+
+	def get_longsite(self, long_O):	
+		self.long_O = longO
+
+	def get_distance(self):
+		# calculate distance to suplant D_OC given lat and longs of source and site
+		# Haversine equation source https://en.wikipedia.org/wiki/Haversine_formula
+		avg_radius = 6371
+		self.dist = 2*R_teton*arcsin(sqrt(sin((lat_O-lat_C)/2)**2 + cos(lat_C)*cos(lat_O)sin((long_C-long_O)/2)**2))
+
 	def get_lat_dd(self):
 		return self.lat0*180/pi
 
@@ -47,6 +69,7 @@ class BrightP2P(object):
 
 	def get_beta_deg(self):
 		return self.beta*180/pi
+
 
 # Input Variables
 print '**INPUTS**'
@@ -77,6 +100,28 @@ print 'R_T, Radius of curvature of the Earth (km): {}'.format(p2p.R_T)
 # Scattering distance increment
 p2p.set_del_u(0.02) #km
 print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+
+# latitude of site
+p2p.get_latsite() # degrees
+print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+
+# latitude of source
+p2p.get_latsource() # degrees
+print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+
+# longitude of site
+p2p.get_longsite() #degrees
+print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+
+# longitude of source
+p2p.get_longsource() #degrees
+print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+
+# Distance between source and site
+p2p.get_distance() #km
+print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
+
+
 
 # Set "u", the line of sight to scattering that is integration variable
 # u, Direct line distance from scattering point (Q) to observation site (O), REF 2, Fig. 6, p. 648
@@ -265,7 +310,7 @@ def fsum(p2p):
 	del_u = p2p.del_u
 	K_am = p2p.K_am
 
-	# Constants
+	print "*Constants*"
 	# N_m,0 - Molecular density at sea level, REF 2, p. 645
 	N_m0 = 2.55e19 # cm^-3
 
@@ -283,7 +328,6 @@ def fsum(p2p):
 	# light loss per night hour after midnight (negative hours before midnight)
 	d_ll = -0.045
 
-	print '*GEOMETRY*'
 	# Earth angle from source to site, REF 3, p. 308
 	Chi = D_OC/R_T # radians for trig
 	Chi_deg = Chi*180/pi # degrees for display
@@ -306,21 +350,23 @@ def fsum(p2p):
 	theta_deg = theta*180/pi # degrees
 	print 'theta, elevation angle of scatter above source from site (QOC) (deg): {}'.format(theta_deg)
 
+	print "*End Constants*"
 
-	total_sum = 0
 	u_OQ = u0 # km
+	total_sum = 0
 	loopcount = 0
 	#variable reassigned in loop
 	df_prop = 1
-	
-	while df_prop > 0.0001*total_sum:
 
+	#Total Propogation stable to 4 significant figures
+	stability_limit = 0.0000001
+	
+	while df_prop > stability_limit*total_sum:
 		## START OF "u" LOOP
 		# s, Distance from source to scattering CQ, REF 2, Appendix A (A1), p. 656
 		# equation is wrong in Ref 2 (Cinzano). Changed angle from Chi to theta according to Ref 3, p. 308, Equation 7 (Garstang)
 		s_CQ = sqrt((u_OQ - l_OC)**2 + 4*u_OQ*l_OC*sin(theta/2)**2) # km
-	
-
+		
 		# h, Height of scattering above Earth reference surface Q, REF 2, Appendix A (A1), p. 656
 		h_Q = R_T*(sqrt(1 + (u_OQ**2 + 2*u_OQ*R_T*cos(zen))/R_T**2) - 1) # km
 		
@@ -433,7 +479,8 @@ def fsum(p2p):
 		# S_u, Total illumance as a function of u, REF 2, Eq. 8, p. 645
 		S_u = S_d*D_S
 		
-		df_prop = S_u*ksi1*u_OQ
+		df_prop = S_u*ksi1*del_u
+		print(df_prop)
 		# integrand of propogation function, REF 2, Eq. 3, p. 644
 		total_sum = df_prop + total_sum
 		u_OQ += del_u
@@ -471,9 +518,34 @@ def fsum(p2p):
 	print 'S, Total illumance as a function of u: {}'.format(S_u)
 
 
-	print 'Final Scattering Height, where the next increment would add less than .1% propogation: {}'.format(u_OQ)
+	print 'u_OQ, Final Scattering Height, where the next increment would add less than .1% propogation: {}'.format(u_OQ)
 	print 'Total Integration of Propogation Function: {}'.format(total_sum)
 	print 'Number of loops to calculate Total Propogation: {}'.format(loopcount)
 	return total_sum
 
 fsum(p2p)
+
+
+
+
+# **) MIT License
+#
+# Copyright (C) 2016-2017 -- mrJean1@Gmail.com
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
