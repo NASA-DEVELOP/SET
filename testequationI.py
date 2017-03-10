@@ -28,6 +28,7 @@ class BrightP2P(object):
 	def set_lat(self, lat0):
 		self.lat0 = lat0
 
+	#use this in distance equation with avg of lat at source and site. possibly incorporate azimuth 
 	def set_radius_curvature(self):
 		self.R_T = (self.R_polar*self.R_equator**2)/((self.R_equator*cos(self.lat0))**2+(self.R_polar*sin(self.lat0))**2)
 
@@ -288,6 +289,15 @@ print 'distance,  gets the distance between source and site, dummy distance for 
 # # S_u, Total illumance as a function of u, REF 2, Eq. 8, p. 645
 # S_u = S_d*D_S
 # print 'S, Total illumance as a function of u: {}'.format(S_u)
+
+
+
+
+################################################################# Moving Window Kernel
+#define Kernel size
+
+#define cell size in lat long (from VIIRS data from Ben) and get number of rows to iterate over
+#
 
 ################################################################# Function
 
