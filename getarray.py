@@ -73,9 +73,10 @@ distance_kernel = get_dist_arr(cent_lat, R_teton, p_deg)
 for x in nditer(distance_kernel, op_flags=['readwrite']):
 	if x > 201:
 		x[...] = numpy.NaN
+		
 distance_kernel = distance_kernel[:, ~isnan(distance_kernel).any(axis=0)]
+Chi_kernel = distance_kernel/R_teton
 
-print distance_kernel
 
 # in_raster = arcpy.Raster("C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06.tif")
 # lowerLeft = arcpy.Point(in_raster.extent.XMin, in_raster.extent.YMin)
