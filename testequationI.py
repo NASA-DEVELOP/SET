@@ -339,18 +339,13 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 		u_OQ += del_u
 		loopcount += 1
 	return total_sum
-# http://stackoverflow.com/questions/19602900/element-wise-effecient-multiplication-of-arrays-of-matrices
-D_OC = D_OC[500:503,500:503]
-Chi = Chi[500:503,500:503]
-u0 = u0[500:503,500:503]
-theta = theta[500:503,500:503]
-PropSumArray = zeros_like(D_OC)
+# https://docs.scipy.org/doc/numpy/reference/arrays.nditer.html Iterator-Allocated output Arrays
+PropSumArray = zeros_like(l_OC)
 for i,c,u,l,t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),nditer(Chi, op_flags=['readwrite']),nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']),nditer(theta, op_flags=['readwrite'])):
-	i = fsum(p2p, R_T, c, u, l, t)
-	print PropSumArray
+	i[...] = fsum(p2p, R_T, c, u, l, t)
 print "*************************Propogation Array*******************************"
 print PropSumArray
-savetxt("TestPropArray.txt", PropSumArray, fmt= "%f", delimiter= ',', newline=';')
+savetxt("TestPropArray.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
 
 
 #didn't end up using ellipsoidal calculation of distance, we used great circle. 
