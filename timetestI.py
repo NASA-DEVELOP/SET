@@ -11,6 +11,8 @@ from __future__ import division
 import numpy
 from numpy import *
 import itertools
+import time
+import threading
 
 class BrightP2P(object):
 	def __init__(self, K_am):
@@ -51,7 +53,7 @@ p2p.set_beta(0.0) #deg
 print 'beta, Relative azimuth line-of-sight to scatter (deg): {}'.format(p2p.get_beta_deg())
 
 # Scattering distance increment
-p2p.set_del_u(0.02) #km
+p2p.set_del_u(0.2) #km
 print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(p2p.del_u)
 
 # # Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
@@ -107,9 +109,9 @@ cent_lat_km = cent_lat*R_teton*pi/180
 
 #pixel units
 kernel_w = round(400/p_w)
-print "kernel width in pixels: {}".format(kernel_w)
+print "kernel width in pixels, untrimmed: {}".format(kernel_w)
 kernel_h = round(400/p_h)
-print "kernel height in pixels: {}".format(kernel_h)
+print "kernel height in pixels, untrimmed: {}".format(kernel_h)
 if kernel_w%2 == 0:
 	kernel_w += 1 
 if kernel_h%2 == 0:
@@ -150,32 +152,27 @@ D_OC = D_OC[:, ~isnan(D_OC).any(axis=0)]
 
 ##causes radius_kernel to be empty
 #radius_kernel = radius_kernel[:, ~isnan(radius_kernel).any(axis=0)]
+print "kernel width in pixels, trimmed: {}".format(D_OC.shape[0])
 
+print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 # Earth angle from source to site, REF 3, p. 308
 Chi = D_OC/R_T
-print"********************chi"
-print Chi.ndim
+print"******************** Chi Array"
 print Chi
 #u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
-print"********************u0"
-print u0.ndim
+print"******************** u0 Array"
 print u0
 # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
 # L_OC and D_OC are similar as expected
 l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
-print"********************l_OC"
-print l_OC.ndim
+print"******************** l_OC Array"
 print l_OC
 # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
 q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
-print"********************q1"
-print q1.ndim
-print q1
 # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
 theta = arccos(q1/l_OC) # radians
-print"********************theta"
-print theta.ndim
+print"******************** theta Array"
 print theta
 ################################################################# Function that takes elements of the arrays of D_Oc, Chi , etc. as arguemnts. 
 ################################################################# Arguments named the same as arrays for laziness
@@ -186,7 +183,7 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 	del_u = p2p.del_u
 	K_am = p2p.K_am
 
-	print "*Constants*"
+	#*Constants*
 	# N_m,0 - Molecular density at sea level, REF 2, p. 645
 	N_m0 = 2.55e19 # cm^-3
 
@@ -203,17 +200,15 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 	W_c = 7.6e-5
 	# light loss per night hour after midnight (negative hours before midnight)
 	d_ll = -0.045
-
-	print "*End Constants*"
-	###################need to change so that u_OQ is updated to be element wise value of u0 array
+	#*End Constants*
+	
+	#containers for variables that update in loop
 	u_OQ = u0 # km
 	total_sum = 0
-	loopcount = 0
-	#variable reassigned in loop
 	df_prop = 1
 
-	#Total Propogation stable to 4 significant figures
-	stability_limit = 0.0000001
+	#Total Propogation stable to 3 significant figures
+	stability_limit = 0.001
 	
 	while df_prop > stability_limit*total_sum:
 		## START OF "u" LOOP
@@ -337,19 +332,57 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 		# integrand of propogation function, REF 2, Eq. 3, p. 644
 		total_sum = df_prop + total_sum
 		u_OQ += del_u
-		loopcount += 1
 	return total_sum
-Chi = Chi[500:510,500:510]
-u0 = u0[500:510, 500:510]
-l_OC = l_OC[500:510,500:510]
-theta = theta[500:510,500:510]
+#testing to reduce size of array
+Chi = Chi[500:520,500:520]
+u0 = u0[500:520,500:520]
+l_OC = l_OC[500:520,500:520]
+theta = theta[500:520,500:520]
 # https://docs.scipy.org/doc/numpy/reference/arrays.nditer.html Iterator-Allocated output Arrays
 PropSumArray = zeros_like(l_OC)
-for i,c,u,l,t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),nditer(Chi, op_flags=['readwrite']),nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']),nditer(theta, op_flags=['readwrite'])):
-	i[...] = fsum(p2p, R_T, c, u, l, t)
-print "*************************Propogation Array*******************************"
-print PropSumArray
-savetxt("TestPropArray.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
+
+################## Threading # currently does no better than no threading
+# print "Time in seconds for 400 iterations, with threads"
+
+# start = time.time()
+
+# threads = []
+# def helper(p, p2p, R_T, c, u, l, t):
+# 	p[...] = fsum(p2p, R_T, c, u, l, t)
+
+# for p, c, u, l, t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),nditer(Chi, op_flags=['readwrite']),nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']),nditer(theta, op_flags=['readwrite'])):
+#     threads.append(threading.Thread(target=helper(p, p2p, R_T, c, u, l ,t), args=(p, p2p, R_T, c, u, l, t)))
+
+# count = 0
+# for thread in threads:
+# 	if (count % 30 == 0 and count != 0):
+# 		time.sleep(.6) #time for previous threads to finish so the next round doesn't interfere with the previous
+# 	thread.start()
+# 	count += 1
+
+# end = time.time()
+# print (end-start)
+
+############################
+
+
+################### NoThreading
+# print "Time in seconds for 400 iterations, no threads"
+# start = time.time()
+# for p,c,u,l,t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),nditer(Chi, op_flags=['readwrite']),nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']),nditer(theta, op_flags=['readwrite'])):
+# 	p[...] = fsum(p2p, R_T, c, u, l, t)
+# end = time.time()
+# print (end-start)
+
+#####################
+
+# print "*************************Propogation Array*******************************"
+# print PropSumArray
+# savetxt("timetest.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
+
+
+
+
 
 
 #didn't end up using ellipsoidal calculation of distance, we used great circle. 
