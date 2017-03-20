@@ -1,5 +1,3 @@
-# finsih distance function, figure out degree radians conversion, which variable needs which units.
-
 # REFERENCES
 # (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A. Rybnikova
 #       and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness. Sci. Adv. 2.

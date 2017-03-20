@@ -84,29 +84,34 @@ p_deg = .0041666667
 #slice arrays down the middle, then stitch back together after adding pixel increment element wise
 def slice_n_stack(arr, pix_measure, central_index):
 	arr_left = arr.T[0:central_index]
+	# print "shape left: {}".format(arr_left.shape)
+	
 	arr_right = arr.T[central_index+1:]
+	# print "shape right: {}".format(arr_right.shape)
+	
 	
 	p_incr = pix_measure
 	for column in arr_left:
 		column -= p_incr
 		p_incr += pix_measure
 	arr_left = arr_left[ : : -1]
-	
+	print arr_left.shape
 	p_incr = pix_measure
 	for column in arr_right:
 		column += p_incr
 		p_incr += pix_measure
-	
-
+	print arr_right.shape
 	centercolumn = arr.T[central_index:central_index+1]
 	
 	result = hstack((arr_left.T, centercolumn.T, arr_right.T))
+	print result
 	return result
 
 p_h = R_teton*p_deg*pi/180
 p_w = cos(cent_lat*pi/180)*R_teton*p_deg*pi/180
 cent_lat_km = cent_lat*R_teton*pi/180
-
+print "cent lat"
+print cent_lat_km
 #pixel units
 kernel_w = round(400/p_w)
 print "kernel width in pixels, untrimmed: {}".format(kernel_w)
@@ -119,21 +124,35 @@ if kernel_h%2 == 0:
 
 #made relative arrays the same size, easier, few extra distance calculations will be trimmed
 rel_long = zeros((int(kernel_w), int(kernel_w)))
+# print "shape long initial: {}".format(rel_long.shape)
 rel_lat = ones((int(kernel_w), int(kernel_w)))*cent_lat_km
-
+# print "shape lat initial: {}".format(rel_long.shape)
 centralcolumnindex_long = int(round(rel_long.shape[1]/2))-1
 centralrowindex_lat = int(round(rel_lat.shape[0]/2))-1
-
+print centralcolumnindex_long
+print centralrowindex_lat
 rel_long_km = slice_n_stack(rel_long, p_h, centralcolumnindex_long)
+# print "shape long km: {}".format(rel_long_km.shape)
 rel_lat_km = slice_n_stack(rel_lat.T, p_w, centralrowindex_lat)
-# convert to radians for haversine formula
+# print "shape lat km: {}".format(rel_long_km.shape)
+rel_lat_km = rel_lat_km.T
+# print"******************** Relative Longitude (KM) Array"
+# print rel_long_km[0:1,centralcolumnindex_long:centralcolumnindex_long+20]
+
+
+# print"******************** Relative Lat (KM) Array"
+# print rel_lat_km[centralrowindex_lat:centralrowindex_lat+20,0:1]
+# # convert to radians for haversine formula
 rel_long_rad = rel_long_km/R_teton
 rel_lat_rad = rel_lat_km/R_teton
 cent_lat_rad = cent_lat*pi/180
-
+# print "shape long: {}".format(rel_long_rad.shape)
+# print "shape lat: {}".format(rel_lat_rad.shape)
 # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
 D_OC = 2*R_teton*arcsin(sqrt(sin((cent_lat_rad-rel_lat_rad)/2)**2 + cos(rel_lat_rad)*cos(cent_lat_rad)*sin((rel_long_rad-0)/2)**2))
-
+# print 'D_OC array'
+print "Center Distance, is close too but not equal to zero"
+print D_OC[centralrowindex_lat:centralrowindex_lat+1, centralcolumnindex_long:centralcolumnindex_long+1]
 # Radius of curvature
 # R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
 R_T = 6367.941
@@ -146,34 +165,39 @@ R_T = 6367.941
 for x in nditer(D_OC, op_flags=['readwrite']):
 	if x > 201:
 		x[...] = numpy.NaN
+savetxt("D_OC_withNans.txt", D_OC, fmt= "%.2e", delimiter= ',', newline=';')
 
-#functions to prune NaNs, not sure if they are necessary or if they modify arrays in a bad way
-D_OC = D_OC[:, ~isnan(D_OC).any(axis=0)]
+#functions to prune all columns with NaNs. Need to figure out elemen wiseMay also need to prune corresponding elements in lat and longitude arrays
+#D_OC = D_OC[:, ~isnan(D_OC).any(axis=0)]
+
 
 ##causes radius_kernel to be empty
 #radius_kernel = radius_kernel[:, ~isnan(radius_kernel).any(axis=0)]
 print "kernel width in pixels, trimmed: {}".format(D_OC.shape[0])
 
 print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
-# Earth angle from source to site, REF 3, p. 308
-Chi = D_OC/R_T
-print"******************** Chi Array"
-print Chi
-#u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
-u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
-print"******************** u0 Array"
-print u0
-# l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
-# L_OC and D_OC are similar as expected
-l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
-print"******************** l_OC Array"
-print l_OC
-# q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
-q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
-# theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
-theta = arccos(q1/l_OC) # radians
-print"******************** theta Array"
-print theta
+
+print"******************** D_OC Array"
+print D_OC
+# # Earth angle from source to site, REF 3, p. 308
+# Chi = D_OC/R_T
+# print"******************** Chi Array"
+# print Chi
+# #u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
+# u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
+# print"******************** u0 Array"
+# print u0
+# # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
+# # L_OC and D_OC are similar as expected
+# l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
+# print"******************** l_OC Array"
+# print l_OC
+# # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
+# q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
+# # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
+# theta = arccos(q1/l_OC) # radians
+# print"******************** theta Array"
+# print theta
 ################################################################# Function that takes elements of the arrays of D_Oc, Chi , etc. as arguemnts. 
 ################################################################# Arguments named the same as arrays for laziness
 
