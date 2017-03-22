@@ -12,6 +12,9 @@ import numpy
 from numpy import *
 import itertools
 import time
+import archook
+archook.get_arcpy()
+import arcpy
 import threading
 
 class BrightP2P(object):
@@ -165,7 +168,7 @@ R_T = 6367.941
 for x in nditer(D_OC, op_flags=['readwrite']):
 	if x > 201:
 		x[...] = numpy.NaN
-savetxt("D_OC_withNans.txt", D_OC, fmt= "%.2e", delimiter= ',', newline=';')
+
 
 #functions to prune all columns with NaNs. Need to figure out elemen wiseMay also need to prune corresponding elements in lat and longitude arrays
 #D_OC = D_OC[:, ~isnan(D_OC).any(axis=0)]
@@ -177,25 +180,25 @@ print "kernel width in pixels, trimmed: {}".format(D_OC.shape[0])
 
 print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 
-print"******************** D_OC Array"
-print D_OC
-# # Earth angle from source to site, REF 3, p. 308
-# Chi = D_OC/R_T
+# print"******************** D_OC Array"
+# print D_OC
+# Earth angle from source to site, REF 3, p. 308
+Chi = D_OC/R_T
 # print"******************** Chi Array"
 # print Chi
-# #u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
-# u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
+#u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
+u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
 # print"******************** u0 Array"
 # print u0
-# # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
-# # L_OC and D_OC are similar as expected
-# l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
+# l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
+# L_OC and D_OC are similar as expected
+l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
 # print"******************** l_OC Array"
 # print l_OC
-# # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
-# q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
-# # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
-# theta = arccos(q1/l_OC) # radians
+# q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
+q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
+# theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
+theta = arccos(q1/l_OC) # radians
 # print"******************** theta Array"
 # print theta
 ################################################################# Function that takes elements of the arrays of D_Oc, Chi , etc. as arguemnts. 
@@ -203,6 +206,8 @@ print D_OC
 
 def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 	
+	if isnan(l_OC):
+		return nan
 	# Unpack point-to-point variables. Class may not be necessary anymore
 	del_u = p2p.del_u
 	K_am = p2p.K_am
@@ -231,7 +236,7 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 	total_sum = 0
 	df_prop = 1
 
-	#Total Propogation stable to 3 significant figures
+	#Total Propogation stable to 7 significant figures
 	stability_limit = 0.001
 	
 	while df_prop > stability_limit*total_sum:
@@ -330,7 +335,6 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 
 		# f_m, Angular scattering function for molecular Rayleigh scattering, REF 2, Eq. 13, p. 646
 		f_m = 3*(1 + cos(omega)**2)/(16*pi)
-		
 
 		# f_a, Angular scattering function for aerosol Mie scattering, REF 2, Eq. 14, p. 646
 		if omega_deg >= 0.0 and omega_deg <= 10.0:
@@ -356,53 +360,91 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 		# integrand of propogation function, REF 2, Eq. 3, p. 644
 		total_sum = df_prop + total_sum
 		u_OQ += del_u
+
 	return total_sum
+
 #testing to reduce size of array
-Chi = Chi[500:520,500:520]
-u0 = u0[500:520,500:520]
-l_OC = l_OC[500:520,500:520]
-theta = theta[500:520,500:520]
+D_OCleft = D_OC[0:,0:565]
+Chileft = Chi[0:,0:565]
+u0left = u0[0:,0:565]
+l_OCleft = l_OC[0:,0:565]
+thetaleft = theta[0:,0:565]
+
+D_OCleft = D_OC[560:,560:565]
+Chileft = Chi[560:,560:565]
+u0left = u0[560:,560:565]
+l_OCleft = l_OC[560:,560:565]
+thetaleft = theta[560:,560:565]
+print"******************** D_OCleft Array Subsetted"
+print D_OCleft
+print"******************** Chileft Array Sub"
+print Chileft
+print"******************** u0left Array Sub"
+print u0left
+print"******************** l_OCleft Array Sub"
+print l_OCleft
+print"******************** thetaleft Array Sub"
+print thetaleft
 # https://docs.scipy.org/doc/numpy/reference/arrays.nditer.html Iterator-Allocated output Arrays
-PropSumArray = zeros_like(l_OC)
+PropSumArrayleft = zeros_like(l_OCleft)
 
-################## Threading # currently does no better than no threading
-# print "Time in seconds for 400 iterations, with threads"
+# ################## Threading # currently does no better than no threading
+# # print "Time in seconds for 400 iterations, with threads"
 
-# start = time.time()
+# # start = time.time()
 
-# threads = []
-# def helper(p, p2p, R_T, c, u, l, t):
-# 	p[...] = fsum(p2p, R_T, c, u, l, t)
+# # threads = []
+# # def helper(p, p2p, R_T, c, u, l, t):
+# # 	p[...] = fsum(p2p, R_T, c, u, l, t)
 
-# for p, c, u, l, t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),nditer(Chi, op_flags=['readwrite']),nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']),nditer(theta, op_flags=['readwrite'])):
-#     threads.append(threading.Thread(target=helper(p, p2p, R_T, c, u, l ,t), args=(p, p2p, R_T, c, u, l, t)))
+# # for p, c, u, l, t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),nditer(Chi, op_flags=['readwrite']),nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']),nditer(theta, op_flags=['readwrite'])):
+# #     threads.append(threading.Thread(target=helper(p, p2p, R_T, c, u, l ,t), args=(p, p2p, R_T, c, u, l, t)))
 
-# count = 0
-# for thread in threads:
-# 	if (count % 30 == 0 and count != 0):
-# 		time.sleep(.6) #time for previous threads to finish so the next round doesn't interfere with the previous
-# 	thread.start()
-# 	count += 1
+# # count = 0
+# # for thread in threads:
+# # 	if (count % 30 == 0 and count != 0):
+# # 		time.sleep(.6) #time for previous threads to finish so the next round doesn't interfere with the previous
+# # 	thread.start()
+# # 	count += 1
 
-# end = time.time()
-# print (end-start)
+# # end = time.time()
+# # print (end-start)
 
-############################
+# ############################
 
 
-################### NoThreading
-# print "Time in seconds for 400 iterations, no threads"
-# start = time.time()
-# for p,c,u,l,t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),nditer(Chi, op_flags=['readwrite']),nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']),nditer(theta, op_flags=['readwrite'])):
-# 	p[...] = fsum(p2p, R_T, c, u, l, t)
-# end = time.time()
-# print (end-start)
+# ################### NoThreading
+print "Time in seconds for 400 iterations, no threads"
+start = time.time()
+for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
+	p[...] = fsum(p2p, R_T, c, u, l, t)
+end = time.time()
+print (end-start)
+PropSumArrayright = PropSumArrayleft[ : :-1][:,1:]
+PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
 
+long_deg = rel_long_rad*180/pi
+long_deg = rel_lat_rad*180/pi
+
+
+filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
+myRaster = arcpy.Raster(filein)
+arcpy.env.overwriteOutput = True
+arcpy.env.outputCoordinateSystem = filein
+arcpy.env.cellSize = filein
+
+mx = myRaster.extent.XMin
+my = myRaster.extent.YMin
+
+lower_left = (mx,my)
+print lower_left
+x_cell_size = cos(cent_lat*pi/180)*p_deg
+y_cell_size = p_deg
 #####################
 
 # print "*************************Propogation Array*******************************"
-# print PropSumArray
-# savetxt("timetest.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
+print PropSumArrayleft
+savetxt("timetest.txt", PropSumArrayleft, fmt= "%.6e", delimiter= ',', newline=';')
 
 
 
