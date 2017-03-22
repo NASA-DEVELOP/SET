@@ -81,7 +81,9 @@ zen = p2p.z
 beta = p2p.beta
 
 #arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
-cent_lat = 40.0
+#bottom cent_lat = 40.8797
+#top
+cent_lat = 46.755666
 p_deg = .0041666667
 
 #slice arrays down the middle, then stitch back together after adding pixel increment element wise
@@ -370,11 +372,6 @@ u0left = u0[0:,0:565]
 l_OCleft = l_OC[0:,0:565]
 thetaleft = theta[0:,0:565]
 
-D_OCleft = D_OC[560:,560:565]
-Chileft = Chi[560:,560:565]
-u0left = u0[560:,560:565]
-l_OCleft = l_OC[560:,560:565]
-thetaleft = theta[560:,560:565]
 print"******************** D_OCleft Array Subsetted"
 print D_OCleft
 print"******************** Chileft Array Sub"
@@ -426,7 +423,7 @@ PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
 long_deg = rel_long_rad*180/pi
 long_deg = rel_lat_rad*180/pi
 
-
+########################### Array to Raster
 filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
 myRaster = arcpy.Raster(filein)
 arcpy.env.overwriteOutput = True
@@ -436,10 +433,15 @@ arcpy.env.cellSize = filein
 mx = myRaster.extent.XMin
 my = myRaster.extent.YMin
 
-lower_left = (mx,my)
+lower_left = arcpy.Point(mx,my)
 print lower_left
-x_cell_size = cos(cent_lat*pi/180)*p_deg
-y_cell_size = p_deg
+x_size = cos(cent_lat*pi/180)*p_deg
+y_size = p_deg
+
+
+Kernel = arcpy.NumPyArrayToRaster(PropSumArray, lower_left, x_size, y_size, nan)
+output = "C:/ArtificialBrightness/Kernel40.tif"
+Kernel.save(output)
 #####################
 
 # print "*************************Propogation Array*******************************"
