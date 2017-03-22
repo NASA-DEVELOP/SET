@@ -11,6 +11,8 @@ from numpy import *
 import itertools
 import numpy.ma as ma
 
+pflag = 'quiet'
+
 class BrightP2P(object):
 	def __init__(self, K_am):
 		# K - Parameter for relative importance of aerosols to molecules, REF 1, p. 10
@@ -130,15 +132,23 @@ rel_long_rad = rel_long_km/R_teton
 rel_lat_rad = rel_lat_km/R_teton
 cent_lat_rad = cent_lat*pi/180
 
+def varrprint(varrval, varrtext, print_flag):
+	if print_flag != 'quiet':
+		print '********************',
+		print varrtext,
+		print ':'
+		print varrval.shape,
+		print varrval.dtype
+		print varrtext, 
+		print 'maximum: {}'.format(ma.maximum(varrval[~isnan(varrval)])),
+		print ',',
+		print varrtext,
+		print 'minimum: {}'.format(ma.minimum(varrval[~isnan(varrval)]))
+
 # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
 D_OC = 2*R_teton*arcsin(sqrt(sin((cent_lat_rad-rel_lat_rad)/2)**2 + cos(rel_lat_rad)*cos(cent_lat_rad)*sin((rel_long_rad-0)/2)**2))
-print"********************D_OC:"
-print D_OC.shape,
-print D_OC.dtype
-print 'D_OC maximum: {}'.format(ma.maximum(D_OC)),
-print ', D_OC minimum: {}'.format(ma.minimum(D_OC))
+varrprint(D_OC,'D_OC', pflag)
 
-# print D_OC
 # Radius of curvature
 # R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
 R_T = 6367.941
@@ -153,13 +163,8 @@ R_T = 6367.941
 # 	if x > 201:
 # 		x[...] = numpy.NaN
 
-Dmask = D_OC < 201
-print"********************D Mask:"
-print Dmask.shape,
-print Dmask.dtype
-print 'Dmask maximum: {}'.format(ma.maximum(Dmask)),
-print ', Dmask minimum: {}'.format(ma.minimum(Dmask))
-# print Dmask
+D_OC[D_OC > 201] = numpy.NaN
+varrprint(D_OC,'D_OC', pflag)
 
 #functions to prune NaNs, not sure if they are necessary or if they modify arrays in a bad way
 # D_OC = D_OC[:, ~isnan(D_OC).any(axis=0)]
@@ -175,49 +180,24 @@ print ', Dmask minimum: {}'.format(ma.minimum(Dmask))
 
 # Earth angle from source to site, REF 3, p. 308
 Chi = D_OC/R_T
-print"********************chi:"
-print Chi.shape,
-print Chi.dtype
-print 'Chi maximum: {}'.format(ma.maximum(Chi)),
-print ', Chi minimum: {}'.format(ma.minimum(Chi))
-# print Chi
+varrprint(Chi,'Chi', pflag)
 
 #u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
-print"********************u0"
-print u0.shape,
-print u0.dtype
-print 'u0 maximum: {}'.format(ma.maximum(u0)),
-print ', u0 minimum: {}'.format(ma.minimum(u0))
-# print u0
+varrprint(u0,'u0', pflag)
 
 # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
 # L_OC and D_OC are similar as expected
 l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
-print"********************l_OC"
-print l_OC.shape,
-print l_OC.dtype
-print 'l_OC maximum: {}'.format(ma.maximum(l_OC)),
-print ', l_OC minimum: {}'.format(ma.minimum(l_OC))
-# print l_OC
+varrprint(l_OC,'l_OC', pflag)
 
 # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
 q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
-print"********************q1"
-print q1.shape,
-print q1.dtype
-print 'q1 maximum: {}'.format(ma.maximum(q1)),
-print ', q1 minimum: {}'.format(ma.minimum(q1))
-# print q1
+varrprint(q1,'q1', pflag)
 
 # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
 theta = arccos(q1/l_OC) # radians
-print"********************theta"
-print theta.shape,
-print theta.dtype
-print 'theta maximum: {}'.format(ma.maximum(theta)),
-print ', theta minimum: {}'.format(ma.minimum(theta))
-# print theta
+varrprint(theta,'theta', pflag)
 
 ################################################################# Function that takes elements of the arrays of D_Oc, Chi , etc. as arguemnts. 
 ################################################################# Arguments named the same as arrays for laziness
@@ -398,12 +378,7 @@ for i,c,u,l,t in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']),ndi
 print ii
 print "done"
 
-print "*************************Propagation Array*******************************"
-print PropSumArray.shape,
-print PropSumArray.dtype
-print 'propagation array maximum: {}'.format(ma.maximum(PropSumArray)),
-print ', propagation array minimum: {}'.format(ma.minimum(PropSumArray))
-# print PropSumArray
+varrprint(PropSumArray,'Propagation Array', pflag)
 
 savetxt("TestPropArray.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
 
