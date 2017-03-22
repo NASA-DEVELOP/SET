@@ -166,11 +166,7 @@ R_T = 6367.941
 # 	if x > 201:
 # 		y[...] = numpy.NaN
 
-
-for x in nditer(D_OC, op_flags=['readwrite']):
-	if x > 201:
-		x[...] = numpy.NaN
-
+D_OC[D_OC > 201] = numpy.NaN
 
 #functions to prune all columns with NaNs. Need to figure out elemen wiseMay also need to prune corresponding elements in lat and longitude arrays
 #D_OC = D_OC[:, ~isnan(D_OC).any(axis=0)]
@@ -182,27 +178,55 @@ print "kernel width in pixels, trimmed: {}".format(D_OC.shape[0])
 
 print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 
-# print"******************** D_OC Array"
-# print D_OC
+print"******************** D_OC Array"
+print D_OC[560:566,560:566]
+
 # Earth angle from source to site, REF 3, p. 308
 Chi = D_OC/R_T
-# print"******************** Chi Array"
+print"********************chi:"
+print Chi.shape,
+print Chi.dtype
+print 'Chi maximum: {}'.format(ma.maximum(Chi)),
+print ', Chi minimum: {}'.format(ma.minimum(Chi))
 # print Chi
+
 #u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
-# print"******************** u0 Array"
+print"********************u0"
+print u0.shape,
+print u0.dtype
+print 'u0 maximum: {}'.format(ma.maximum(u0)),
+print ', u0 minimum: {}'.format(ma.minimum(u0))
 # print u0
+
 # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
 # L_OC and D_OC are similar as expected
 l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
-# print"******************** l_OC Array"
+print"********************l_OC"
+print l_OC.shape,
+print l_OC.dtype
+print 'l_OC maximum: {}'.format(ma.maximum(l_OC)),
+print ', l_OC minimum: {}'.format(ma.minimum(l_OC))
 # print l_OC
+
 # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
 q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
+print"********************q1"
+print q1.shape,
+print q1.dtype
+print 'q1 maximum: {}'.format(ma.maximum(q1)),
+print ', q1 minimum: {}'.format(ma.minimum(q1))
+# print q1
+
 # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
 theta = arccos(q1/l_OC) # radians
-# print"******************** theta Array"
+print"********************theta"
+print theta.shape,
+print theta.dtype
+print 'theta maximum: {}'.format(ma.maximum(theta)),
+print ', theta minimum: {}'.format(ma.minimum(theta))
 # print theta
+
 ################################################################# Function that takes elements of the arrays of D_Oc, Chi , etc. as arguemnts. 
 ################################################################# Arguments named the same as arrays for laziness
 
@@ -238,7 +262,7 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 	total_sum = 0
 	df_prop = 1
 
-	#Total Propogation stable to 7 significant figures
+	#Total Propogation stable to 3 significant figures
 	stability_limit = 0.001
 	
 	while df_prop > stability_limit*total_sum:
@@ -372,16 +396,16 @@ u0left = u0[0:,0:565]
 l_OCleft = l_OC[0:,0:565]
 thetaleft = theta[0:,0:565]
 
-print"******************** D_OCleft Array Subsetted"
-print D_OCleft
-print"******************** Chileft Array Sub"
-print Chileft
-print"******************** u0left Array Sub"
-print u0left
-print"******************** l_OCleft Array Sub"
-print l_OCleft
-print"******************** thetaleft Array Sub"
-print thetaleft
+# print"******************** D_OCleft Array Subsetted"
+# print D_OCleft
+# print"******************** Chileft Array Sub"
+# print Chileft
+# print"******************** u0left Array Sub"
+# print u0left
+# print"******************** l_OCleft Array Sub"
+# print l_OCleft
+# print"******************** thetaleft Array Sub"
+# print thetaleft
 # https://docs.scipy.org/doc/numpy/reference/arrays.nditer.html Iterator-Allocated output Arrays
 PropSumArrayleft = zeros_like(l_OCleft)
 
@@ -417,11 +441,16 @@ for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite'])
 	p[...] = fsum(p2p, R_T, c, u, l, t)
 end = time.time()
 print (end-start)
-PropSumArrayright = PropSumArrayleft[ : :-1][:,1:]
+PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
 PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
+# print PropSumArrayleft
+# print PropSumArrayright
 
 long_deg = rel_long_rad*180/pi
-long_deg = rel_lat_rad*180/pi
+lat_deg = rel_lat_rad*180/pi
+print long_deg
+print lat_deg
+print "lower left"
 
 ########################### Array to Raster
 filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
@@ -430,22 +459,20 @@ arcpy.env.overwriteOutput = True
 arcpy.env.outputCoordinateSystem = filein
 arcpy.env.cellSize = filein
 
-mx = myRaster.extent.XMin
-my = myRaster.extent.YMin
+latitude = 44.384922
+longitude = -110.650200
 
-lower_left = arcpy.Point(mx,my)
-print lower_left
+lower_left = arcpy.Point(longitude,latitude)
+
 x_size = cos(cent_lat*pi/180)*p_deg
 y_size = p_deg
 
-
 Kernel = arcpy.NumPyArrayToRaster(PropSumArray, lower_left, x_size, y_size, nan)
-output = "C:/ArtificialBrightness/Kernel40.tif"
+output = "C:/ArtificialBrightness/Kernel402.tif"
 Kernel.save(output)
 #####################
 
 # print "*************************Propogation Array*******************************"
-print PropSumArrayleft
 savetxt("timetest.txt", PropSumArrayleft, fmt= "%.6e", delimiter= ',', newline=';')
 
 
