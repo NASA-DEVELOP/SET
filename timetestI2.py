@@ -16,6 +16,7 @@ import archook
 archook.get_arcpy()
 import arcpy
 import threading
+import skimage.external.tifffile
 
 class BrightP2P(object):
 	def __init__(self, K_am):
@@ -442,13 +443,11 @@ end = time.time()
 print (end-start)
 PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
 PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
-D_OCright = fliplr(D_OCleft[:,1:])
-D_OCarr = hstack((D_OCleft, D_OCright))
-print "array shapes"
 print PropSumArray
-print D_OCarr
+print PropSumArray.shape
 long_deg = rel_long_rad*180/pi
 lat_deg = rel_lat_rad*180/pi
+
 
 ########################### Array to Raster
 filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
@@ -457,24 +456,28 @@ arcpy.env.overwriteOutput = True
 arcpy.env.outputCoordinateSystem = filein
 arcpy.env.cellSize = filein
 
-latitude = 44.384922
-longitude = -110.650200
+latitude = 41.417855
+longitude = -112.617213
 
 lower_left = arcpy.Point(longitude,latitude)
 
 x_size = cos(cent_lat*pi/180)*p_deg
 y_size = p_deg
 
+######################### saving as tiff ################
+
+#io.imsave('testkernelbig.png', PropSumArray)
+skimage.external.tifffile.imsave("tifftestKernelBig2.tif", PropSumArray)
+
+######################### saving as geotiff ###########
+# adds extra rows
 Kernel = arcpy.NumPyArrayToRaster(PropSumArray, lower_left, x_size, y_size, nan)
-output = "C:/ArtificialBrightness/BigKerneltest2.tif"
+output = "C:/ArtificialBrightness/geotifftestKernelBig2.tif"
 Kernel.save(output)
 #####################
 
 # print "*************************Propogation Array*******************************"
-savetxt("timetest.txt", PropSumArrayleft, fmt= "%.6e", delimiter= ',', newline=';')
-
-
-
+savetxt("timetest.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
 
 
 
