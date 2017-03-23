@@ -179,7 +179,8 @@ print "kernel width in pixels, trimmed: {}".format(D_OC.shape[0])
 print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 
 print"******************** D_OC Array"
-print D_OC[560:566,560:566]
+##################################reassignment of center value, need to use better method
+D_OC[630:631,630:631] =.01
 
 # Earth angle from source to site, REF 3, p. 308
 Chi = D_OC/R_T
@@ -389,12 +390,10 @@ def fsum(p2p, R_T, Chi, u0, l_OC, theta):
 
 	return total_sum
 
-#testing to reduce size of array
-D_OCleft = D_OC[0:,0:565]
-Chileft = Chi[0:,0:565]
-u0left = u0[0:,0:565]
-l_OCleft = l_OC[0:,0:565]
-thetaleft = theta[0:,0:565]
+Chileft = Chi[0:,0:632]
+u0left = u0[0:,0:632]
+l_OCleft = l_OC[0:,0:632]
+thetaleft = theta[0:,0:632]
 
 # print"******************** D_OCleft Array Subsetted"
 # print D_OCleft
@@ -443,14 +442,13 @@ end = time.time()
 print (end-start)
 PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
 PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
-# print PropSumArrayleft
-# print PropSumArrayright
-
+D_OCright = fliplr(D_OCleft[:,1:])
+D_OCarr = hstack((D_OCleft, D_OCright))
+print "array shapes"
+print PropSumArray
+print D_OCarr
 long_deg = rel_long_rad*180/pi
 lat_deg = rel_lat_rad*180/pi
-print long_deg
-print lat_deg
-print "lower left"
 
 ########################### Array to Raster
 filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
@@ -468,7 +466,7 @@ x_size = cos(cent_lat*pi/180)*p_deg
 y_size = p_deg
 
 Kernel = arcpy.NumPyArrayToRaster(PropSumArray, lower_left, x_size, y_size, nan)
-output = "C:/ArtificialBrightness/Kernel402.tif"
+output = "C:/ArtificialBrightness/BigKerneltest2.tif"
 Kernel.save(output)
 #####################
 
