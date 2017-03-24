@@ -156,17 +156,21 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	print ', theta minimum: {}'.format(ma.minimum(theta))
 	# print theta
 
+	# Get left arrays to cut processing time in half
 	Chileft = Chi[0:,0:632]
 	u0left = u0[0:,0:632]
 	l_OCleft = l_OC[0:,0:632]
 	thetaleft = theta[0:,0:632]
 
+	#test array subsets to reduce processin time
 	Chileft = Chi[620:640,620:632]
 	u0left = u0[620:640,620:632]
 	l_OCleft = l_OC[620:640,620:632]
 	thetaleft = theta[620:640,620:632]
+
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
+
 	# print"******************** D_OCleft Array Subsetted"
 	# print D_OCleft
 	# print"******************** Chileft Array Sub"
@@ -202,8 +206,7 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	# # print (end-start)
 
 	# ############################
-
-	# https://docs.scipy.org/doc/numpy/reference/arrays.nditer.html Iterator-Allocated output Arrays
+	
 	# ################### NoThreading #####################
 	print "Time for iterations, no threads"
 	start = time.time()
