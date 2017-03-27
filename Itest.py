@@ -26,7 +26,7 @@ def main():
 	propagation_array = fsum_2d(pflag)
 	varrprint(propagation_array,'propagation_array', pflag)
 
-	proparray_to_geotiff('C:/outputkerneltiffs/test_noclass_3_24_1.tif')
+	proparray_to_geotiff('C:/outputkerneltiffs/test_noclass_3_24_1.tif', propagation_array)
 
 # Function that creates 2d propagation function
 def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
@@ -461,22 +461,22 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, 
 
 	return total_sum
 
-def proparray_to_geotiff(tiffoutpathwithname, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
+def proparray_to_geotiff(tiffoutpathwithname, PropSumArray, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
 	########################### Array to Raster
 	
-	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
-	myRaster = arcpy.Raster(filein)
-	arcpy.env.overwriteOutput = True
-	arcpy.env.outputCoordinateSystem = filein
-	arcpy.env.cellSize = filein
+	# filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
+	# myRaster = arcpy.Raster(filein)
+	# arcpy.env.overwriteOutput = True
+	# arcpy.env.outputCoordinateSystem = filein
+	# arcpy.env.cellSize = filein
 
-	latitude = lwr_l_lat
-	longitude = lwr_l_long
+	# latitude = lwr_l_lat
+	# longitude = lwr_l_long
 
-	lower_left = arcpy.Point(longitude,latitude)
+	# lower_left = arcpy.Point(longitude,latitude)
 
-	x_size = cos(cent_lat*pi/180)*p_deg
-	y_size = p_deg
+	# x_size = cos(cent_lat*pi/180)*p_deg
+	# y_size = p_deg
 
 	######################### saving output propogation array as tiff ################
 	
