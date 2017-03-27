@@ -24,6 +24,14 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	# Print flag, set to 'quiet' to turn off flagged prints
 	pflag = 'verbose'
 
+	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
+	#bottom cent_lat = 40.8797
+	#top
+	cent_lat_deg = 46.755666
+	cent_lat = cent_lat_deg*pi/180
+	p_deg = .0041666667
+	p_rad = p_deg*pi/180
+
 	# Earth ellipse semi-major orbit, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
 	R_equator = 6378.1370 # km (a)
 
@@ -33,9 +41,12 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	# Earth radius at latitude 43.7904 (grand teton)
 	R_teton = 6367.941 # km  (c)
 
-	# # Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	# R_T = (R_polar*R_equator**2)/((R_equator*cos((lat_O+lat_C/2)))**2+(R_polar*sin((lat_O+lat_C/2)))**2)
-	# print 'R_T, Radius of curvature of the Earth (km): {}'.format(R_T)
+	# Gaussian Directional Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
+	R_T = ((R_equator**2)*R_polar)/((R_equator*cos(cent_lat))**2 + (R_polar*sin(cent_lat))**2)
+	print 'R_T, Radius of curvature of the Earth (km): {}'.format(R_T)
+	
+	# NOT USED PRESENTLY: Directional Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
+	# R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
 
 	# z, Zenith angle site, REF 2, Fig. 6, p. 648
 	zen = zen_arg
@@ -45,16 +56,8 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	beta= beta_arg
 	print 'beta, Relative azimuth line-of-sight to scatter (deg): {}'.format(beta)
 
-	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
-	#bottom cent_lat = 40.8797
-	#top
-	cent_lat_deg = 46.755666
-	cent_lat = cent_lat_deg*pi/180
-	p_deg = .0041666667
-	p_rad = p_deg*pi/180
-
-	p_h = R_teton*p_rad
-	p_w = cos(cent_lat)*R_teton*p_rad
+	p_h = R_T*p_rad
+	p_w = cos(cent_lat)*R_T*p_rad
 	# cent_lat_km = cent_lat*R_teton
 	# print "cent lat"
 	# print cent_lat_km
@@ -137,14 +140,9 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	# # print "shape lat: {}".format(rel_lat_rad.shape)
 	# # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
 
-	D_OC = 2*R_teton*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rel_long/2)**2))
-	# print 'D_OC array'
+	D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rel_long/2)**2))
 	print "Center Distance, is close too but not equal to zero"
 	print D_OC[center_row, center_col]
-	
-	#### Radius of curvature array ### Should we use this if we use R_teton for pixel sizes?
-	# R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
-	R_T = R_teton
 
 	D_OC[D_OC > 201] = numpy.NaN
 
