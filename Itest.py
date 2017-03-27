@@ -18,11 +18,20 @@ import arcpy
 import threading
 import skimage.external.tifffile
 
-def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
+def main():
+	# Print flag
+	pflag = "verbose"
+
+	# Estimate the 2d propagation function
+	propagation_array = fsum_2d(pflag)
+	varrprint(propagation_array,'propagation_array', pflag)
+
+	proparray_to_geotiff('C:/outputkerneltiffs/test_noclass_3_24_1.tif')
+
+# Function that creates 2d propagation function
+def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
 	# Input Variables
 	print '**INPUTS**'
-	# Print flag, set to 'quiet' to turn off flagged prints
-	pflag = 'verbose'
 
 	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
 	#bottom cent_lat = 40.8797
@@ -32,22 +41,6 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	p_deg = .0041666667
 	p_rad = p_deg*pi/180
 
-	# Earth ellipse semi-major orbit, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	R_equator = 6378.1370 # km (a)
-
-	# Earth ellipse semi-minor axis, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	R_polar = 6356.7523142 # km (b)
-
-	# Earth radius at latitude 43.7904 (grand teton)
-	R_teton = 6367.941 # km  (c)
-
-	# Gaussian Directional Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	R_T = ((R_equator**2)*R_polar)/((R_equator*cos(cent_lat))**2 + (R_polar*sin(cent_lat))**2)
-	print 'R_T, Radius of curvature of the Earth (km): {}'.format(R_T)
-	
-	# NOT USED PRESENTLY: Directional Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	# R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
-
 	# z, Zenith angle site, REF 2, Fig. 6, p. 648
 	zen = zen_arg
 	print 'z, Site zenith (deg): {}'.format(zen)
@@ -56,22 +49,30 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	beta= beta_arg
 	print 'beta, Relative azimuth line-of-sight to scatter (deg): {}'.format(beta)
 
+	# Earth radius at latitude 43.7904 (grand teton)
+	R_teton = 6367.941 # km  (c)
+	print 'R_teton, Radius of curvature of the Earth at Teton (km): {}'.format(R_teton)
+
+	# Gaussian Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
+	R_T = gauss_earth_curvature_radius(cent_lat)
+	print 'R_T, Radius of curvature of the Earth (km): {}'.format(R_T)
+
 	# Create latitude/longitude arrays
 	source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cent_lat, p_rad, pflag)
 
-	# # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
-
+	# Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
+	# using haversine formula
 	D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2)**2))
 	print "Center Distance, is close too but not equal to zero"
 	print D_OC[cent_row, cent_col]
 
+	# Assignment of NaNs or null values outside of 200 km
 	D_OC[D_OC > 201] = numpy.NaN
 
+	# Check of D_OC shape after assigning NaNs outside of 200 km
 	print "kernel width in pixels, trimmed: {}".format(D_OC.shape[0])
-
 	print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 
-	print"******************** D_OC Array"
 	################################## reassignment of center value, need to use better method
 	D_OC[630:631,630:631] =.01
 	varrprint(D_OC,'D_OC', pflag)
@@ -80,12 +81,12 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	Chi = D_OC/R_T
 	varrprint(Chi,'Chi', pflag)
 
-	#u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
+	# u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 	u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
 	varrprint(u0,'u0', pflag)
 
 	# l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
-	# L_OC and D_OC are similar as expected
+	# l_OC and D_OC are similar as expected
 	l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
 	varrprint(l_OC,'l_OC', pflag)
 
@@ -151,47 +152,34 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	# ################### NoThreading #####################
 	print "Time for iterations, no threads"
 	start = time.time()
+
+	# 2d iteration for integrating from u0 to infinity to create propagation function for each element
 	for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-		p[...] = fsum(R_T, c, u, l, t, zen, beta)
+		p[...] = fsum_single(R_T, c, u, l, t, zen, beta)
 	end = time.time()
 	print (end-start)
 	PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
+
+	# Complete 2d propagation function
 	PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
-	print "final propogation array and array shape"
-	print PropSumArray
-	print PropSumArray.shape
-	# long_deg = rel_long_rad*180/pi
-	# lat_deg = rel_lat_rad*180/pi
 
+	return PropSumArray
 
-	########################### Array to Raster
-	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
-	myRaster = arcpy.Raster(filein)
-	arcpy.env.overwriteOutput = True
-	arcpy.env.outputCoordinateSystem = filein
-	arcpy.env.cellSize = filein
+# Function to calculate Gaussian Earth radius of curvature as a function of latitude
+def gauss_earth_curvature_radius(center_lat):
+	# Earth ellipse semi-major orbit, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
+	R_equator = 6378.1370 # km (a)
 
-	latitude = lwr_l_lat
-	longitude = lwr_l_long
+	# Earth ellipse semi-minor axis, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
+	R_polar = 6356.7523142 # km (b)
 
-	lower_left = arcpy.Point(longitude,latitude)
-
-	x_size = cos(cent_lat*pi/180)*p_deg
-	y_size = p_deg
-
-	######################### saving output propogation array as tiff ################
+	# Gaussian Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
+	R_curve = ((R_equator**2)*R_polar)/((R_equator*cos(center_lat))**2 + (R_polar*sin(center_lat))**2)
 	
-	skimage.external.tifffile.imsave(tiffoutpathwithname, PropSumArray)
+	# NOT USED PRESENTLY: Directional Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
+	# R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
 
-	######################### saving as geotiff ###########
-	# adds extra rows
-	# Kernel = arcpy.NumPyArrayToRaster(PropSumArray, lower_left, x_size, y_size, nan)
-	# output = "C:/ArtificialBrightness/geotifftestKernelBig2.tif"
-	# Kernel.save(output)
-	#####################
-
-	# print "*************************Propogation Array*******************************"
-	# savetxt("timetest.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
+	return R_curve
 
 # Function does initial array sizing and create latitude/longitude arrays
 def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
@@ -307,8 +295,8 @@ def slice_n_stack(arr, pix_measure, central_index):
 	print result
 	return result
 
-# Function that takes elements of the arrays of D_Oc, Chi , etc. as arguemnts. 
-def fsum(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, del_u_farg = .2):
+# Function that takes elements of the arrays of D_OC, Chi, etc. as arguemnts. 
+def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, del_u_farg = .2):
 	if isnan(l_OC):
 		return nan
 
@@ -473,6 +461,38 @@ def fsum(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, del_u_f
 
 	return total_sum
 
+def proparray_to_geotiff(tiffoutpathwithname, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
+	########################### Array to Raster
+	
+	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
+	myRaster = arcpy.Raster(filein)
+	arcpy.env.overwriteOutput = True
+	arcpy.env.outputCoordinateSystem = filein
+	arcpy.env.cellSize = filein
+
+	latitude = lwr_l_lat
+	longitude = lwr_l_long
+
+	lower_left = arcpy.Point(longitude,latitude)
+
+	x_size = cos(cent_lat*pi/180)*p_deg
+	y_size = p_deg
+
+	######################### saving output propogation array as tiff ################
+	
+	skimage.external.tifffile.imsave(tiffoutpathwithname, PropSumArray)
+
+	######################### saving as geotiff ###########
+	# adds extra rows
+	# Kernel = arcpy.NumPyArrayToRaster(PropSumArray, lower_left, x_size, y_size, nan)
+	# output = "C:/ArtificialBrightness/geotifftestKernelBig2.tif"
+	# Kernel.save(output)
+	#####################
+
+	# print "*************************Propogation Array*******************************"
+	# savetxt("timetest.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
+
+
 # array variable check print function
 def varrprint(varrval, varrtext, print_flag):
 	if print_flag != 'quiet':
@@ -487,7 +507,6 @@ def varrprint(varrval, varrtext, print_flag):
 		print varrtext,
 		print 'minimum: {}'.format(ma.minimum(varrval[~isnan(varrval)]))
 
-main('C:/outputkerneltiffs/test_noclass_3_24_1.tif')
 #didn't end up using ellipsoidal calculation of distance, we used great circle. 
 #if we decide we can use this guy's code for ellipsoid calc
 
@@ -512,3 +531,6 @@ main('C:/outputkerneltiffs/test_noclass_3_24_1.tif')
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
+
+if __name__ == "__main__":
+	main()
