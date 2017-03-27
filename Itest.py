@@ -56,93 +56,14 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	beta= beta_arg
 	print 'beta, Relative azimuth line-of-sight to scatter (deg): {}'.format(beta)
 
-	p_h = R_T*p_rad
-	p_w = cos(cent_lat)*R_T*p_rad
-	# cent_lat_km = cent_lat*R_teton
-	# print "cent lat"
-	# print cent_lat_km
-	# #pixel units
-	# kernel_w = round(400/p_w)
-	# print "kernel width in pixels, untrimmed: {}".format(kernel_w)
-	# kernel_h = round(400/p_h)
-	# print "kernel height in pixels, untrimmed: {}".format(kernel_h)
-	# if kernel_w%2 == 0:
-	# 	kernel_w += 1 
-	# if kernel_h%2 == 0:
-	# 	kernel_h += 1
+	# Create latitude/longitude arrays
+	source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cent_lat, p_rad, pflag)
 
-	# Calculate dimensions for kernel
-	kernel_cols = int(round(400/p_w))
-	kernel_rows = int(round(400/p_h))
-	if kernel_cols%2 == 0:
-		kernel_cols += 1 
-	if kernel_rows%2 == 0:
-		kernel_rows += 1
-	print "kernel width in columns, untrimmed: {}".format(kernel_cols)
-	print "kernel height in rows, untrimmed: {}".format(kernel_rows)
-
-	# Create vectors of column and row counts
-	col_count = array(range(kernel_cols))
-	row_count = array(range(kernel_rows))
-
-	# Find center column, center row
-	center_col = int((kernel_cols - 1)/2)
-	center_row = int((kernel_rows - 1)/2)
-	print center_col
-	print center_row
-
-	# Create vecotrs of relative longitude and latitudes (in radians)
-	rel_long_vec = array(p_rad*(col_count - center_col))
-	print rel_long_vec.shape
-	rel_lat_vec = -p_rad*(row_count - center_row)
-	print rel_lat_vec.shape
-	print rel_long_vec
-	print rel_lat_vec
-	print rel_long_vec[center_col]
-	print rel_lat_vec[center_row] 
-
-	rel_long = tile(rel_long_vec,(kernel_rows,1))
-	rel_lat = transpose(tile(rel_lat_vec,(kernel_cols,1)))
-	print rel_long
-	varrprint(rel_long,'rel_long',pflag)
-	print rel_lat
-	varrprint(rel_lat,'rel_lat',pflag)
-
-	source_lat = rel_lat + cent_lat
-	print source_lat
-	varrprint(source_lat,'source_lat',pflag)
-
-	# #made relative arrays the same size, easier, few extra distance calculations will be trimmed
-	# rel_long = zeros((int(kernel_w), int(kernel_w)))
-	# # print "shape long initial: {}".format(rel_long.shape)
-	# rel_lat = ones((int(kernel_w), int(kernel_w)))*cent_lat_km
-	# # print "shape lat initial: {}".format(rel_long.shape)
-	# centralcolumnindex_long = int(round(rel_long.shape[1]/2))-1
-	# centralrowindex_lat = int(round(rel_lat.shape[0]/2))-1
-	# print centralcolumnindex_long
-	# print centralrowindex_lat
-	# rel_long_km = slice_n_stack(rel_long, p_h, centralcolumnindex_long)
-	# # print "shape long km: {}".format(rel_long_km.shape)
-	# rel_lat_km = slice_n_stack(rel_lat.T, p_w, centralrowindex_lat)
-	# # print "shape lat km: {}".format(rel_long_km.shape)
-	# rel_lat_km = rel_lat_km.T
-	# # print"******************** Relative Longitude (KM) Array"
-	# # print rel_long_km[0:1,centralcolumnindex_long:centralcolumnindex_long+20]
-
-
-	# # print"******************** Relative Lat (KM) Array"
-	# # print rel_lat_km[centralrowindex_lat:centralrowindex_lat+20,0:1]
-	# # # convert to radians for haversine formula
-	# rel_long_rad = rel_long_km/R_teton
-	# rel_lat_rad = rel_lat_km/R_teton
-	# cent_lat_rad = cent_lat*pi/180
-	# # print "shape long: {}".format(rel_long_rad.shape)
-	# # print "shape lat: {}".format(rel_lat_rad.shape)
 	# # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
 
-	D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rel_long/2)**2))
+	D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2)**2))
 	print "Center Distance, is close too but not equal to zero"
-	print D_OC[center_row, center_col]
+	print D_OC[cent_row, cent_col]
 
 	D_OC[D_OC > 201] = numpy.NaN
 
@@ -272,7 +193,92 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	# print "*************************Propogation Array*******************************"
 	# savetxt("timetest.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
 
+# Function does initial array sizing and create latitude/longitude arrays
+def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
+	p_h = R_curve*pix_rad
+	p_w = cos(center_lat)*R_curve*pix_rad
+	# cent_lat_km = cent_lat*R_teton
+	# print "cent lat"
+	# print cent_lat_km
+	# #pixel units
+	# kernel_w = round(400/p_w)
+	# print "kernel width in pixels, untrimmed: {}".format(kernel_w)
+	# kernel_h = round(400/p_h)
+	# print "kernel height in pixels, untrimmed: {}".format(kernel_h)
+	# if kernel_w%2 == 0:
+	# 	kernel_w += 1 
+	# if kernel_h%2 == 0:
+	# 	kernel_h += 1
 
+	# Calculate dimensions for kernel
+	kernel_cols = int(round(400/p_w))
+	kernel_rows = int(round(400/p_h))
+	if kernel_cols%2 == 0:
+		kernel_cols += 1 
+	if kernel_rows%2 == 0:
+		kernel_rows += 1
+	print "kernel width in columns, untrimmed: {}".format(kernel_cols)
+	print "kernel height in rows, untrimmed: {}".format(kernel_rows)
+
+	# Create vectors of column and row counts
+	col_count = array(range(kernel_cols))
+	row_count = array(range(kernel_rows))
+
+	# Find center column, center row
+	center_col = int((kernel_cols - 1)/2)
+	center_row = int((kernel_rows - 1)/2)
+	print center_col
+	print center_row
+
+	# Create vecotrs of relative longitude and latitudes (in radians)
+	rel_long_vec = array(pix_rad*(col_count - center_col))
+	print rel_long_vec.shape
+	rel_lat_vec = -pix_rad*(row_count - center_row)
+	print rel_lat_vec.shape
+	print rel_long_vec
+	print rel_lat_vec
+	print rel_long_vec[center_col]
+	print rel_lat_vec[center_row] 
+
+	rel_long = tile(rel_long_vec,(kernel_rows,1))
+	rel_lat = transpose(tile(rel_lat_vec,(kernel_cols,1)))
+	print rel_long
+	varrprint(rel_long,'rel_long',pf)
+	print rel_lat
+	varrprint(rel_lat,'rel_lat',pf)
+
+	src_lat = rel_lat + center_lat
+	print src_lat
+	varrprint(src_lat,'src_lat',pf)
+
+	return src_lat, rel_long, center_row, center_col
+
+	# #made relative arrays the same size, easier, few extra distance calculations will be trimmed
+	# rel_long = zeros((int(kernel_w), int(kernel_w)))
+	# # print "shape long initial: {}".format(rel_long.shape)
+	# rel_lat = ones((int(kernel_w), int(kernel_w)))*cent_lat_km
+	# # print "shape lat initial: {}".format(rel_long.shape)
+	# centralcolumnindex_long = int(round(rel_long.shape[1]/2))-1
+	# centralrowindex_lat = int(round(rel_lat.shape[0]/2))-1
+	# print centralcolumnindex_long
+	# print centralrowindex_lat
+	# rel_long_km = slice_n_stack(rel_long, p_h, centralcolumnindex_long)
+	# # print "shape long km: {}".format(rel_long_km.shape)
+	# rel_lat_km = slice_n_stack(rel_lat.T, p_w, centralrowindex_lat)
+	# # print "shape lat km: {}".format(rel_long_km.shape)
+	# rel_lat_km = rel_lat_km.T
+	# # print"******************** Relative Longitude (KM) Array"
+	# # print rel_long_km[0:1,centralcolumnindex_long:centralcolumnindex_long+20]
+
+
+	# # print"******************** Relative Lat (KM) Array"
+	# # print rel_lat_km[centralrowindex_lat:centralrowindex_lat+20,0:1]
+	# # # convert to radians for haversine formula
+	# rel_long_rad = rel_long_km/R_teton
+	# rel_lat_rad = rel_lat_km/R_teton
+	# cent_lat_rad = cent_lat*pi/180
+	# # print "shape long: {}".format(rel_long_rad.shape)
+	# # print "shape lat: {}".format(rel_lat_rad.shape)
 
 
 #slice arrays down the middle, then stitch back together after adding pixel increment element wise
