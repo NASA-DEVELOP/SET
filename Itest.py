@@ -48,55 +48,99 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
 	#bottom cent_lat = 40.8797
 	#top
-	cent_lat = 46.755666
+	cent_lat_deg = 46.755666
+	cent_lat = cent_lat_deg*pi/180
 	p_deg = .0041666667
+	p_rad = p_deg*pi/180
 
-	p_h = R_teton*p_deg*pi/180
-	p_w = cos(cent_lat*pi/180)*R_teton*p_deg*pi/180
-	cent_lat_km = cent_lat*R_teton*pi/180
-	print "cent lat"
-	print cent_lat_km
-	#pixel units
-	kernel_w = round(400/p_w)
-	print "kernel width in pixels, untrimmed: {}".format(kernel_w)
-	kernel_h = round(400/p_h)
-	print "kernel height in pixels, untrimmed: {}".format(kernel_h)
-	if kernel_w%2 == 0:
-		kernel_w += 1 
-	if kernel_h%2 == 0:
-		kernel_h += 1
+	p_h = R_teton*p_rad
+	p_w = cos(cent_lat)*R_teton*p_rad
+	# cent_lat_km = cent_lat*R_teton
+	# print "cent lat"
+	# print cent_lat_km
+	# #pixel units
+	# kernel_w = round(400/p_w)
+	# print "kernel width in pixels, untrimmed: {}".format(kernel_w)
+	# kernel_h = round(400/p_h)
+	# print "kernel height in pixels, untrimmed: {}".format(kernel_h)
+	# if kernel_w%2 == 0:
+	# 	kernel_w += 1 
+	# if kernel_h%2 == 0:
+	# 	kernel_h += 1
 
-	#made relative arrays the same size, easier, few extra distance calculations will be trimmed
-	rel_long = zeros((int(kernel_w), int(kernel_w)))
-	# print "shape long initial: {}".format(rel_long.shape)
-	rel_lat = ones((int(kernel_w), int(kernel_w)))*cent_lat_km
-	# print "shape lat initial: {}".format(rel_long.shape)
-	centralcolumnindex_long = int(round(rel_long.shape[1]/2))-1
-	centralrowindex_lat = int(round(rel_lat.shape[0]/2))-1
-	print centralcolumnindex_long
-	print centralrowindex_lat
-	rel_long_km = slice_n_stack(rel_long, p_h, centralcolumnindex_long)
-	# print "shape long km: {}".format(rel_long_km.shape)
-	rel_lat_km = slice_n_stack(rel_lat.T, p_w, centralrowindex_lat)
-	# print "shape lat km: {}".format(rel_long_km.shape)
-	rel_lat_km = rel_lat_km.T
-	# print"******************** Relative Longitude (KM) Array"
-	# print rel_long_km[0:1,centralcolumnindex_long:centralcolumnindex_long+20]
+	# Calculate dimensions for kernel
+	kernel_cols = int(round(400/p_w))
+	kernel_rows = int(round(400/p_h))
+	if kernel_cols%2 == 0:
+		kernel_cols += 1 
+	if kernel_rows%2 == 0:
+		kernel_rows += 1
+	print "kernel width in columns, untrimmed: {}".format(kernel_cols)
+	print "kernel height in rows, untrimmed: {}".format(kernel_rows)
+
+	# Create vectors of column and row counts
+	col_count = array(range(kernel_cols))
+	row_count = array(range(kernel_rows))
+
+	# Find center column, center row
+	center_col = int((kernel_cols - 1)/2)
+	center_row = int((kernel_rows - 1)/2)
+	print center_col
+	print center_row
+
+	# Create vecotrs of relative longitude and latitudes (in radians)
+	rel_long_vec = array(p_rad*(col_count - center_col))
+	print rel_long_vec.shape
+	rel_lat_vec = -p_rad*(row_count - center_row)
+	print rel_lat_vec.shape
+	print rel_long_vec
+	print rel_lat_vec
+	print rel_long_vec[center_col]
+	print rel_lat_vec[center_row] 
+
+	rel_long = tile(rel_long_vec,(kernel_rows,1))
+	rel_lat = transpose(tile(rel_lat_vec,(kernel_cols,1)))
+	print rel_long
+	varrprint(rel_long,'rel_long',pflag)
+	print rel_lat
+	varrprint(rel_lat,'rel_lat',pflag)
+
+	source_lat = rel_lat + cent_lat
+	print source_lat
+	varrprint(source_lat,'source_lat',pflag)
+
+	# #made relative arrays the same size, easier, few extra distance calculations will be trimmed
+	# rel_long = zeros((int(kernel_w), int(kernel_w)))
+	# # print "shape long initial: {}".format(rel_long.shape)
+	# rel_lat = ones((int(kernel_w), int(kernel_w)))*cent_lat_km
+	# # print "shape lat initial: {}".format(rel_long.shape)
+	# centralcolumnindex_long = int(round(rel_long.shape[1]/2))-1
+	# centralrowindex_lat = int(round(rel_lat.shape[0]/2))-1
+	# print centralcolumnindex_long
+	# print centralrowindex_lat
+	# rel_long_km = slice_n_stack(rel_long, p_h, centralcolumnindex_long)
+	# # print "shape long km: {}".format(rel_long_km.shape)
+	# rel_lat_km = slice_n_stack(rel_lat.T, p_w, centralrowindex_lat)
+	# # print "shape lat km: {}".format(rel_long_km.shape)
+	# rel_lat_km = rel_lat_km.T
+	# # print"******************** Relative Longitude (KM) Array"
+	# # print rel_long_km[0:1,centralcolumnindex_long:centralcolumnindex_long+20]
 
 
-	# print"******************** Relative Lat (KM) Array"
-	# print rel_lat_km[centralrowindex_lat:centralrowindex_lat+20,0:1]
-	# # convert to radians for haversine formula
-	rel_long_rad = rel_long_km/R_teton
-	rel_lat_rad = rel_lat_km/R_teton
-	cent_lat_rad = cent_lat*pi/180
-	# print "shape long: {}".format(rel_long_rad.shape)
-	# print "shape lat: {}".format(rel_lat_rad.shape)
-	# Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
-	D_OC = 2*R_teton*arcsin(sqrt(sin((cent_lat_rad-rel_lat_rad)/2)**2 + cos(rel_lat_rad)*cos(cent_lat_rad)*sin((rel_long_rad-0)/2)**2))
+	# # print"******************** Relative Lat (KM) Array"
+	# # print rel_lat_km[centralrowindex_lat:centralrowindex_lat+20,0:1]
+	# # # convert to radians for haversine formula
+	# rel_long_rad = rel_long_km/R_teton
+	# rel_lat_rad = rel_lat_km/R_teton
+	# cent_lat_rad = cent_lat*pi/180
+	# # print "shape long: {}".format(rel_long_rad.shape)
+	# # print "shape lat: {}".format(rel_lat_rad.shape)
+	# # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
+
+	D_OC = 2*R_teton*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rel_long/2)**2))
 	# print 'D_OC array'
 	print "Center Distance, is close too but not equal to zero"
-	print D_OC[centralrowindex_lat:centralrowindex_lat+1, centralcolumnindex_long:centralcolumnindex_long+1]
+	print D_OC[center_row, center_col]
 	
 	#### Radius of curvature array ### Should we use this if we use R_teton for pixel sizes?
 	# R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
@@ -197,8 +241,8 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	print "final propogation array and array shape"
 	print PropSumArray
 	print PropSumArray.shape
-	long_deg = rel_long_rad*180/pi
-	lat_deg = rel_lat_rad*180/pi
+	# long_deg = rel_long_rad*180/pi
+	# lat_deg = rel_lat_rad*180/pi
 
 
 	########################### Array to Raster
