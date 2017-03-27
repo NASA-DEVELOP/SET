@@ -21,6 +21,8 @@ import skimage.external.tifffile
 def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
 	# Input Variables
 	print '**INPUTS**'
+	# Print flag, set to 'quiet' to turn off flagged prints
+	pflag = 'verbose'
 
 	# Earth ellipse semi-major orbit, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
 	R_equator = 6378.1370 # km (a)
@@ -109,52 +111,28 @@ def main(tiffoutpathwithname, zen_arg = 0.0, beta_arg = 0.0, lwr_l_long = -112.6
 	print"******************** D_OC Array"
 	################################## reassignment of center value, need to use better method
 	D_OC[630:631,630:631] =.01
+	varrprint(D_OC,'D_OC', pflag)
 
 	# Earth angle from source to site, REF 3, p. 308
 	Chi = D_OC/R_T
-	print"********************chi:"
-	print Chi.shape,
-	print Chi.dtype
-	print 'Chi maximum: {}'.format(ma.maximum(Chi)),
-	print ', Chi minimum: {}'.format(ma.minimum(Chi))
-	# print Chi
+	varrprint(Chi,'Chi', pflag)
 
 	#u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 	u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
-	print"********************u0"
-	print u0.shape,
-	print u0.dtype
-	print 'u0 maximum: {}'.format(ma.maximum(u0)),
-	print ', u0 minimum: {}'.format(ma.minimum(u0))
-	# print u0
+	varrprint(u0,'u0', pflag)
 
 	# l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
 	# L_OC and D_OC are similar as expected
 	l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
-	print"********************l_OC"
-	print l_OC.shape,
-	print l_OC.dtype
-	print 'l_OC maximum: {}'.format(ma.maximum(l_OC)),
-	print ', l_OC minimum: {}'.format(ma.minimum(l_OC))
-	# print l_OC
+	varrprint(l_OC,'l_OC', pflag)
 
 	# q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
 	q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
-	print"********************q1"
-	print q1.shape,
-	print q1.dtype
-	print 'q1 maximum: {}'.format(ma.maximum(q1)),
-	print ', q1 minimum: {}'.format(ma.minimum(q1))
-	# print q1
+	varrprint(q1,'q1', pflag)
 
 	# theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
 	theta = arccos(q1/l_OC) # radians
-	print"********************theta"
-	print theta.shape,
-	print theta.dtype
-	print 'theta maximum: {}'.format(ma.maximum(theta)),
-	print ', theta minimum: {}'.format(ma.minimum(theta))
-	# print theta
+	varrprint(theta,'theta', pflag)
 
 	# Get left arrays to cut processing time in half
 	Chileft = Chi[0:,0:632]
@@ -281,6 +259,7 @@ def slice_n_stack(arr, pix_measure, central_index):
 	print result
 	return result
 
+# Function that takes elements of the arrays of D_Oc, Chi , etc. as arguemnts. 
 def fsum(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, del_u_farg = .2):
 	if isnan(l_OC):
 		return nan
@@ -445,6 +424,20 @@ def fsum(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, del_u_f
 		u_OQ += del_u
 
 	return total_sum
+
+# array variable check print function
+def varrprint(varrval, varrtext, print_flag):
+	if print_flag != 'quiet':
+		print '********************',
+		print varrtext,
+		print ':'
+		print varrval.shape,
+		print varrval.dtype
+		print varrtext, 
+		print 'maximum: {}'.format(ma.maximum(varrval[~isnan(varrval)])),
+		print ',',
+		print varrtext,
+		print 'minimum: {}'.format(ma.minimum(varrval[~isnan(varrval)]))
 
 main('C:/outputkerneltiffs/test_noclass_3_24_1.tif')
 #didn't end up using ellipsoidal calculation of distance, we used great circle. 
