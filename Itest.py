@@ -16,7 +16,7 @@ import time
 #pip install archook
 import archook
 archook.get_arcpy()
-import arcpy
+# import arcpy
 import threading
 #pip install scikit-image
 import skimage.external.tifffile
@@ -26,13 +26,16 @@ def main():
 	pflag = "verbose"
 
 	# Estimate the 2d propagation function
-	propagation_array = fsum_2d(pflag)
-	varrprint(propagation_array,'propagation_array', pflag)
+	propagation_array1 = fsum_2d(pflag,0.0,0.0,30.0)
+	varrprint(propagation_array1,'propagation_array1', pflag)
 
-	proparray_to_geotiff('C:/outputkerneltiffs/test_noclass_3_24_1.tif', propagation_array)
+	# propagation_array2 = fsum_2d(pflag,0.0,0.0,10.0)
+	# varrprint(propagation_array2,'propagation_array2', pflag)
+
+	proparray_to_geotiff('C:/outputkerneltiffs/test_noclass_3_24_1.tif', propagation_array1)
 
 # Function that creates 2d propagation function
-def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
+def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0, ubr_arg = 10.0):
 	# Input Variables
 	print '**INPUTS**'
 
@@ -49,8 +52,12 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
 	print 'z, Site zenith (deg): {}'.format(zen)
 
 	# beta, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
-	beta= beta_arg
+	beta = beta_arg
 	print 'beta, Relative azimuth line-of-sight to scatter (deg): {}'.format(beta)
+
+	# ubr, Length of u for relaxing integration increment
+	ubr = ubr_arg
+	print 'ubr, Length of u for relaxing integration increment (km): {}'.format(ubr)
 
 	# Earth radius at latitude 43.7904 (grand teton)
 	R_teton = 6367.941 # km  (c)
@@ -113,10 +120,10 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
 	thetaleft = theta[0:,0:630]
 
 	#test array subsets to reduce processin time
-	# Chileft = Chi[429:432,620:630]
-	# u0left = u0[429:432,620:630]
-	# l_OCleft = l_OC[429:432,620:630]
-	# thetaleft = theta[429:432,620:630]
+	Chileft = Chi[429:432,620:630]
+	u0left = u0[429:432,620:630]
+	l_OCleft = l_OC[429:432,620:630]
+	thetaleft = theta[429:432,620:630]
 
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
@@ -163,7 +170,7 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
 
 	# 2d iteration for integrating from u0 to infinity to create propagation function for each element
 	for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-		p[...] = fsum_single(R_T, c, u, l, t, zen, beta)
+		p[...] = fsum_single(R_T, c, u, l, t, zen, beta, ubr)
 	end = time.time()
 	print (end-start)
 	PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
@@ -305,16 +312,22 @@ def slice_n_stack(arr, pix_measure, central_index):
 	return result
 
 # Function that takes elements of the arrays of D_OC, Chi, etc. as arguemnts. 
-def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, del_u_farg = .2):
+def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2):
 	if isnan(l_OC):
 		return nan
 
 	# Scattering distance increment
-	del_u = del_u_farg
+	del_u0 = del_u_farg
 	# print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(del_u)
 
-	zen = zen_farg
-	beta = beta_farg
+	# zenith angle at observation site
+	zen = zen_farg # radians
+
+	# horizontal angle at observation site from line-of-sight (OC) to line of incoming scattered light (OQ)
+	beta = beta_farg #radians
+
+	# length of u, scattering distance, at which the integration increment is relaxed
+	ubreak = ubrk_farg #km
 
 	# K - Parameter for relative importance of aerosols to molecules, REF 1, p. 10
 	K_am = K_am_arg # unitless ratio
@@ -345,9 +358,18 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, 
 
 	#Total Propogation stable to 3 significant figures
 	stability_limit = 0.001
+
+	# loop counter
+	lc = 1
 	
-	while df_prop > stability_limit*total_sum:
+	while u_OQ < 30.0: # df_prop > stability_limit*total_sum:
 		## START OF "u" LOOP
+
+		if u_OQ < ubreak:
+			del_u = del_u0
+		else:
+			del_u = del_u0*10.0
+
 		# s, Distance from source to scattering CQ, REF 2, Appendix A (A1), p. 656
 		# equation is wrong in Ref 2 (Cinzano). Changed angle from Chi to theta according to Ref 3, p. 308, Equation 7 (Garstang)
 		s_CQ = sqrt((u_OQ - l_OC)**2 + 4*u_OQ*l_OC*sin(theta/2)**2) # km
@@ -467,6 +489,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, K_am_arg = 1.0, 
 		# integrand of propogation function, REF 2, Eq. 3, p. 644
 		total_sum = df_prop + total_sum
 		u_OQ += del_u
+		lc += 1
+		print lc,
 
 	return total_sum
 
