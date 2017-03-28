@@ -8,14 +8,17 @@
 # (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc. Pac. 101.
 
 from __future__ import division
+#pip install numpy
 import numpy
 from numpy import *
 import itertools
 import time
+#pip install archook
 import archook
 archook.get_arcpy()
 import arcpy
 import threading
+#pip install scikit-image
 import skimage.external.tifffile
 
 def main():
@@ -74,10 +77,15 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
 	print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 
 	################################## reassignment of center value, need to use better method
-	D_OC[630:631,630:631] =.01
-	varrprint(D_OC,'D_OC', pflag)
+	print "center distance prechange"
+	print D_OC[430:433,628:631]
 
-	# Earth angle from source to site, REF 3, p. 308
+	D_OC[431:432,629:630] = .01
+	varrprint(D_OC,'D_OC', pflag)
+	print "center distance post"
+	print D_OC[430:433,628:631]
+	# Earth angle from source to site, REF 3, p. 308\
+	print str(.01/R_T)
 	Chi = D_OC/R_T
 	varrprint(Chi,'Chi', pflag)
 
@@ -99,30 +107,30 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
 	varrprint(theta,'theta', pflag)
 
 	# Get left arrays to cut processing time in half
-	Chileft = Chi[0:,0:632]
-	u0left = u0[0:,0:632]
-	l_OCleft = l_OC[0:,0:632]
-	thetaleft = theta[0:,0:632]
+	Chileft = Chi[0:,0:630]
+	u0left = u0[0:,0:630]
+	l_OCleft = l_OC[0:,0:630]
+	thetaleft = theta[0:,0:630]
 
 	#test array subsets to reduce processin time
-	Chileft = Chi[620:640,620:632]
-	u0left = u0[620:640,620:632]
-	l_OCleft = l_OC[620:640,620:632]
-	thetaleft = theta[620:640,620:632]
+	# Chileft = Chi[429:432,620:630]
+	# u0left = u0[429:432,620:630]
+	# l_OCleft = l_OC[429:432,620:630]
+	# thetaleft = theta[429:432,620:630]
 
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
 
 	# print"******************** D_OCleft Array Subsetted"
 	# print D_OCleft
-	# print"******************** Chileft Array Sub"
-	# print Chileft
-	# print"******************** u0left Array Sub"
-	# print u0left
-	# print"******************** l_OCleft Array Sub"
-	# print l_OCleft
-	# print"******************** thetaleft Array Sub"
-	# print thetaleft
+	print"******************** Chileft Array Sub"
+	print Chileft
+	print"******************** u0left Array Sub"
+	print u0left
+	print"******************** l_OCleft Array Sub"
+	print l_OCleft
+	print"******************** thetaleft Array Sub"
+	print thetaleft
 	
 
 	# ################## Threading # currently does no better than no threading
@@ -162,7 +170,8 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0):
 
 	# Complete 2d propagation function
 	PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
-
+	print "prop sum array hstacked"
+	print PropSumArray
 	return PropSumArray
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
