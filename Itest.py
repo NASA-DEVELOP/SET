@@ -14,8 +14,8 @@ from numpy import *
 import itertools
 import time
 #pip install archook
-import archook
-archook.get_arcpy()
+# import archook
+# archook.get_arcpy()
 # import arcpy
 import threading
 #pip install scikit-image
@@ -23,19 +23,23 @@ import skimage.external.tifffile
 
 def main():
 	# Print flag
-	pflag = "verbose"
+	pflag = "quiet"
 
 	# Estimate the 2d propagation function
-	propagation_array1 = fsum_2d(pflag,0.0,0.0,30.0)
+	propagation_array1, time_1 = fsum_2d(pflag,30.0)
+	
 	varrprint(propagation_array1,'propagation_array1', pflag)
 
-	# propagation_array2 = fsum_2d(pflag,0.0,0.0,10.0)
-	# varrprint(propagation_array2,'propagation_array2', pflag)
-
+	propagation_array2, time_2 = fsum_2d(pflag,10.0)
+	print "Time Factor Improvement!: {}".format(time_1/time_2)
+	varrprint(propagation_array2,'propagation_array2', pflag)
+	differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
+	print "Accuracy Loss Factor!: {}".format(differencearray_perc)
+	varrprint(differencearray_perc, 'difference array perc', pflag)
 	proparray_to_geotiff('C:/outputkerneltiffs/test_noclass_3_24_1.tif', propagation_array1)
-
+	proparray_to_geotiff('C:/outputkerneltiffs/difference_perc.tif', differencearray_perc)
 # Function that creates 2d propagation function
-def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0, ubr_arg = 10.0):
+def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	# Input Variables
 	print '**INPUTS**'
 
@@ -84,15 +88,13 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0, ubr_arg = 10.0):
 	print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 
 	################################## reassignment of center value, need to use better method
-	print "center distance prechange"
-	print D_OC[430:433,628:631]
+	
 
 	D_OC[431:432,629:630] = .01
 	varrprint(D_OC,'D_OC', pflag)
-	print "center distance post"
-	print D_OC[430:433,628:631]
+	
 	# Earth angle from source to site, REF 3, p. 308\
-	print str(.01/R_T)
+	
 	Chi = D_OC/R_T
 	varrprint(Chi,'Chi', pflag)
 
@@ -130,14 +132,14 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0, ubr_arg = 10.0):
 
 	# print"******************** D_OCleft Array Subsetted"
 	# print D_OCleft
-	print"******************** Chileft Array Sub"
-	print Chileft
-	print"******************** u0left Array Sub"
-	print u0left
-	print"******************** l_OCleft Array Sub"
-	print l_OCleft
-	print"******************** thetaleft Array Sub"
-	print thetaleft
+	# print"******************** Chileft Array Sub"
+	# print Chileft
+	# print"******************** u0left Array Sub"
+	# print u0left
+	# print"******************** l_OCleft Array Sub"
+	# print l_OCleft
+	# print"******************** thetaleft Array Sub"
+	# print thetaleft
 	
 
 	# ################## Threading # currently does no better than no threading
@@ -172,14 +174,14 @@ def fsum_2d(pflag = 'verbose', zen_arg = 0.0, beta_arg = 0.0, ubr_arg = 10.0):
 	for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
 		p[...] = fsum_single(R_T, c, u, l, t, zen, beta, ubr)
 	end = time.time()
-	print (end-start)
+	time_sec = end-start
 	PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
 
 	# Complete 2d propagation function
 	PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
 	print "prop sum array hstacked"
 	print PropSumArray
-	return PropSumArray
+	return PropSumArray, time_sec
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
 def gauss_earth_curvature_radius(center_lat):
@@ -201,18 +203,6 @@ def gauss_earth_curvature_radius(center_lat):
 def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
 	p_h = R_curve*pix_rad
 	p_w = cos(center_lat)*R_curve*pix_rad
-	# cent_lat_km = cent_lat*R_teton
-	# print "cent lat"
-	# print cent_lat_km
-	# #pixel units
-	# kernel_w = round(400/p_w)
-	# print "kernel width in pixels, untrimmed: {}".format(kernel_w)
-	# kernel_h = round(400/p_h)
-	# print "kernel height in pixels, untrimmed: {}".format(kernel_h)
-	# if kernel_w%2 == 0:
-	# 	kernel_w += 1 
-	# if kernel_h%2 == 0:
-	# 	kernel_h += 1
 
 	# Calculate dimensions for kernel
 	kernel_cols = int(round(400/p_w))
@@ -256,60 +246,6 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
 	varrprint(src_lat,'src_lat',pf)
 
 	return src_lat, rel_long, center_row, center_col
-
-	# #made relative arrays the same size, easier, few extra distance calculations will be trimmed
-	# rel_long = zeros((int(kernel_w), int(kernel_w)))
-	# # print "shape long initial: {}".format(rel_long.shape)
-	# rel_lat = ones((int(kernel_w), int(kernel_w)))*cent_lat_km
-	# # print "shape lat initial: {}".format(rel_long.shape)
-	# centralcolumnindex_long = int(round(rel_long.shape[1]/2))-1
-	# centralrowindex_lat = int(round(rel_lat.shape[0]/2))-1
-	# print centralcolumnindex_long
-	# print centralrowindex_lat
-	# rel_long_km = slice_n_stack(rel_long, p_h, centralcolumnindex_long)
-	# # print "shape long km: {}".format(rel_long_km.shape)
-	# rel_lat_km = slice_n_stack(rel_lat.T, p_w, centralrowindex_lat)
-	# # print "shape lat km: {}".format(rel_long_km.shape)
-	# rel_lat_km = rel_lat_km.T
-	# # print"******************** Relative Longitude (KM) Array"
-	# # print rel_long_km[0:1,centralcolumnindex_long:centralcolumnindex_long+20]
-
-
-	# # print"******************** Relative Lat (KM) Array"
-	# # print rel_lat_km[centralrowindex_lat:centralrowindex_lat+20,0:1]
-	# # # convert to radians for haversine formula
-	# rel_long_rad = rel_long_km/R_teton
-	# rel_lat_rad = rel_lat_km/R_teton
-	# cent_lat_rad = cent_lat*pi/180
-	# # print "shape long: {}".format(rel_long_rad.shape)
-	# # print "shape lat: {}".format(rel_lat_rad.shape)
-
-
-#slice arrays down the middle, then stitch back together after adding pixel increment element wise
-def slice_n_stack(arr, pix_measure, central_index):
-	arr_left = arr.T[0:central_index]
-	# print "shape left: {}".format(arr_left.shape)
-	
-	arr_right = arr.T[central_index+1:]
-	# print "shape right: {}".format(arr_right.shape)
-	
-	
-	p_incr = pix_measure
-	for column in arr_left:
-		column -= p_incr
-		p_incr += pix_measure
-	arr_left = arr_left[ : : -1]
-	print arr_left.shape
-	p_incr = pix_measure
-	for column in arr_right:
-		column += p_incr
-		p_incr += pix_measure
-	print arr_right.shape
-	centercolumn = arr.T[central_index:central_index+1]
-	
-	result = hstack((arr_left.T, centercolumn.T, arr_right.T))
-	print result
-	return result
 
 # Function that takes elements of the arrays of D_OC, Chi, etc. as arguemnts. 
 def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2):
@@ -490,7 +426,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_
 		total_sum = df_prop + total_sum
 		u_OQ += del_u
 		lc += 1
-		print lc,
+		# print lc,
 
 	return total_sum
 
