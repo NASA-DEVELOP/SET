@@ -19,26 +19,31 @@ import threading
 #pip install scikit-image
 import skimage.external.tifffile
 from scipy import ndimage
+import os.path
 
 def main():
 	# Print flag
 	pflag = "quiet"
+	kerneltiffpath = 'C:/outputkerneltiffs/kernelubreak30.tif'
 
-	# Estimate the 2d propagation function
-	propagation_array1, time_1 = fsum_2d(pflag,30.0)
-	proparray_to_tiff('C:/outputkerneltiffs/kernelubreak30.tif', propagation_array1)
-	varrprint(propagation_array1,'propagation_array1', pflag)
+	if os.path.isfile(kerneltiffpath)==False:
+		# Estimate the 2d propagation function and calc time and accuracy
+		propagation_array1, time_1 = fsum_2d(pflag,30.0)
+		proparray_to_tiff(kerneltiffpath, propagation_array1)
+		varrprint(propagation_array1,'propagation_array1', pflag)
 
-	propagation_array2, time_2 = fsum_2d(pflag,10.0)
-	print "Time Factor Improvement!: {}".format(time_1/time_2)
-	varrprint(propagation_array2,'propagation_array2', pflag)
-	differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
-	print "Accuracy Loss Factor!: {}".format(differencearray_perc)
-	varrprint(differencearray_perc, 'difference array perc', pflag)
-	print "time for prop function ubreak 30"
-	print time_1
+		propagation_array2, time_2 = fsum_2d(pflag,10.0)
+		print "Time Factor Improvement!: {}".format(time_1/time_2)
+		varrprint(propagation_array2,'propagation_array2', pflag)
+		differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
+		print "Accuracy Loss Factor!: {}".format(differencearray_perc)
+		varrprint(differencearray_perc, 'difference array perc', pflag)
+		print "time for prop function ubreak 30"
+		print time_1
+
+	# apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
+	propagation_array1 = arcpy.RasterToNumPyArray(arcpy.Raster(kerneltiffpath), nodata_to_value = numpy.NaN)
 	start = time.time()
-	# https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
 	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
 	myRaster = arcpy.Raster(filein)
 	imagearr = arcpy.RasterToNumPyArray(myRaster, nodata_to_value = numpy.NaN)
