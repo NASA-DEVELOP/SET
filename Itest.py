@@ -1,5 +1,3 @@
-# finsih distance function, figure out degree radians conversion, which variable needs which units.
-
 # REFERENCES
 # (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A. Rybnikova
 #       and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness. Sci. Adv. 2.
@@ -14,12 +12,13 @@ from numpy import *
 import itertools
 import time
 #pip install archook
-# import archook
-# archook.get_arcpy()
-# import arcpy
+import archook
+archook.get_arcpy()
+import arcpy
 import threading
 #pip install scikit-image
 import skimage.external.tifffile
+from scipy import ndimage
 
 def main():
 	# Print flag
@@ -27,7 +26,7 @@ def main():
 
 	# Estimate the 2d propagation function
 	propagation_array1, time_1 = fsum_2d(pflag,30.0)
-	
+	proparray_to_tiff('C:/outputkerneltiffs/kernelubreak30.tif', propagation_array1)
 	varrprint(propagation_array1,'propagation_array1', pflag)
 
 	propagation_array2, time_2 = fsum_2d(pflag,10.0)
@@ -36,8 +35,18 @@ def main():
 	differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
 	print "Accuracy Loss Factor!: {}".format(differencearray_perc)
 	varrprint(differencearray_perc, 'difference array perc', pflag)
-	proparray_to_geotiff('C:/outputkerneltiffs/test_noclass_3_24_1.tif', propagation_array1)
-	proparray_to_geotiff('C:/outputkerneltiffs/difference_perc.tif', differencearray_perc)
+	print "time for prop function ubreak 30"
+	print time_1
+	start = time.time()
+	# https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
+	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
+	myRaster = arcpy.Raster(filein)
+	imagearr = arcpy.RasterToNumPyArray(myRaster, nodata_to_value = numpy.NaN)
+	filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
+	proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
+	end = time.time()
+	print "convolution time"
+	print str(end - start)
 # Function that creates 2d propagation function
 def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	# Input Variables
@@ -122,10 +131,10 @@ def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	thetaleft = theta[0:,0:630]
 
 	#test array subsets to reduce processin time
-	Chileft = Chi[429:432,620:630]
-	u0left = u0[429:432,620:630]
-	l_OCleft = l_OC[429:432,620:630]
-	thetaleft = theta[429:432,620:630]
+	# Chileft = Chi[429:432,620:630]
+	# u0left = u0[429:432,620:630]
+	# l_OCleft = l_OC[429:432,620:630]
+	# thetaleft = theta[429:432,620:630]
 
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
@@ -430,7 +439,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_
 
 	return total_sum
 
-def proparray_to_geotiff(tiffoutpathwithname, PropSumArray, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
+def proparray_to_tiff(tiffoutpathwithname, PropSumArray, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
 	########################### Array to Raster
 	
 	# filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
@@ -459,7 +468,7 @@ def proparray_to_geotiff(tiffoutpathwithname, PropSumArray, lwr_l_long = -112.61
 	#####################
 
 	# print "*************************Propogation Array*******************************"
-	# savetxt("timetest.txt", PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
+	# savetxt(txtoutputwithname, PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
 
 
 # array variable check print function
@@ -503,3 +512,4 @@ def varrprint(varrval, varrtext, print_flag):
 
 if __name__ == "__main__":
 	main()
+
