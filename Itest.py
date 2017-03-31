@@ -11,10 +11,11 @@ import numpy
 from numpy import *
 import itertools
 import time
-#pip install archook
+## pip install archook
 import archook
 archook.get_arcpy()
 import arcpy
+# from PIL import Image
 import threading
 #pip install scikit-image
 import skimage.external.tifffile
@@ -23,9 +24,8 @@ import os.path
 
 def main():
 	# Print flag
-	pflag = "quiet"
-	kerneltiffpath = 'C:/outputkerneltiffs/kernelubreak30.tif'
-
+	pflag = "verbose"
+	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30.tif"
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
 		propagation_array1, time_1 = fsum_2d(pflag,30.0)
@@ -43,12 +43,37 @@ def main():
 
 	# apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
 	propagation_array1 = arcpy.RasterToNumPyArray(arcpy.Raster(kerneltiffpath), nodata_to_value = numpy.NaN)
+	# propagation_array1 = Image.open(kerneltiffpath)
+	# propagation_array1 = numpy.array(propagation_array1)
+	varrprint(propagation_array1, 'kernel',pflag)
+	
 	start = time.time()
 	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
 	myRaster = arcpy.Raster(filein)
 	imagearr = arcpy.RasterToNumPyArray(myRaster, nodata_to_value = numpy.NaN)
+	varrprint(imagearr, 'VIIRS', pflag)
+
+	arr_scaling_factor = 10**16
+	virrs_scaling_factor = 10**3
+	imagearr *= virrs_scaling_factor
+	imagearr = rint(imagearr)
+	propagation_array1 *= arr_scaling_factor
+	propagation_array1 = rint(propagation_array1)
+
+	varrprint(propagation_array1, 'kernelscaled',pflag)
+	varrprint(imagearr, 'VIIRSscaled', pflag)
+	imagearr = imagearr.astype(int32)
+	propagation_array1 = propagation_array1.astype(uint32)
+	varrprint(propagation_array1, 'kernelint32',pflag)
+	varrprint(imagearr, 'VIIRSint32', pflag)
+
+	# myRaster = Image.open(filein)
+	# imagearr = numpy.array(myRaster)
+	subset = 300
+	propagation_array1 = propagation_array1[100:subset,100:subset]
 	filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
 	proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
+	
 	end = time.time()
 	print "convolution time"
 	print str(end - start)
