@@ -21,7 +21,7 @@ import threading
 import skimage.external.tifffile
 from scipy import ndimage
 import os.path
-
+# try to use opencv package to use fourier transform instead of regular convolution
 def main():
 	# Print flag
 	pflag = "verbose"
@@ -58,7 +58,7 @@ def main():
 	imagearr *= virrs_scaling_factor
 	imagearr = rint(imagearr)
 	propagation_array1 *= arr_scaling_factor
-	propagation_array1 = rint(propagation_array1)
+	propagation_array1 = nan_to_num(rint(propagation_array1))
 
 	varrprint(propagation_array1, 'kernelscaled',pflag)
 	varrprint(imagearr, 'VIIRSscaled', pflag)
@@ -69,7 +69,7 @@ def main():
 
 	# myRaster = Image.open(filein)
 	# imagearr = numpy.array(myRaster)
-	subset = 300
+	subset = 200
 	propagation_array1 = propagation_array1[100:subset,100:subset]
 	filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
 	proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
