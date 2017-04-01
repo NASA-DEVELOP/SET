@@ -22,6 +22,7 @@ import skimage.external.tifffile
 from scipy import ndimage
 import os.path
 # try to use opencv package to use fourier transform instead of regular convolution
+# https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
 def main():
 	# Print flag
 	pflag = "verbose"
