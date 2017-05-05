@@ -21,8 +21,10 @@ import threading
 import skimage.external.tifffile
 from scipy import ndimage
 import os.path
-# try to use opencv package to use fourier transform instead of regular convolution
-# https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
+# install instructions: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_setup/py_setup_in_windows/py_setup_in_windows.html#install-opencv-python-in-windows
+import cv2
+from matplotlib import pyplot as plt
+
 def main():
 	# Print flag
 	pflag = "verbose"
@@ -48,36 +50,54 @@ def main():
 	# propagation_array1 = numpy.array(propagation_array1)
 	varrprint(propagation_array1, 'kernel',pflag)
 	
-	start = time.time()
+	# start = time.time()
 	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
 	myRaster = arcpy.Raster(filein)
 	imagearr = arcpy.RasterToNumPyArray(myRaster, nodata_to_value = numpy.NaN)
 	varrprint(imagearr, 'VIIRS', pflag)
 
-	arr_scaling_factor = 10**16
-	virrs_scaling_factor = 10**3
-	imagearr *= virrs_scaling_factor
-	imagearr = rint(imagearr)
-	propagation_array1 *= arr_scaling_factor
-	propagation_array1 = nan_to_num(rint(propagation_array1))
+	######### Changing type to improve processing speed doesn't appear to have any effect
+	# kernel_scaling_factor = 10**16
+	# viirs_scaling_factor = 10**3
+	# imagearr *= viirs_scaling_factor
+	# imagearr = rint(imagearr)
+	# propagation_array1 *= kernel_scaling_factor
+	# propagation_array1 = nan_to_num(rint(propagation_array1))
 
-	varrprint(propagation_array1, 'kernelscaled',pflag)
-	varrprint(imagearr, 'VIIRSscaled', pflag)
-	imagearr = imagearr.astype(int32)
-	propagation_array1 = propagation_array1.astype(uint32)
-	varrprint(propagation_array1, 'kernelint32',pflag)
-	varrprint(imagearr, 'VIIRSint32', pflag)
+	# varrprint(propagation_array1, 'kernelscaled',pflag)
+	# varrprint(imagearr, 'VIIRSscaled', pflag)
+	# imagearr = imagearr.astype(int32)
+	# propagation_array1 = propagation_array1.astype(uint32)
+	# varrprint(propagation_array1, 'kernelint32',pflag)
+	# varrprint(imagearr, 'VIIRSint32', pflag)
 
-	# myRaster = Image.open(filein)
-	# imagearr = numpy.array(myRaster)
-	subset = 200
-	propagation_array1 = propagation_array1[100:subset,100:subset]
-	filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
-	proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
+	# subset = 200
+	# propagation_array1 = propagation_array1[100:subset,100:subset]
+
+######################## Fourier Transform Method ################################
+# can later optimize dft by making array size power of 2 with zero padding
+# https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
+# for some reason, magnitude spectrum is empty
+	dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
+	dft_shift = fft.fftshift(dftpropim)
+
+	magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
+
+	plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
+	plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+	plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+	plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+	plt.show()
+
 	
-	end = time.time()
-	print "convolution time"
-	print str(end - start)
+##################################################################################	
+
+	#filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
+	# proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
+	# end = time.time()
+	# print "convolution time"
+	# print str(end - start)
+	# varrprint(filtered, 'SkyGlowZenith0', pflag)
 # Function that creates 2d propagation function
 def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	# Input Variables
