@@ -57,12 +57,12 @@ def main():
 	varrprint(imagearr, 'VIIRS', pflag)
 
 	######### Changing type to improve processing speed doesn't appear to have any effect
-	# kernel_scaling_factor = 10**16
+	kernel_scaling_factor = 10**16
 	# viirs_scaling_factor = 10**3
 	# imagearr *= viirs_scaling_factor
 	# imagearr = rint(imagearr)
-	# propagation_array1 *= kernel_scaling_factor
-	# propagation_array1 = nan_to_num(rint(propagation_array1))
+	propagation_array1 *= kernel_scaling_factor
+	propagation_array1 = nan_to_num(rint(propagation_array1))
 
 	# varrprint(propagation_array1, 'kernelscaled',pflag)
 	# varrprint(imagearr, 'VIIRSscaled', pflag)
@@ -71,43 +71,34 @@ def main():
 	# varrprint(propagation_array1, 'kernelint32',pflag)
 	# varrprint(imagearr, 'VIIRSint32', pflag)
 
-	# subset = 200
+	subset = 200
 	# propagation_array1 = propagation_array1[100:subset,100:subset]
 
 ######################## Fourier Transform Method ################################
 # can later optimize dft by making array size power of 2 with zero padding
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
-# for some reason, magnitude spectrum is empty
 	np_dftpropim = fft.fft2(float32(propagation_array1))
 	np_dft_shift = fft.fftshift(np_dftpropim)
 	np_magnitude_spectrum = 20*log(abs(np_dft_shift))
-	print np_dftpropim
-	varrprint(np_dftpropim, 'dftpropim', pflag)
-
-	varrprint(np_dft_shift, 'dft_shift', pflag)
 	plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
-	plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+	plt.title('Input Image NP Method'), plt.xticks([]), plt.yticks([])
 	plt.subplot(122),plt.imshow(np_magnitude_spectrum, cmap = 'gray')
-	plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+	plt.title('Magnitude Spectrum NP Method'), plt.xticks([]), plt.yticks([])
 	plt.show()
+	varrprint(np_dft_shift, 'np_dft_shift', pflag)
 
+	# cv2.dft method
+	dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
+	dft_shift = fft.fftshift(dftpropim)
 
+	magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
 
-
-	# cv2.dft method, not plotting magnitude
-	# dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
-	# dft_shift = fft.fftshift(dftpropim)
-	# varrprint(dftpropim, 'dftpropim', pflag)
-	# varrprint(dft_shift, 'dft_shift', pflag)
-
-	# magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
-
-	# plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
-	# plt.title('Input Image'), plt.xticks([]), plt.yticks([])
-	# plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
-	# plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
-	# plt.show()
-
+	plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
+	plt.title('CV2 Input Image'), plt.xticks([]), plt.yticks([])
+	plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+	plt.title('Magnitude Spectrum CV2 Method'), plt.xticks([]), plt.yticks([])
+	plt.show()
+	varrprint(dft_shift, 'cv2_dft_shift', pflag)
 	
 ##################################################################################	
 
