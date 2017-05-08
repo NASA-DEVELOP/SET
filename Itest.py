@@ -57,50 +57,72 @@ def main():
 	imagearr = arcpy.RasterToNumPyArray(myRaster, nodata_to_value = numpy.NaN)
 	varrprint(imagearr, 'VIIRS', pflag)
 
-	######### Changing type to improve processing speed doesn't appear to have any effect
+	######### Convert to float 32 for Fourier, scale, and round
 	kernel_scaling_factor = 10**16
-	# viirs_scaling_factor = 10**3
-	# imagearr *= viirs_scaling_factor
-	# imagearr = rint(imagearr)
+	viirs_scaling_factor = 10**3
+	imagearr *= viirs_scaling_factor
+	imagearr = rint(imagearr)
 	propagation_array1 *= kernel_scaling_factor
-	propagation_array1 = nan_to_num(rint(propagation_array1))
-
-	# varrprint(propagation_array1, 'kernelscaled',pflag)
-	# varrprint(imagearr, 'VIIRSscaled', pflag)
+	propagation_array1 = float32(nan_to_num(rint(propagation_array1)))
+	# need to be same size to multiple fourier transforms
+	padded_prop = pad(propagation_array1,((282,283),(328,328)), 'constant', constant_values = 0)
+	varrprint(padded_prop, 'kernel scaled and padded',pflag)
+	varrprint(imagearr, 'VIIRSscaled', pflag)
 	# imagearr = imagearr.astype(int32)
 	# propagation_array1 = propagation_array1.astype(uint32)
 	# varrprint(propagation_array1, 'kernelint32',pflag)
 	# varrprint(imagearr, 'VIIRSint32', pflag)
 
-	subset = 200
+	# subset = 200
 	# propagation_array1 = propagation_array1[100:subset,100:subset]
 
 ######################## Fourier Transform Method ################################
 # can later optimize dft by making array size power of 2 with zero padding
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
 	#np method
-	np_dftpropim = fft.fft2(float32(propagation_array1))
-	np_dft_shift = fft.fftshift(np_dftpropim)
-	np_magnitude_spectrum = 20*log(abs(np_dft_shift))
-	plt.subplot(121),plt.imshow(propagation_array1, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('Input Image NP Method'), plt.xticks([]), plt.yticks([])
+	np_dft_prop_im = fft.fft2(padded_prop)
+	np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
+	np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
+	plt.subplot(121),plt.imshow(padded_prop, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title('Prop Kernel Log Normal'), plt.xticks([]), plt.yticks([])
 	plt.subplot(122),plt.imshow(np_magnitude_spectrum, cmap = 'gray')
-	plt.title('Magnitude Spectrum NP Method'), plt.xticks([]), plt.yticks([])
+	plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
 	plt.show()
-	varrprint(np_dft_shift, 'np_dft_shift', pflag)
+	varrprint(np_dft_prop_im, 'np_dft_kernel', pflag)
 
-	# cv2.dft method
-	dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
-	dft_shift = fft.fftshift(dftpropim)
-
-	magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
-
-	plt.subplot(121),plt.imshow(propagation_array1, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('CV2 Input Image'), plt.xticks([]), plt.yticks([])
-	plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
-	plt.title('Magnitude Spectrum CV2 Method'), plt.xticks([]), plt.yticks([])
+	np_dft_viirs_im = fft.fft2(imagearr)
+	np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
+	np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
+	plt.subplot(121),plt.imshow(imagearr, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title('VIIRS Image Log Normal'), plt.xticks([]), plt.yticks([])
+	plt.subplot(122),plt.imshow(np_magnitude_spectrum_viirs, cmap = 'gray')
+	plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
 	plt.show()
-	varrprint(dft_shift, 'cv2_dft_shift', pflag)
+	varrprint(np_dft_viirs_im, 'np_dft_viirs', pflag)
+
+
+	FFT_product = fft.ifft(np_dft_viirs_shift * np_dft_kernel_shift)
+	plt.title('Convolution Product'), plt.xticks([]), plt.yticks([])
+	plt.subplot(FFT_product, norm = colors.LogNorm(), cmap = 'gray')
+	plt.subplot(121),plt.imshow(imagearr, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title('VIIRS Image Log Normal'), plt.xticks([]), plt.yticks([])
+	plt.subplot(121),plt.imshow(padded_prop, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title('Prop Kernel Log Normal'), plt.xticks([]), plt.yticks([])
+	plt.show()
+
+
+	# # cv2.dft method
+	# dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
+	# dft_shift = fft.fftshift(dftpropim)
+
+	# magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
+
+	# plt.subplot(121),plt.imshow(propagation_array1, norm = colors.LogNorm(), cmap = 'gray')
+	# plt.title('CV2 Input Image Log Normailized'), plt.xticks([]), plt.yticks([])
+	# plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+	# plt.title('Magnitude Spectrum CV2 Method'), plt.xticks([]), plt.yticks([])
+	# plt.show()
+	# varrprint(dft_shift, 'cv2_dft_shift', pflag)
 	
 ##################################################################################	
 
