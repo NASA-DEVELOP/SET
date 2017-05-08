@@ -78,16 +78,35 @@ def main():
 # can later optimize dft by making array size power of 2 with zero padding
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
 # for some reason, magnitude spectrum is empty
-	dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
-	dft_shift = fft.fftshift(dftpropim)
+	np_dftpropim = fft.fft2(float32(propagation_array1))
+	np_dft_shift = fft.fftshift(np_dftpropim)
+	np_magnitude_spectrum = 20*log(abs(np_dft_shift))
+	print np_dftpropim
+	varrprint(np_dftpropim, 'dftpropim', pflag)
 
-	magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
-
+	varrprint(np_dft_shift, 'dft_shift', pflag)
 	plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
 	plt.title('Input Image'), plt.xticks([]), plt.yticks([])
-	plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+	plt.subplot(122),plt.imshow(np_magnitude_spectrum, cmap = 'gray')
 	plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
 	plt.show()
+
+
+
+
+	# cv2.dft method, not plotting magnitude
+	# dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
+	# dft_shift = fft.fftshift(dftpropim)
+	# varrprint(dftpropim, 'dftpropim', pflag)
+	# varrprint(dft_shift, 'dft_shift', pflag)
+
+	# magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
+
+	# plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
+	# plt.title('Input Image'), plt.xticks([]), plt.yticks([])
+	# plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
+	# plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
+	# plt.show()
 
 	
 ##################################################################################	
