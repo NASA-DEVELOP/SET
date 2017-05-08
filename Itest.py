@@ -24,6 +24,7 @@ import os.path
 # install instructions: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_setup/py_setup_in_windows/py_setup_in_windows.html#install-opencv-python-in-windows
 import cv2
 from matplotlib import pyplot as plt
+import matplotlib.colors as colors
 
 def main():
 	# Print flag
@@ -77,10 +78,11 @@ def main():
 ######################## Fourier Transform Method ################################
 # can later optimize dft by making array size power of 2 with zero padding
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
+	#np method
 	np_dftpropim = fft.fft2(float32(propagation_array1))
 	np_dft_shift = fft.fftshift(np_dftpropim)
 	np_magnitude_spectrum = 20*log(abs(np_dft_shift))
-	plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
+	plt.subplot(121),plt.imshow(propagation_array1, norm = colors.LogNorm(), cmap = 'gray')
 	plt.title('Input Image NP Method'), plt.xticks([]), plt.yticks([])
 	plt.subplot(122),plt.imshow(np_magnitude_spectrum, cmap = 'gray')
 	plt.title('Magnitude Spectrum NP Method'), plt.xticks([]), plt.yticks([])
@@ -93,7 +95,7 @@ def main():
 
 	magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
 
-	plt.subplot(121),plt.imshow(propagation_array1, cmap = 'gray')
+	plt.subplot(121),plt.imshow(propagation_array1, norm = colors.LogNorm(), cmap = 'gray')
 	plt.title('CV2 Input Image'), plt.xticks([]), plt.yticks([])
 	plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
 	plt.title('Magnitude Spectrum CV2 Method'), plt.xticks([]), plt.yticks([])
