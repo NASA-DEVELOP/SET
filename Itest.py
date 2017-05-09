@@ -19,10 +19,12 @@ import arcpy
 import threading
 #pip install scikit-image
 import skimage.external.tifffile
+# scipy has simpler implementation of Fast Fourier Transform (fft), ndimage.convolve is obsolete for our purposes with numpy.fft except as a comparison check
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html#scipy.signal.fftconvolve
 from scipy import ndimage
 import os.path
 # install instructions: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_setup/py_setup_in_windows/py_setup_in_windows.html#install-opencv-python-in-windows
-import cv2
+# (not necessary since numpt.fft works) import cv2
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 
@@ -45,7 +47,6 @@ def main():
 		print "time for prop function ubreak 30"
 		print time_1
 
-	# apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
 	propagation_array1 = arcpy.RasterToNumPyArray(arcpy.Raster(kerneltiffpath), nodata_to_value = numpy.NaN)
 	# propagation_array1 = Image.open(kerneltiffpath)
 	# propagation_array1 = numpy.array(propagation_array1)
@@ -58,28 +59,27 @@ def main():
 	varrprint(imagearr, 'VIIRS', pflag)
 
 	######### Convert to float 32 for Fourier, scale, and round
-	kernel_scaling_factor = 10**16
-	viirs_scaling_factor = 10**3
+	# kernel_scaling_factor = 10**16
+	# scale to be in units of watt/cm^2/steradian. 
+	# falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
+	viirs_scaling_factor = 10**-9
 	imagearr *= viirs_scaling_factor
-	imagearr = rint(imagearr)
-	propagation_array1 *= kernel_scaling_factor
-	propagation_array1 = float32(nan_to_num(rint(propagation_array1)))
+	# imagearr = rint(imagearr)
+	# propagation_array1 *= kernel_scaling_factor
+	propagation_array1 = float32(nan_to_num(propagation_array1))
+
 	# need to be same size to multiple fourier transforms
 	padded_prop = pad(propagation_array1,((282,283),(328,328)), 'constant', constant_values = 0)
 	varrprint(padded_prop, 'kernel scaled and padded',pflag)
 	varrprint(imagearr, 'VIIRSscaled', pflag)
-	# imagearr = imagearr.astype(int32)
-	# propagation_array1 = propagation_array1.astype(uint32)
-	# varrprint(propagation_array1, 'kernelint32',pflag)
-	# varrprint(imagearr, 'VIIRSint32', pflag)
-
-	# subset = 200
-	# propagation_array1 = propagation_array1[100:subset,100:subset]
 
 ######################## Fourier Transform Method ################################
 # can later optimize dft by making array size power of 2 with zero padding
 # https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
 	#np method
+	# #possibly useful links for properly formatting arrays for transform# #
+	# http://stackoverflow.com/questions/11195923/where-to-center-the-kernel-when-using-fftw-for-image-convolution
+	# https://dsp.stackexchange.com/questions/9039/centering-zero-frequency-for-discrete-fourier-transform
 	np_dft_prop_im = fft.fft2(padded_prop)
 	np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
 	np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
@@ -100,14 +100,15 @@ def main():
 	plt.show()
 	varrprint(np_dft_viirs_im, 'np_dft_viirs', pflag)
 
+	kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
+	viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
-	FFT_product = fft.ifft(np_dft_viirs_shift * np_dft_kernel_shift)
+	FFT_product_inverse = abs(fft.ifft2(np_dft_kernel_shift * np_dft_viirs_shift))
+	varrprint(FFT_product_inverse, 'FFT_product_inverse', pflag)
+	plt.subplot(121),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
 	plt.title('Convolution Product'), plt.xticks([]), plt.yticks([])
-	plt.subplot(FFT_product, norm = colors.LogNorm(), cmap = 'gray')
-	plt.subplot(121),plt.imshow(imagearr, norm = colors.LogNorm(), cmap = 'gray')
+	plt.subplot(122),plt.imshow(imagearr, norm = colors.LogNorm(), cmap = 'gray')
 	plt.title('VIIRS Image Log Normal'), plt.xticks([]), plt.yticks([])
-	plt.subplot(121),plt.imshow(padded_prop, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('Prop Kernel Log Normal'), plt.xticks([]), plt.yticks([])
 	plt.show()
 
 
@@ -125,8 +126,8 @@ def main():
 	# varrprint(dft_shift, 'cv2_dft_shift', pflag)
 	
 ##################################################################################	
-
-	#filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
+	# apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
+	# filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
 	# proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
 	# end = time.time()
 	# print "convolution time"
