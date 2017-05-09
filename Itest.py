@@ -103,7 +103,7 @@ def main():
 	kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
 	viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
-	FFT_product_inverse = abs(fft.ifft2(np_dft_kernel_shift * np_dft_viirs_shift))
+	FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
 	varrprint(FFT_product_inverse, 'FFT_product_inverse', pflag)
 	plt.subplot(121),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
 	plt.title('Convolution Product'), plt.xticks([]), plt.yticks([])
