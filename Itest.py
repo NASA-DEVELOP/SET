@@ -53,7 +53,7 @@ def main():
 	varrprint(propagation_array1, 'kernel',pflag)
 	
 	# start = time.time()
-	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
+	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_09"
 	myRaster = arcpy.Raster(filein)
 	imagearr = arcpy.RasterToNumPyArray(myRaster, nodata_to_value = numpy.NaN)
 	varrprint(imagearr, 'VIIRS', pflag)
@@ -72,6 +72,17 @@ def main():
 	padded_prop = pad(propagation_array1,((282,283),(328,328)), 'constant', constant_values = 0)
 	varrprint(padded_prop, 'kernel scaled and padded',pflag)
 	varrprint(imagearr, 'VIIRSscaled', pflag)
+
+	subset = 50
+	prows = padded_prop.shape[0]
+	pcols = padded_prop.shape[1]
+	irows = padded_prop.shape[0]
+	icols = padded_prop.shape[1]
+
+	padded_prop = padded_prop[(prows//2)-subset:(prows//2)+subset, (pcols//2)-subset:(pcols//2)+subset]
+	imagearr = imagearr[(irows//2)-subset:(irows//2)+subset, (icols//2)-subset:(icols//2)+subset]
+	varrprint(padded_prop, "subsetted prop", pflag)
+	varrprint(imagearr, "subsetted viirs", pflag)
 
 ######################## Fourier Transform Method ################################
 # can later optimize dft by making array size power of 2 with zero padding
@@ -111,23 +122,15 @@ def main():
 	plt.title('VIIRS Image Log Normal'), plt.xticks([]), plt.yticks([])
 	plt.show()
 
-
-	# # cv2.dft method
-	# dftpropim = cv2.dft(float32(propagation_array1), flags = cv2.DFT_COMPLEX_OUTPUT)
-	# dft_shift = fft.fftshift(dftpropim)
-
-	# magnitude_spectrum = 20*log(cv2.magnitude(dft_shift[:,:,0],dft_shift[:,:,1]))
-
-	# plt.subplot(121),plt.imshow(propagation_array1, norm = colors.LogNorm(), cmap = 'gray')
-	# plt.title('CV2 Input Image Log Normailized'), plt.xticks([]), plt.yticks([])
-	# plt.subplot(122),plt.imshow(magnitude_spectrum, cmap = 'gray')
-	# plt.title('Magnitude Spectrum CV2 Method'), plt.xticks([]), plt.yticks([])
-	# plt.show()
-	# varrprint(dft_shift, 'cv2_dft_shift', pflag)
-	
-##################################################################################	
 	# apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
-	# filtered = ndimage.convolve(imagearr, propagation_array1, mode='constant', cval = 0.0)
+	filtered = ndimage.convolve(imagearr, padded_prop, mode='constant', cval = 0.0)
+	plt.subplot(121),plt.imshow(filtered, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title('Slow Convolution Product'), plt.xticks([]), plt.yticks([])
+	plt.subplot(122),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
+	plt.show()
+##################################################################################	
+	
 	# proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
 	# end = time.time()
 	# print "convolution time"
