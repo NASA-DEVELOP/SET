@@ -31,7 +31,7 @@ import matplotlib.colors as colors
 def main():
 	# Print flag
 	pflag = "verbose"
-	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30.tif"
+	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30_lowlat.tif"
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
 		propagation_array1, time_1 = fsum_2d(pflag,30.0)
@@ -62,7 +62,7 @@ def main():
 	# kernel_scaling_factor = 10**16
 	# scale to be in units of watt/cm^2/steradian. 
 	# falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
-	viirs_scaling_factor = 10**-9
+	viirs_scaling_factor = 10**9
 	imagearr *= viirs_scaling_factor
 	# imagearr = rint(imagearr)
 	# propagation_array1 *= kernel_scaling_factor
@@ -73,16 +73,16 @@ def main():
 	varrprint(padded_prop, 'kernel scaled and padded',pflag)
 	varrprint(imagearr, 'VIIRSscaled', pflag)
 
-	subset = 50
-	prows = padded_prop.shape[0]
-	pcols = padded_prop.shape[1]
-	irows = padded_prop.shape[0]
-	icols = padded_prop.shape[1]
+	# subset = 50
+	# prows = padded_prop.shape[0]
+	# pcols = padded_prop.shape[1]
+	# irows = padded_prop.shape[0]
+	# icols = padded_prop.shape[1]
 
-	padded_prop = padded_prop[(prows//2)-subset:(prows//2)+subset, (pcols//2)-subset:(pcols//2)+subset]
-	imagearr = imagearr[(irows//2)-subset:(irows//2)+subset, (icols//2)-subset:(icols//2)+subset]
-	varrprint(padded_prop, "subsetted prop", pflag)
-	varrprint(imagearr, "subsetted viirs", pflag)
+	# padded_prop = padded_prop[(prows//2)-subset:(prows//2)+subset, (pcols//2)-subset:(pcols//2)+subset]
+	# imagearr = imagearr[(irows//2)-subset:(irows//2)+subset, (icols//2)-subset:(icols//2)+subset]
+	# varrprint(padded_prop, "subsetted prop", pflag)
+	# varrprint(imagearr, "subsetted viirs", pflag)
 
 ######################## Fourier Transform Method ################################
 # can later optimize dft by making array size power of 2 with zero padding
@@ -122,29 +122,31 @@ def main():
 	plt.title('VIIRS Image Log Normal'), plt.xticks([]), plt.yticks([])
 	plt.show()
 
+
+	######## Comparison with Slow Convolution (Make sure to subset first)
 	# apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
-	filtered = ndimage.convolve(imagearr, padded_prop, mode='constant', cval = 0.0)
-	plt.subplot(121),plt.imshow(filtered, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('Slow Convolution Product'), plt.xticks([]), plt.yticks([])
-	plt.subplot(122),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
-	plt.show()
+	# filtered = ndimage.convolve(imagearr, padded_prop, mode='constant', cval = 0.0)
+	# plt.subplot(121),plt.imshow(filtered, norm = colors.LogNorm(), cmap = 'gray')
+	# plt.title('Slow Convolution Product'), plt.xticks([]), plt.yticks([])
+	# plt.subplot(122),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
+	# plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
+	# plt.show()
 ##################################################################################	
 	
-	# proparray_to_tiff('C:/outputkerneltiffs/filtered_fullkernel.tif', filtered)
+	proparray_to_tiff('C:/outputkerneltiffs/fftconvproductlowlat.tif', FFT_product_inverse)
+	
 	# end = time.time()
-	# print "convolution time"
+	# print ""
 	# print str(end - start)
-	# varrprint(filtered, 'SkyGlowZenith0', pflag)
 # Function that creates 2d propagation function
 def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	# Input Variables
 	print '**INPUTS**'
 
 	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
-	#bottom cent_lat = 40.8797
-	#top
-	cent_lat_deg = 46.755666
+	#bottom bottom_lat = 40.8797
+	#top lat= 46.755666
+	cent_lat_deg = 40.8797
 	cent_lat = cent_lat_deg*pi/180
 	p_deg = .0041666667
 	p_rad = p_deg*pi/180
