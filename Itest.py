@@ -177,8 +177,6 @@ def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	# Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
 	# using haversine formula
 	D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2)**2))
-	print "Center Distance, is close too but not equal to zero"
-	print D_OC[cent_row, cent_col]
 
 	# Assignment of NaNs or null values outside of 200 km
 	D_OC[D_OC > 201] = numpy.NaN
@@ -188,11 +186,8 @@ def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
 
 	################################## reassignment of center value, need to use better method
-	
-
-	D_OC[431:432,629:630] = .01
+	D_OC[cent_row,cent_col] = .01
 	varrprint(D_OC,'D_OC', pflag)
-	
 	# Earth angle from source to site, REF 3, p. 308\
 	
 	Chi = D_OC/R_T
