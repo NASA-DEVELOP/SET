@@ -31,21 +31,21 @@ import matplotlib.colors as colors
 def main():
 	# Print flag
 	pflag = "verbose"
-	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30_lowlat.tif"
+	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30_highlat2.tif"
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
 		propagation_array1, time_1 = fsum_2d(pflag,30.0)
 		proparray_to_tiff(kerneltiffpath, propagation_array1)
 		varrprint(propagation_array1,'propagation_array1', pflag)
 
-		propagation_array2, time_2 = fsum_2d(pflag,10.0)
-		print "Time Factor Improvement!: {}".format(time_1/time_2)
-		varrprint(propagation_array2,'propagation_array2', pflag)
-		differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
-		print "Accuracy Loss Factor!: {}".format(differencearray_perc)
-		varrprint(differencearray_perc, 'difference array perc', pflag)
-		print "time for prop function ubreak 30"
-		print time_1
+		# propagation_array2, time_2 = fsum_2d(pflag,10.0)
+		# print "Time Factor Improvement!: {}".format(time_1/time_2)
+		# varrprint(propagation_array2,'propagation_array2', pflag)
+		# differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
+		# print "Accuracy Loss Factor!: {}".format(differencearray_perc)
+		# varrprint(differencearray_perc, 'difference array perc', pflag)
+		# print "time for prop function ubreak 30"
+		# print time_1
 
 	propagation_array1 = arcpy.RasterToNumPyArray(arcpy.Raster(kerneltiffpath), nodata_to_value = numpy.NaN)
 	# propagation_array1 = Image.open(kerneltiffpath)
@@ -146,7 +146,7 @@ def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
 	#bottom bottom_lat = 40.8797
 	#top lat= 46.755666
-	cent_lat_deg = 40.8797
+	cent_lat_deg = 46.755666
 	cent_lat = cent_lat_deg*pi/180
 	p_deg = .0041666667
 	p_rad = p_deg*pi/180
