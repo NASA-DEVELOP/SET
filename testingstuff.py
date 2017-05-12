@@ -69,7 +69,7 @@ def varrprint(varrval, varrtext, print_flag):
 # # x_size = cos(cent_lat*pi/180)*p_deg
 # # y_size = p_deg
 
-unreffed_tiff = "C:/outputkerneltiffs/kernelubreak30_lowlat.tif"
+unreffed_tiff = "C:/outputkerneltiffs/kernelubreak30_highlat2.tif"
 # skimage.external.tifffile.imsave(src_filename, FFT_product_inverse)
 
 reffed_tiff = 'C:/outputkerneltiffs/gdalproduct_lowlat_referenced.tif'
@@ -92,9 +92,13 @@ gt = [-114.6687495, .0041666667, 0, 46.7854164, 0, -.0041666667]
 dst_ds.SetGeoTransform(gt)
 
 # Get raster projection
-epsg = 4326
-srs = osr.SpatialReference()
-srs.ImportFromEPSG(epsg)
+viirsname = "C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif"
+viirs = gdal.Open(viirsname)
+# epsg = 4326
+srs = viirs.GetSpatialReference()
+
+# srs.ImportFromEPSG(epsg)
+
 dest_wkt = srs.ExportToWkt()
 
 # Set projection

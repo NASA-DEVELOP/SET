@@ -71,6 +71,7 @@ def main():
 	propagation_array1 = float32(nan_to_num(propagation_array1))
 
 	# need to be same size to multiple fourier transforms
+	# generalize padding
 	padded_prop = pad(propagation_array1,((282,283),(328,328)), 'constant', constant_values = 0)
 	varrprint(padded_prop, 'kernel scaled and padded',pflag)
 	varrprint(imagearr, 'VIIRSscaled', pflag)
