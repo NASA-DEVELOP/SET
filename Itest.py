@@ -31,10 +31,12 @@ import matplotlib.colors as colors
 def main():
 	# Print flag
 	pflag = "verbose"
-	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30_highlat2.tif"
+	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30_lowlat2.tif"
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
-		propagation_array1, time_1 = fsum_2d(pflag,30.0)
+		#bottom bottom_lat = 40.8797
+		#top lat= 46.755666
+		propagation_array1, time_1 = fsum_2d(pflag, 40.8797, 30.0)
 		proparray_to_tiff(kerneltiffpath, propagation_array1)
 		varrprint(propagation_array1,'propagation_array1', pflag)
 
@@ -44,8 +46,8 @@ def main():
 		# differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
 		# print "Accuracy Loss Factor!: {}".format(differencearray_perc)
 		# varrprint(differencearray_perc, 'difference array perc', pflag)
-		# print "time for prop function ubreak 30"
-		# print time_1
+		print "time for prop function ubreak 30"
+		print time_1
 
 	propagation_array1 = arcpy.RasterToNumPyArray(arcpy.Raster(kerneltiffpath), nodata_to_value = numpy.NaN)
 	# propagation_array1 = Image.open(kerneltiffpath)
@@ -139,14 +141,14 @@ def main():
 	# print ""
 	# print str(end - start)
 # Function that creates 2d propagation function
-def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
+def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	# Input Variables
 	print '**INPUTS**'
 
 	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
 	#bottom bottom_lat = 40.8797
 	#top lat= 46.755666
-	cent_lat_deg = 46.755666
+	cent_lat_deg = latitude
 	cent_lat = cent_lat_deg*pi/180
 	p_deg = .0041666667
 	p_rad = p_deg*pi/180
@@ -182,60 +184,50 @@ def fsum_2d(pflag = 'verbose', ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	D_OC[D_OC > 201] = numpy.NaN
 
 	# Check of D_OC shape after assigning NaNs outside of 200 km
-	print "kernel width in pixels, trimmed: {}".format(D_OC.shape[0])
-	print "kernel height in pixels, trimmed: {}".format(D_OC.shape[1])
-
+	print "kernel heigth in pixels, trimmed: {}".format(D_OC.shape[0])
+	print "kernel width in pixels, trimmed: {}".format(D_OC.shape[1])
+	widthcenter = (D_OC.shape[1] + 1)//2
+	heigthcenter = (D_OC.shape[0] +1)//2
 	################################## reassignment of center value, need to use better method
 	D_OC[cent_row,cent_col] = .01
 	varrprint(D_OC,'D_OC', pflag)
+	# print "center area ##################################################################"
+	# print D_OC[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# Earth angle from source to site, REF 3, p. 308\
-	
 	Chi = D_OC/R_T
 	varrprint(Chi,'Chi', pflag)
-
+	
 	# u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 	u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
 	varrprint(u0,'u0', pflag)
-
+	
 	# l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
 	# l_OC and D_OC are similar as expected
 	l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
-	varrprint(l_OC,'l_OC', pflag)
 
+	print l_OC[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
 	q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
-	varrprint(q1,'q1', pflag)
 
+	print q1[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
 	theta = arccos(q1/l_OC) # radians
-	varrprint(theta,'theta', pflag)
-
+	
+	print theta[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# Get left arrays to cut processing time in half
-	Chileft = Chi[0:,0:630]
-	u0left = u0[0:,0:630]
-	l_OCleft = l_OC[0:,0:630]
-	thetaleft = theta[0:,0:630]
+	Chileft = Chi[0:,0:widthcenter]
+	u0left = u0[0:,0:widthcenter]
+	l_OCleft = l_OC[0:,0:widthcenter]
+	thetaleft = theta[0:,0:widthcenter]
 
-	#test array subsets to reduce processin time
-	# Chileft = Chi[429:432,620:630]
-	# u0left = u0[429:432,620:630]
-	# l_OCleft = l_OC[429:432,620:630]
-	# thetaleft = theta[429:432,620:630]
+	#test array subsets to reduce processing time
+	# Chileft = Chi[427:432,530:widthcenter]
+	# u0left = u0[427:432,530:widthcenter]
+	# l_OCleft = l_OC[427:432,530:widthcenter]
+	# thetaleft = theta[427:432,530:widthcenter]
 
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
-
-	# print"******************** D_OCleft Array Subsetted"
-	# print D_OCleft
-	# print"******************** Chileft Array Sub"
-	# print Chileft
-	# print"******************** u0left Array Sub"
-	# print u0left
-	# print"******************** l_OCleft Array Sub"
-	# print l_OCleft
-	# print"******************** thetaleft Array Sub"
-	# print thetaleft
-	
 
 	# ################## Threading # currently does no better than no threading
 	# # print "Time in seconds for 400 iterations, with threads"
