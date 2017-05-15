@@ -72,7 +72,11 @@ def main():
 
 	# need to be same size to multiple fourier transforms
 	# generalize padding
-	padded_prop = pad(propagation_array1,((282,283),(328,328)), 'constant', constant_values = 0)
+	pad_left = (imagearr.shape[0] - propagation_array1.shape[0])//2
+	pad_right = (imagearr.shape[0] - propagation_array1.shape[0])//2 + 1
+	pad_up = (imagearr.shape[1] - propagation_array1.shape[1])//2
+	pad_down = (imagearr.shape[1] - propagation_array1.shape[1])//2
+	padded_prop = pad(propagation_array1,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
 	varrprint(padded_prop, 'kernel scaled and padded',pflag)
 	varrprint(imagearr, 'VIIRSscaled', pflag)
 
