@@ -11,7 +11,7 @@ import numpy
 from numpy import *
 import itertools
 import time
-## pip install archook
+## pip install archook ####################get rid of arcpy? now that gdal works?
 import archook
 archook.get_arcpy()
 import arcpy
@@ -27,6 +27,7 @@ import os.path
 # (not necessary since numpt.fft works) import cv2
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
+from osgeo import gdal
 
 def main():
 	# Print flag
@@ -140,7 +141,7 @@ def main():
 	# plt.show()
 ##################################################################################	
 	
-	proparray_to_tiff('C:/outputkerneltiffs/fftconvproductlowlat.tif', FFT_product_inverse)
+	proparray_to_tiff(FFT_product_inverse)
 	
 	# end = time.time()
 	# print ""
@@ -522,36 +523,35 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_
 
 	return total_sum
 
-def proparray_to_tiff(tiffoutpathwithname, PropSumArray, lwr_l_long = -112.617213, lwr_l_lat = 41.417855):
+def proparray_to_tiff(convolved_array, referenceVIIRS="C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif", outfilename= 'C:/outputkerneltiffs/referenced.tif'):
 	########################### Array to Raster
 	
-	# filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_06"
-	# myRaster = arcpy.Raster(filein)
-	# arcpy.env.overwriteOutput = True
-	# arcpy.env.outputCoordinateSystem = filein
-	# arcpy.env.cellSize = filein
+	imdata = gdal.Open(referenceVIIRS, )
 
-	# latitude = lwr_l_lat
-	# longitude = lwr_l_long
+	# Save out to a GeoTiff
+	arr = convolved_array
+	# First of all, gather some information from VIIRS image
+	[cols,rows] = arr.shape
+	trans       = imdata.GetGeoTransform()
+	proj        = imdata.GetProjection()
+	nodatav     = 0
+	outfile     = outfilename
 
-	# lower_left = arcpy.Point(longitude,latitude)
+	# Create the georeffed file, using the information from the VIIRS image
+	outdriver = gdal.GetDriverByName("GTiff")
+	outdata   = outdriver.Create(str(outfile), rows, cols, 1, gdal.GDT_Float32)
 
-	# x_size = cos(cent_lat*pi/180)*p_deg
-	# y_size = p_deg
+	# Write data to the file, which is the kernel array in this example
+	outdata.GetRasterBand(1).WriteArray(arr)
 
-	######################### saving output propogation array as tiff ################
-	
-	skimage.external.tifffile.imsave(tiffoutpathwithname, PropSumArray)
+	# Set a no data value
+	outdata.GetRasterBand(1).SetNoDataValue(nodatav)
 
-	######################### saving as geotiff ###########
-	# adds extra rows
-	# Kernel = arcpy.NumPyArrayToRaster(PropSumArray, lower_left, x_size, y_size, nan)
-	# output = "C:/ArtificialBrightness/geotifftestKernelBig2.tif"
-	# Kernel.save(output)
-	#####################
+	# Georeference the image
+	outdata.SetGeoTransform(trans)
 
-	# print "*************************Propogation Array*******************************"
-	# savetxt(txtoutputwithname, PropSumArray, fmt= "%.6e", delimiter= ',', newline=';')
+	# Write projection information
+	outdata.SetProjection(proj)
 
 
 # array variable check print function
