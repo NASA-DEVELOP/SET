@@ -12,7 +12,6 @@ import os.path
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 import skimage.external.tifffile
-import seaborn
 def varrprint(varrval, varrtext, print_flag):
 	if print_flag != 'quiet':
 		print '********************',
@@ -108,3 +107,4 @@ plt.subplot(122),plt.imshow(diffrelative, norm = colors.LogNorm(), cmap = 'jet')
 plt.title('Difference/high lat conv'), plt.xticks([]), plt.yticks([])
 plt.colorbar()
 plt.show()
+
