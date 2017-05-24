@@ -11,14 +11,7 @@ import numpy
 from numpy import *
 import itertools
 import time
-## pip install archook ####################get rid of arcpy? now that gdal works?
-import archook
-archook.get_arcpy()
-import arcpy
-# from PIL import Image
 import threading
-#pip install scikit-image
-import skimage.external.tifffile
 # scipy has simpler implementation of Fast Fourier Transform (fft), ndimage.convolve is obsolete for our purposes with numpy.fft except as a comparison check
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html#scipy.signal.fftconvolve
 from scipy import ndimage
@@ -41,7 +34,7 @@ def main():
 		proparray_to_tiff(kerneltiffpath, propagation_array1)
 		varrprint(propagation_array1,'propagation_array1', pflag)
 
-		# propagation_array2, time_2 = fsum_2d(pflag,10.0)
+		# propagation_array2, time_2 = fsum_2d(pflag, 40.8797, 10.0)
 		# print "Time Factor Improvement!: {}".format(time_1/time_2)
 		# varrprint(propagation_array2,'propagation_array2', pflag)
 		# differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
@@ -49,30 +42,23 @@ def main():
 		# varrprint(differencearray_perc, 'difference array perc', pflag)
 		print "time for prop function ubreak 30"
 		print time_1
-
-	propagation_array1 = arcpy.RasterToNumPyArray(arcpy.Raster(kerneltiffpath), nodata_to_value = numpy.NaN)
-	# propagation_array1 = Image.open(kerneltiffpath)
-	# propagation_array1 = numpy.array(propagation_array1)
-	varrprint(propagation_array1, 'kernel',pflag)
 	
-	# start = time.time()
-	filein = "C:/VIIRS_processing/Clipped Rasters.gdb/VIIRS_2014_09"
-	myRaster = arcpy.Raster(filein)
-	imagearr = arcpy.RasterToNumPyArray(myRaster, nodata_to_value = numpy.NaN)
+	kerneldata = gdal.Open(kerneltiffpath)
+	propagation_array1 = kerneldata.ReadAsArray()
+	varrprint(propagation_array1, 'kernel',pflag)
+
+	filein = "C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif"
+	viirsraster = gdal.Open(filein)
+	imagearr = viirsraster.ReadAsArray()
 	varrprint(imagearr, 'VIIRS', pflag)
 
 	######### Convert to float 32 for Fourier, scale, and round
-	# kernel_scaling_factor = 10**16
-	# scale to be in units of watt/cm^2/steradian. 
 	# falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
+	# Not sure if this is correct scaling factor, I assume that this makes the output prop image in units of cd/m^2
 	viirs_scaling_factor = 10**9
 	imagearr *= viirs_scaling_factor
-	# imagearr = rint(imagearr)
-	# propagation_array1 *= kernel_scaling_factor
 	propagation_array1 = float32(nan_to_num(propagation_array1))
-
-	# need to be same size to multiple fourier transforms
-	# generalize padding
+	# generalized padding of kernel so that fft can run
 	pad_left = (imagearr.shape[0] - propagation_array1.shape[0])//2
 	pad_right = (imagearr.shape[0] - propagation_array1.shape[0])//2 + 1
 	pad_up = (imagearr.shape[1] - propagation_array1.shape[1])//2
@@ -93,45 +79,31 @@ def main():
 	# varrprint(imagearr, "subsetted viirs", pflag)
 
 ######################## Fourier Transform Method ################################
-# can later optimize dft by making array size power of 2 with zero padding
-# https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html#fourier-transform
-	#np method
-	# #possibly useful links for properly formatting arrays for transform# #
-	# http://stackoverflow.com/questions/11195923/where-to-center-the-kernel-when-using-fftw-for-image-convolution
-	# https://dsp.stackexchange.com/questions/9039/centering-zero-frequency-for-discrete-fourier-transform
+	def compare_arr(arr1, arr2, title1, title2):
+		plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
+		plt.title(title1), plt.xticks([]), plt.yticks([])
+		plt.subplot(122),plt.imshow(arr2, norm = colors.LogNorm(), cmap = 'gray')
+		plt.title(title2), plt.xticks([]), plt.yticks([])
+		plt.show()
+
 	np_dft_prop_im = fft.fft2(padded_prop)
 	np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
 	np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
-	plt.subplot(121),plt.imshow(padded_prop, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('Prop Kernel Log Normal'), plt.xticks([]), plt.yticks([])
-	plt.subplot(122),plt.imshow(np_magnitude_spectrum, cmap = 'gray')
-	plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
-	plt.show()
 	varrprint(np_dft_prop_im, 'np_dft_kernel', pflag)
 
 	np_dft_viirs_im = fft.fft2(imagearr)
 	np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
 	np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
-	plt.subplot(121),plt.imshow(imagearr, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('VIIRS Image Log Normal'), plt.xticks([]), plt.yticks([])
-	plt.subplot(122),plt.imshow(np_magnitude_spectrum_viirs, cmap = 'gray')
-	plt.title('Magnitude Spectrum'), plt.xticks([]), plt.yticks([])
-	plt.show()
 	varrprint(np_dft_viirs_im, 'np_dft_viirs', pflag)
 
 	kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
 	viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
 	FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
+	compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'FFT_product_inverse Log Normal')
 	varrprint(FFT_product_inverse, 'FFT_product_inverse', pflag)
-	plt.subplot(121),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('Convolution Product'), plt.xticks([]), plt.yticks([])
-	plt.subplot(122),plt.imshow(imagearr, norm = colors.LogNorm(), cmap = 'gray')
-	plt.title('VIIRS Image Log Normal'), plt.xticks([]), plt.yticks([])
-	plt.show()
 
-
-	######## Comparison with Slow Convolution (Make sure to subset first)
+	######## Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
 	# apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
 	# filtered = ndimage.convolve(imagearr, padded_prop, mode='constant', cval = 0.0)
 	# plt.subplot(121),plt.imshow(filtered, norm = colors.LogNorm(), cmap = 'gray')
@@ -139,13 +111,10 @@ def main():
 	# plt.subplot(122),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
 	# plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
 	# plt.show()
-##################################################################################	
+	###############################################################################	
 	
-	proparray_to_tiff(FFT_product_inverse)
-	
-	# end = time.time()
-	# print ""
-	# print str(end - start)
+	proparray_to_geotiff(FFT_product_inverse)
+
 # Function that creates 2d propagation function
 def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
 	# Input Variables
@@ -523,9 +492,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_
 
 	return total_sum
 
-def proparray_to_tiff(convolved_array, referenceVIIRS="C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif", outfilename= 'C:/outputkerneltiffs/referenced.tif'):
-	########################### Array to Raster
-	
+def proparray_to_geotiff(convolved_array, referenceVIIRS="C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif", outfilename= 'C:/outputkerneltiffs/referenced.tif'):
 	imdata = gdal.Open(referenceVIIRS, )
 
 	# Save out to a GeoTiff
