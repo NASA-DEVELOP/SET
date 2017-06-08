@@ -1,4 +1,4 @@
-# REFERENCES
+ # REFERENCES
 # (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A. Rybnikova
 #       and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness. Sci. Adv. 2.
 # (2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial night sky brightness mapped
@@ -89,11 +89,13 @@ def main():
 	np_dft_prop_im = fft.fft2(padded_prop)
 	np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
 	np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
+	compare_arr(padded_prop, imagearr,'Kernel', 'VIRRS')
 	varrprint(np_dft_prop_im, 'np_dft_kernel', pflag)
 
 	np_dft_viirs_im = fft.fft2(imagearr)
 	np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
 	np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
+	compare_arr(imagearr, FFT_product,'VIIRS Image', 'FFT VIRRS')
 	varrprint(np_dft_viirs_im, 'np_dft_viirs', pflag)
 
 	kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
