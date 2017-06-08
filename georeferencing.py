@@ -10,7 +10,7 @@ arr    = kerneldata.ReadAsArray()
 # Read VIIRS Data for transform information
 imdata = gdal.Open("./20140901_20140930_75N180W_C.tif")
 imarray = imdata.ReadAsArray()
-
+arr = float32(nan_to_num(arr))
 def compare_arr(arr1, arr2, title1, title2):
 	plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
 	plt.title(title1), plt.xticks([]), plt.yticks([])
