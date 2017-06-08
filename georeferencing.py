@@ -1,14 +1,24 @@
 import numpy
 from numpy import *
 from osgeo import gdal, osr
-
+from matplotlib import pyplot as plt
+import matplotlib.colors as colors
 # Read the input raster into a Numpy array
-infile = "C:/outputkerneltiffs/kernelubreak30_highlat2.tif"
+infile = "./kernelubreak30_highlat2.tif"
 kerneldata   = gdal.Open(infile)
 arr    = kerneldata.ReadAsArray()
 # Read VIIRS Data for transform information
-imdata = gdal.Open("C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif")
+imdata = gdal.Open("./20140901_20140930_75N180W_C.tif")
+imarray = imdata.ReadAsArray()
 
+def compare_arr(arr1, arr2, title1, title2):
+	plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title(title1), plt.xticks([]), plt.yticks([])
+	plt.subplot(122),plt.imshow(arr2, norm = colors.LogNorm(), cmap = 'gray')
+	plt.title(title2), plt.xticks([]), plt.yticks([])
+	plt.show()
+
+compare_arr(arr, imarray, "Light Scattering Coefficients", "Nighttime Lights VIIRS Image")
 # Save out to a GeoTiff
 
 # First of all, gather some information from VIIRS image
