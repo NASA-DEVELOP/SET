@@ -6,18 +6,15 @@
 # (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc. Pac. 101.
 
 from __future__ import division
-#pip install numpy
 import numpy
 from numpy import *
 import itertools
 import time
 import threading
 # scipy has simpler implementation of Fast Fourier Transform (fft), ndimage.convolve is obsolete for our purposes with numpy.fft except as a comparison check
-# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html#scipy.signal.fftconvolve
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html #scipy.signal.fftconvolve
 from scipy import ndimage
 import os.path
-# install instructions: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_setup/py_setup_in_windows/py_setup_in_windows.html#install-opencv-python-in-windows
-# (not necessary since numpt.fft works) import cv2
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from osgeo import gdal
@@ -537,31 +534,5 @@ def varrprint(varrval, varrtext, print_flag):
 		print varrtext,
 		print 'minimum: {}'.format(ma.minimum(varrval[~isnan(varrval)]))
 
-#didn't end up using ellipsoidal calculation of distance, we used great circle. 
-#if we decide we can use this guy's code for ellipsoid calc
-
-# **) MIT License
-#
-# Copyright (C) 2016-2017 -- mrJean1@Gmail.com
-#
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included
-# in all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
-# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
-# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-# OTHER DEALINGS IN THE SOFTWARE.
-
 if __name__ == "__main__":
 	main()
-
