@@ -25,7 +25,7 @@ from osgeo import gdal
 def main():
 	# Print flag
 	pflag = "verbose"
-	kerneltiffpath = "C:/outputkerneltiffs/kernelubreak30_lowlat2.tif"
+	kerneltiffpath = "kernelubreak30_highlat2.tif"
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
 		#bottom bottom_lat = 40.8797
@@ -47,7 +47,7 @@ def main():
 	propagation_array1 = kerneldata.ReadAsArray()
 	varrprint(propagation_array1, 'kernel',pflag)
 
-	filein = "C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif"
+	filein = "20140901_20140930_75N180W_C.tif"
 	viirsraster = gdal.Open(filein)
 	imagearr = viirsraster.ReadAsArray()
 	varrprint(imagearr, 'VIIRS', pflag)
