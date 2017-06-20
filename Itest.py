@@ -17,6 +17,7 @@ from scipy import ndimage
 import os.path
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
+from matplotlib_scalebar.scalebar import ScaleBar
 from osgeo import gdal
 
 def main():
@@ -76,30 +77,42 @@ def main():
 	# varrprint(imagearr, "subsetted viirs", pflag)
 
 ######################## Fourier Transform Method ################################
-	def compare_arr(arr1, arr2, title1, title2):
-		plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
-		plt.title(title1), plt.xticks([]), plt.yticks([])
-		plt.subplot(122),plt.imshow(arr2, norm = colors.LogNorm(), cmap = 'gray')
-		plt.title(title2), plt.xticks([]), plt.yticks([])
+	def compare_arr(arr1, arr2, title1, title2, pixsize, norm1=True, norm2=True):
+		scalebar = ScaleBar(pixsize)
+		if norm1:
+			plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
+			plt.title(title1), plt.xticks([]), plt.yticks([])
+			plt.gca().add_artist(scalebar)
+		else:
+			plt.subplot(121),plt.imshow(arr1, cmap = 'gray')
+			plt.title(title1), plt.xticks([]), plt.yticks([])
+			plt.gca().add_artist(scalebar)
+		if norm2:
+			plt.subplot(122),plt.imshow(arr2, norm = colors.LogNorm(), cmap = 'gray')
+			plt.title(title2), plt.xticks([]), plt.yticks([])
+		else:
+			plt.subplot(122),plt.imshow(arr2, cmap = 'gray')
+			plt.title(title2), plt.xticks([]), plt.yticks([])
 		plt.show()
 
 	np_dft_prop_im = fft.fft2(padded_prop)
 	np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
 	np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
-	compare_arr(padded_prop, imagearr,'Kernel', 'VIRRS')
+	compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
+	compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False) 
 	varrprint(np_dft_prop_im, 'np_dft_kernel', pflag)
 
 	np_dft_viirs_im = fft.fft2(imagearr)
 	np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
 	np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
-	compare_arr(imagearr, FFT_product,'VIIRS Image', 'FFT VIRRS')
+	compare_arr(imagearr, np_magnitude_spectrum_viirs,'VIIRS Image', 'Fast Fourier Transformed VIIRS', 462.7)
 	varrprint(np_dft_viirs_im, 'np_dft_viirs', pflag)
 
 	kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
 	viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
 	FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
-	compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'FFT_product_inverse Log Normal')
+	compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
 	varrprint(FFT_product_inverse, 'FFT_product_inverse', pflag)
 
 	######## Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
