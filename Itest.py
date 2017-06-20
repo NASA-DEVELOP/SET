@@ -98,7 +98,7 @@ def main():
 	np_dft_prop_im = fft.fft2(padded_prop)
 	np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
 	np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
-	compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
+	compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', '20140901_20140930 VIIRS Composite', 462.7) #meters 462.7
 	compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False) 
 	varrprint(np_dft_prop_im, 'np_dft_kernel', pflag)
 
@@ -112,7 +112,7 @@ def main():
 	viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
 	FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
-	compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
+	compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Total Sky Glow at Zenith', 462.7)
 	varrprint(FFT_product_inverse, 'FFT_product_inverse', pflag)
 
 	######## Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
