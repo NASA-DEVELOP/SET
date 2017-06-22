@@ -505,7 +505,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_
 	return total_sum
 
 def proparray_to_geotiff(convolved_array, referenceVIIRS="C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif", outfilename= 'C:/outputkerneltiffs/referenced.tif'):
-	imdata = gdal.Open(referenceVIIRS, )
+	imdata = gdal.Open(referenceVIIRS)
 
 	# Save out to a GeoTiff
 	arr = convolved_array
