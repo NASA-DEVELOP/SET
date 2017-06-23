@@ -132,7 +132,6 @@ def main():
 
 # Function that creates 2d propagation function
 def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0, azimuth = 0.0):
-	kernelmeta = open('kernel_'+str(latitude)+'_'+str(ubr_arg)+'_'+str(zen_arg)+'_'+str(azimuth), 'w')
 	# Input Variables
 	print '**INPUTS**'
 
@@ -171,20 +170,17 @@ def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0
 	# D_OC[D_OC > 201] = numpy.NaN
 
 	# Check of D_OC shape after assigning NaNs outside of 200 km
-	print "kernel heigth in pixels, trimmed: {}".format(D_OC.shape[0])
-	print "kernel width in pixels, trimmed: {}".format(D_OC.shape[1])
+	print 'kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0])
+	print 'kernel width in pixels, trimmed: {}'.format(D_OC.shape[1])
 	widthcenter = (D_OC.shape[1] + 1)//2
 	heigthcenter = (D_OC.shape[0] +1)//2
 	################################## reassignment of center value, need to use better method
 	D_OC[cent_row,cent_col] = .01
-	varrprint(D_OC,'D_OC', pflag)
 
 	# print "center area ##################################################################"
 	# print D_OC[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# Earth angle from source to site, REF 3, p. 308\
 	Chi = D_OC/R_T
-	varrprint(Chi,'Chi', pflag)
-	
 	
 	# beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
 	# http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
@@ -212,11 +208,11 @@ def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0
 	thetaleft = theta[0:,0:widthcenter]
 
 	#test array subsets to reduce processing time
-	# Chileft = Chi[427:432,530:widthcenter]
-	# u0left = u0[427:432,530:widthcenter]
-	# l_OCleft = l_OC[427:432,530:widthcenter]
-	# thetaleft = theta[427:432,530:widthcenter]
-	# abetaleft = theta[427:432,530:widthcenter]
+	Chileft = Chi[427:432,530:widthcenter]
+	u0left = u0[427:432,530:widthcenter]
+	l_OCleft = l_OC[427:432,530:widthcenter]
+	thetaleft = theta[427:432,530:widthcenter]
+	abetaleft = theta[427:432,530:widthcenter]
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
 
@@ -257,8 +253,6 @@ def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0
 
 	# Complete 2d propagation function
 	PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
-	print "prop sum array hstacked"
-	print PropSumArray
 	return PropSumArray, time_sec
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
@@ -299,28 +293,18 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
 	# Find center column, center row
 	center_col = int((kernel_cols - 1)/2)
 	center_row = int((kernel_rows - 1)/2)
-	print center_col
-	print center_row
 
 	# Create vecotrs of relative longitude and latitudes (in radians)
 	rel_long_vec = array(pix_rad*(col_count - center_col))
-	print rel_long_vec.shape
+
 	rel_lat_vec = -pix_rad*(row_count - center_row)
-	print rel_lat_vec.shape
-	print rel_long_vec
-	print rel_lat_vec
-	print rel_long_vec[center_col]
-	print rel_lat_vec[center_row] 
 
 	rel_long = tile(rel_long_vec,(kernel_rows,1))
 	rel_lat = transpose(tile(rel_lat_vec,(kernel_cols,1)))
-	print rel_long
 	varrprint(rel_long,'rel_long',pf)
-	print rel_lat
 	varrprint(rel_lat,'rel_lat',pf)
 
 	src_lat = rel_lat + center_lat
-	print src_lat
 	varrprint(src_lat,'src_lat',pf)
 
 	return src_lat, rel_long, center_row, center_col
