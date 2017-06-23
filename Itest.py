@@ -4,8 +4,8 @@
 # (2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial night sky brightness mapped
 #       from DMSP satellite Operational Linescan System measurements. Mon. Not. R. Astron. Soc. 318.
 # (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc. Pac. 101.
-
 from __future__ import division
+import sys
 import numpy
 from numpy import *
 import itertools
@@ -20,10 +20,15 @@ import matplotlib.colors as colors
 from matplotlib_scalebar.scalebar import ScaleBar
 from osgeo import gdal
 
+regionlat_arg = eval(sys.argv[1])
+ubr_arg = eval(sys.argv[2])
+zen_arg = eval(sys.argv[3])
+azimuth_arg = eval(sys.argv[4])
+
 def main():
 	# Print flag
 	pflag = "verbose"
-	kerneltiffpath = 'kernel_' + str(40.8797) +'_'+ str(10.0) +'_'+ str(0.0) +'_'+str(0.0)+'.tif'
+	kerneltiffpath = 'kernel_' + str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'.tif'
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
 		#bottom bottom_lat = 40.8797
@@ -131,14 +136,14 @@ def main():
 	proparray_to_geotiff(FFT_product_inverse, FFTpath)
 
 # Function that creates 2d propagation function
-def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0, azimuth = 0.0):
+def fsum_2d(pflag = 'verbose'):
 	# Input Variables
 	print '**INPUTS**'
 
 	#arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
 	#bottom bottom_lat = 40.8797
 	#top lat= 46.755666
-	cent_lat_deg = latitude
+	cent_lat_deg = regionlat_arg
 	cent_lat = cent_lat_deg*pi/180
 	p_deg = .0041666667
 	p_rad = p_deg*pi/180
@@ -189,7 +194,7 @@ def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0
 	varrprint(beta, 'beta, Relative azimuth line-of-sight to scatter (rad)', pflag)
 	test = beta*180/pi
 	print(test[cent_row-2:cent_row+3, cent_col-2:cent_col+3])
-	abeta = beta - azimuth
+	abeta = beta - azimuth_arg
 	# u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 	u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
 	varrprint(u0,'u0', pflag)
