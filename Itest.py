@@ -23,23 +23,25 @@ from osgeo import gdal
 def main():
 	# Print flag
 	pflag = "verbose"
-	kerneltiffpath = "kernelubreak30_highlat2.tif"
+	kerneltiffpath = 'kernel_' + str(40.8797) +'_'+ str(10.0) +'_'+ str(0.0) +'_'+str(0.0)+'.tif'
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
 		#bottom bottom_lat = 40.8797
 		#top lat= 46.755666
 		propagation_array1, time_1 = fsum_2d(pflag, 40.8797, 30.0)
-		proparray_to_tiff(kerneltiffpath, propagation_array1)
+		proparray_to_geotiff(propagation_array1, kerneltiffpath)
 		varrprint(propagation_array1,'propagation_array1', pflag)
 
-		# propagation_array2, time_2 = fsum_2d(pflag, 40.8797, 10.0)
-		# print "Time Factor Improvement!: {}".format(time_1/time_2)
-		# varrprint(propagation_array2,'propagation_array2', pflag)
-		# differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
-		# print "Accuracy Loss Factor!: {}".format(differencearray_perc)
-		# varrprint(differencearray_perc, 'difference array perc', pflag)
+		propagation_array2, time_2 = fsum_2d(pflag, 40.8797, 10.0)
+		print "Time Factor Improvement!: {}".format(time_1/time_2)
+		varrprint(propagation_array2,'propagation_array2', pflag)
+		differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
+		print "Accuracy Loss Factor!: {}".format(differencearray_perc)
+		varrprint(differencearray_perc, 'difference array perc', pflag)
 		print "time for prop function ubreak 30"
 		print time_1
+		print "time for prop function ubreak 10"
+		print time_2
 	
 	kerneldata = gdal.Open(kerneltiffpath)
 	propagation_array1 = kerneldata.ReadAsArray()
@@ -65,6 +67,7 @@ def main():
 	varrprint(padded_prop, 'kernel scaled and padded',pflag)
 	varrprint(imagearr, 'VIIRSscaled', pflag)
 
+	################# for convolution FFT comparison
 	# subset = 50
 	# prows = padded_prop.shape[0]
 	# pcols = padded_prop.shape[1]
@@ -124,11 +127,11 @@ def main():
 	# plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
 	# plt.show()
 	###############################################################################	
-	
-	proparray_to_geotiff(FFT_product_inverse)
+	FFTpath = filein[:-4]+str(40.8797) +'_'+ str(10.0) +'_'+ str(0.0) +'_'+str(0.0)+'convolved'+'.tif'
+	proparray_to_geotiff(FFT_product_inverse, FFTpath)
 
 # Function that creates 2d propagation function
-def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0, beta_arg = 0.0):
+def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0, azimuth = 0.0):
 	# Input Variables
 	print '**INPUTS**'
 
@@ -143,10 +146,6 @@ def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0
 	# z, Zenith angle site, REF 2, Fig. 6, p. 648
 	zen = zen_arg
 	print 'z, Site zenith (deg): {}'.format(zen)
-
-	# beta, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
-	beta = beta_arg
-	print 'beta, Relative azimuth line-of-sight to scatter (deg): {}'.format(beta)
 
 	# ubr, Length of u for relaxing integration increment
 	ubr = ubr_arg
@@ -168,51 +167,52 @@ def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0
 	D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2)**2))
 
 	# Assignment of NaNs or null values outside of 200 km
-	D_OC[D_OC > 201] = numpy.NaN
+	# D_OC[D_OC > 201] = numpy.NaN
 
 	# Check of D_OC shape after assigning NaNs outside of 200 km
-	print "kernel heigth in pixels, trimmed: {}".format(D_OC.shape[0])
-	print "kernel width in pixels, trimmed: {}".format(D_OC.shape[1])
+	print 'kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0])
+	print 'kernel width in pixels, trimmed: {}'.format(D_OC.shape[1])
 	widthcenter = (D_OC.shape[1] + 1)//2
 	heigthcenter = (D_OC.shape[0] +1)//2
 	################################## reassignment of center value, need to use better method
 	D_OC[cent_row,cent_col] = .01
-	varrprint(D_OC,'D_OC', pflag)
+
 	# print "center area ##################################################################"
 	# print D_OC[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# Earth angle from source to site, REF 3, p. 308\
 	Chi = D_OC/R_T
-	varrprint(Chi,'Chi', pflag)
 	
+	# beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
+	# http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
+	print('*********************************************************************')
+	beta = arcsin(sin(pi/2-source_lat)* sin(rltv_long)/ sin(Chi))
+	varrprint(beta, 'beta, Relative azimuth line-of-sight to scatter (rad)', pflag)
+	test = beta*180/pi
+	print(test[cent_row-2:cent_row+3, cent_col-2:cent_col+3])
+	abeta = beta - azimuth
 	# u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
-	u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
+	u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
 	varrprint(u0,'u0', pflag)
-	
 	# l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
 	# l_OC and D_OC are similar as expected
 	l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
-
-	print l_OC[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
-	q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
-
-	print q1[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
+	q1 = R_T*(sin(Chi)*sin(zen)*cos(abeta) + cos(Chi)*cos(zen) - cos(zen)) # km
 	# theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
 	theta = arccos(q1/l_OC) # radians
-	
-	print theta[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
 	# Get left arrays to cut processing time in half
+	abetaleft = abeta[0:,0:widthcenter]
 	Chileft = Chi[0:,0:widthcenter]
 	u0left = u0[0:,0:widthcenter]
 	l_OCleft = l_OC[0:,0:widthcenter]
 	thetaleft = theta[0:,0:widthcenter]
 
 	#test array subsets to reduce processing time
-	# Chileft = Chi[427:432,530:widthcenter]
-	# u0left = u0[427:432,530:widthcenter]
-	# l_OCleft = l_OC[427:432,530:widthcenter]
-	# thetaleft = theta[427:432,530:widthcenter]
-
+	Chileft = Chi[427:432,530:widthcenter]
+	u0left = u0[427:432,530:widthcenter]
+	l_OCleft = l_OC[427:432,530:widthcenter]
+	thetaleft = theta[427:432,530:widthcenter]
+	abetaleft = theta[427:432,530:widthcenter]
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
 
@@ -245,16 +245,14 @@ def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0
 	start = time.time()
 
 	# 2d iteration for integrating from u0 to infinity to create propagation function for each element
-	for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-		p[...] = fsum_single(R_T, c, u, l, t, zen, beta, ubr)
+	for p,c,u,l,t,b in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite']), nditer(abetaleft, op_flags=['readwrite'])):
+		p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr)
 	end = time.time()
 	time_sec = end-start
 	PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
 
 	# Complete 2d propagation function
 	PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
-	print "prop sum array hstacked"
-	print PropSumArray
 	return PropSumArray, time_sec
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
@@ -295,34 +293,24 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
 	# Find center column, center row
 	center_col = int((kernel_cols - 1)/2)
 	center_row = int((kernel_rows - 1)/2)
-	print center_col
-	print center_row
 
 	# Create vecotrs of relative longitude and latitudes (in radians)
 	rel_long_vec = array(pix_rad*(col_count - center_col))
-	print rel_long_vec.shape
+
 	rel_lat_vec = -pix_rad*(row_count - center_row)
-	print rel_lat_vec.shape
-	print rel_long_vec
-	print rel_lat_vec
-	print rel_long_vec[center_col]
-	print rel_lat_vec[center_row] 
 
 	rel_long = tile(rel_long_vec,(kernel_rows,1))
 	rel_lat = transpose(tile(rel_lat_vec,(kernel_cols,1)))
-	print rel_long
 	varrprint(rel_long,'rel_long',pf)
-	print rel_lat
 	varrprint(rel_lat,'rel_lat',pf)
 
 	src_lat = rel_lat + center_lat
-	print src_lat
 	varrprint(src_lat,'src_lat',pf)
 
 	return src_lat, rel_long, center_row, center_col
 
 # Function that takes elements of the arrays of D_OC, Chi, etc. as arguemnts. 
-def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2):
+def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2):
 	if isnan(l_OC):
 		return nan
 
@@ -504,11 +492,11 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, zen_farg, beta_farg, ubrk_farg, K_am_
 
 	return total_sum
 
-def proparray_to_geotiff(convolved_array, referenceVIIRS="C:/MonthlyViirs2015/20140901_20140930_75N180W_C.tif", outfilename= 'C:/outputkerneltiffs/referenced.tif'):
+def proparray_to_geotiff(array, outfilename, referenceVIIRS="20140901_20140930_75N180W_C.tif"):
 	imdata = gdal.Open(referenceVIIRS)
 
 	# Save out to a GeoTiff
-	arr = convolved_array
+	arr = array
 	# First of all, gather some information from VIIRS image
 	[cols,rows] = arr.shape
 	trans       = imdata.GetGeoTransform()
