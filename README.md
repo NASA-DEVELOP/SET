@@ -1,14 +1,5 @@
-<<<<<<< HEAD
-# README for User Interface branch#
-<<<<<<< HEAD
-# as of June 20, 2017
-=======
-# README #
-# as of June 22, 2017 Azimuth Branch
->>>>>>> eda6f27cf5883b727e8912bbcda8451fb9ecb887
-=======
-# as of June 23, 2017
->>>>>>> b1b00f7d5db257d97e3f659eaae1186ab133b995
+# README for User Interface branch
+# as of June 28, 2017
 # In the words of Cinzano 2000, here is what we are trying to calculate: 
 # "The light pollution propagation function f depends in general on the geometrical disposition (the altitude of the site and the area, and their mutual distance), on the atmospheric
 # distribution of molecules and aerosols and their optical characteristics in the chosen photometric band, on the shape of the emission function of the source, and on the direction 
