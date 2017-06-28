@@ -125,7 +125,7 @@ def main():
 	# plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
 	# plt.show()
 	###############################################################################	
-	FFTpath = filein[:-4]+str(40.8797) +'_'+ str(10.0) +'_'+ str(0.0) +'_'+str(0.0)+'convolved'+'.tif'
+	FFTpath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'convolved'+'.tif'
 	array_to_geotiff(FFT_product_inverse, FFTpath)
 
 # Function that creates 2d propagation function
@@ -165,7 +165,7 @@ def fsum_2d(pflag = 'verbose'):
 	D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2)**2))
 
 	# Assignment of NaNs or null values outside of 200 km
-	# D_OC[D_OC > 201] = numpy.NaN
+	D_OC[D_OC > 201] = numpy.NaN
 
 	# Check of D_OC shape after assigning NaNs outside of 200 km
 	print 'kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0])
