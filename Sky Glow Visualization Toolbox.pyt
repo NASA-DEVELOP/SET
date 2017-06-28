@@ -1,8 +1,8 @@
 """
 Source Name:	Sky Glow Visualization Toolbox.pyt
 Author:			Wyoming Cross-Cutting II, NASA DEVELOP National Program
-Description:	Python tool to generate artificial sky glow maps using data from NASA's
-				Visible Infrared Imaging Radiometer Suite (VIIRS) sensor.
+Description:	Python tool to generate artificial sky glow maps using data from NASA
+				and NOAA's Visible Infrared Imaging Radiometer Suite (VIIRS) sensor.
 """
 ###############INCOMPLETE: Testing random functions from Itest.py###############
 
@@ -46,13 +46,16 @@ class CreateArtificialSkyGlowMap(object):
 	# Define the tool.
 	def __init__(self):
 		self.label = "Create Artificial Sky Glow Map"
-		self.description = """Produce an aritificial sky glow map using data from NASA and NOAA's
-							  Suomi NPP Visible Infrared Imaging Radiometer Suite (VIIRS)
-							  Day Night Band (DNB) sensor."""
+		self.description = """Produce an aritificial sky glow map using data from NASA 
+							  and NOAA's Suomi NPP Visible Infrared Imaging Radiometer Suite
+							  (VIIRS) Day/Night Band (DNB) sensor."""
 		self.canRunInBackground = True
 
 	# Define parameters.
 	def getParameterInfo(self):
+
+		# Input VIIRS reference
+		vImage = parameter("Input VIIRS Reference","vImage","DEFile")
 
 		# Latitude (Grand Teton National Park = 43.7904 degrees N)
 		lat = parameter("Latitude","lat","GPDouble")
@@ -63,7 +66,7 @@ class CreateArtificialSkyGlowMap(object):
 		# Zenith angle
 		zen = parameter("Zenith Angle","zen","GPDouble")
 
-		params = [lat,ubr,zen]
+		params = [vImage,lat,ubr,zen]
 		return params
 
 	# Source code
