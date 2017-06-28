@@ -46,8 +46,9 @@ class CreateArtificialSkyGlowMap(object):
 	# Define the tool.
 	def __init__(self):
 		self.label = "Create Artificial Sky Glow Map"
-		self.description = """Produce an aritificial sky glow map using data from NASA's
-							  Visible Infrared Imaging Radiometer Suite (VIIRS) sensor."""
+		self.description = """Produce an aritificial sky glow map using data from NASA and NOAA's
+							  Suomi NPP Visible Infrared Imaging Radiometer Suite (VIIRS)
+							  Day Night Band (DNB) sensor."""
 		self.canRunInBackground = True
 
 	# Define parameters.
