@@ -1,7 +1,7 @@
 """
-Source Name:	Sky Glow Visualization Toolbox.pyt
+Source Name:	Skyglow Estimation Toolbox.pyt
 Author:			Wyoming Cross-Cutting II, NASA DEVELOP National Program
-Description:	Python tool to generate artificial sky glow maps using data from NASA
+Description:	Python tool to generate artificial skyglow maps using data from NASA
 				and NOAA's Visible Infrared Imaging Radiometer Suite (VIIRS) sensor.
 """
 ###############INCOMPLETE: Testing random functions from Itest.py###############
@@ -36,16 +36,16 @@ def parameter(dName,name,datatype,defaultValue=None,parameterType=None,direction
 class Toolbox(object):
 	# Define the toolbox.
     def __init__(self):
-        self.label = "Sky Glow Visualization Toolbox"
+        self.label = "Skyglow Estimation Toolbox"
         self.alias = "skyglow"
 
         # List of tool classes associated with toolbox.
-        self.tools = [CreateArtificialSkyGlowMap]
+        self.tools = [CreateArtificialSkyglowMap]
 
-class CreateArtificialSkyGlowMap(object):
+class CreateArtificialSkyglowMap(object):
 	# Define the tool.
 	def __init__(self):
-		self.label = "Create Artificial Sky Glow Map"
+		self.label = "Create Artificial Skyglow Map"
 		self.description = """Produce an aritificial sky glow map using data from NASA 
 							  and NOAA's Suomi NPP Visible Infrared Imaging Radiometer Suite
 							  (VIIRS) Day/Night Band (DNB) sensor."""
@@ -57,8 +57,8 @@ class CreateArtificialSkyGlowMap(object):
 		# Input VIIRS reference
 		vImage = parameter("Input VIIRS Reference","vImage","DEFile")
 
-		# Latitude (Grand Teton National Park = 43.7904 degrees N)
-		lat = parameter("Latitude","lat","GPDouble")
+		# Region Latitude (Grand Teton National Park = 43.7904 degrees N)
+		lat = parameter("Region Latitude","lat","GPDouble")
 
 		# Length of u for relaxing integration increment (km) ?
 		ubr = parameter("Distance from observer to night sky (km)","ubr","GPDouble")
@@ -66,12 +66,16 @@ class CreateArtificialSkyGlowMap(object):
 		# Zenith angle
 		zen = parameter("Zenith Angle","zen","GPDouble")
 
-		params = [vImage,lat,ubr,zen]
+		# Azimuth angle
+		azi = parameter("Azimuth Angle","azi","GPDouble")
+
+		params = [vImage,lat,ubr,zen,azi]
 		return params
 
 	# Source code
 	def execute(self,params,messages):
-		lat = params[0].valueAsText
-		ubr = params[1].valueAsText
-		zen = params[2].valueAsText
+		regionlat_arg = params[1].valueAsText
+		ubr_arg = params[2].valueAsText
+		zen_arg = params[3].valueAsText
+		azimuth_arg = params[4].valuAsText
 		return
