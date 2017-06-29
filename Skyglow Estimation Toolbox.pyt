@@ -4,33 +4,22 @@ Author:			Wyoming Cross-Cutting II, NASA DEVELOP National Program
 Description:	Python tool to generate artificial skyglow maps using data from NASA
 				and NOAA's Visible Infrared Imaging Radiometer Suite (VIIRS) sensor.
 """
-###############INCOMPLETE: Testing random functions from Itest.py###############
 
-import arcpy
+from arcpy import *
 from numpy import *
 
-# Calculate Gaussian Earth radius of curvature as a function of latitude
-def gauss_earth_curvature_radius(center_lat):
-	# Earth ellipse semi-major orbit, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	R_equator = 6378.1370 # km (a)
-
-	# Earth ellipse semi-minor axis, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	R_polar = 6356.7523142 # km (b)
-
-	# Gaussian Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-	R_curve = ((R_equator**2)*R_polar)/((R_equator*cos(center_lat))**2 + (R_polar*sin(center_lat))**2)
-
-	return R_curve
-
 # Function to streamline parameter creation.
-def parameter(dName,name,datatype,defaultValue=None,parameterType=None,direction=None):
+def parameter(dName,name,datatype,paramtype=None,direction=None):
+	if paramtype == None:
+		paramtype = "Required"
+	if direction == None:
+		direction = "Input"
 	param = arcpy.Parameter(
 		displayName = dName,
 		name = name,
 		datatype = datatype,
-		parameterType = "Required",
-		direction = "Input")
-	param.value = defaultValue
+		parameterType = paramtype,
+		direction = direction)
 	return param
 
 class Toolbox(object):
@@ -40,7 +29,48 @@ class Toolbox(object):
         self.alias = "skyglow"
 
         # List of tool classes associated with toolbox.
-        self.tools = [CreateArtificialSkyglowMap]
+        self.tools = [CreateKernel,CreateArtificialSkyglowMap]
+
+class CreateKernel(object):
+	# Define the tool
+	def __init__(self):
+		self.label = "Create Kernel"
+		self.description = """Produce a kernel for a specified region. Kernels are required to
+							  generate an artificial skyglow map that uses localized parameters
+							  such as zenith angle and azimuth angle to depict sources of light
+							  pollution."""
+		self.canRunInBackground = True
+
+	# Define parameters.
+	def getParameterInfo(self):
+
+		# Region Latitude (Grand Teton National Park = 43.7904 degrees N)
+		lat = parameter("Region Latitude","lat","GPDouble")
+
+		# Length of u for relaxing integration increment (km) ?
+		ubr = parameter("Distance from observer to night sky (km)","ubr","GPDouble")
+
+		# Zenith angle
+		zen = parameter("Zenith Angle","zen","GPDouble")
+
+		# Azimuth angle
+		azi = parameter("Azimuth Angle","azi","GPDouble")
+
+		# Output kernel path
+		kerneltiffpath = parameter("Output Kernel Path","kerneltiffpath","DEFolder",direction="Output")
+
+		params = [lat,ubr,zen,azi,kerneltiffpath]
+		return params
+
+	def execute(self,params,messages):
+		regionlat_arg = params[0].valueAsText
+		ubr_arg = params[1].valueAsText
+		zen_arg = params[2].valueAsText
+		azimuth_arg = params[3].valueAsText
+		kerneltiffpath = params[4].valueAsText
+
+		AddMessage("Program is working.")
+		return
 
 class CreateArtificialSkyglowMap(object):
 	# Define the tool.
@@ -57,25 +87,9 @@ class CreateArtificialSkyglowMap(object):
 		# Input VIIRS reference
 		vImage = parameter("Input VIIRS Reference","vImage","DEFile")
 
-		# Region Latitude (Grand Teton National Park = 43.7904 degrees N)
-		lat = parameter("Region Latitude","lat","GPDouble")
-
-		# Length of u for relaxing integration increment (km) ?
-		ubr = parameter("Distance from observer to night sky (km)","ubr","GPDouble")
-
-		# Zenith angle
-		zen = parameter("Zenith Angle","zen","GPDouble")
-
-		# Azimuth angle
-		azi = parameter("Azimuth Angle","azi","GPDouble")
-
-		params = [vImage,lat,ubr,zen,azi]
+		params = [vImage]
 		return params
 
 	# Source code
 	def execute(self,params,messages):
-		regionlat_arg = params[1].valueAsText
-		ubr_arg = params[2].valueAsText
-		zen_arg = params[3].valueAsText
-		azimuth_arg = params[4].valuAsText
 		return
