@@ -76,25 +76,6 @@ def main():
 	# varrprint(imagearr, "subsetted viirs", pflag)
 
 ######################## Fourier Transform Method ################################
-	def compare_arr(arr1, arr2, title1, title2, pixsize, norm1=True, norm2=True, compareflag=True):
-		if compareflag == False:
-			return
-		scalebar = ScaleBar(pixsize)
-		if norm1:
-			plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
-			plt.title(title1), plt.xticks([]), plt.yticks([])
-			plt.gca().add_artist(scalebar)
-		else:
-			plt.subplot(121),plt.imshow(arr1, cmap = 'gray')
-			plt.title(title1), plt.xticks([]), plt.yticks([])
-			plt.gca().add_artist(scalebar)
-		if norm2:
-			plt.subplot(122),plt.imshow(arr2, norm = colors.LogNorm(), cmap = 'gray')
-			plt.title(title2), plt.xticks([]), plt.yticks([])
-		else:
-			plt.subplot(122),plt.imshow(arr2, cmap = 'gray')
-			plt.title(title2), plt.xticks([]), plt.yticks([])
-		plt.show()
 
 	np_dft_prop_im = fft.fft2(padded_prop)
 	np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
@@ -186,7 +167,7 @@ def fsum_2d(pflag = 'verbose'):
 	beta = arcsin(sin(pi/2-source_lat)* sin(rltv_long)/ sin(Chi))
 	varrprint(beta, 'beta, Relative azimuth line-of-sight to scatter (rad)', pflag)
 	test = beta*180/pi
-	print(test[cent_row-2:cent_row+3, cent_col-2:cent_col+3])
+	print(beta[cent_row-2:cent_row+3, cent_col-2:cent_col+3])
 	abeta = beta - azimuth_arg
 	# u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
 	u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
@@ -206,11 +187,11 @@ def fsum_2d(pflag = 'verbose'):
 	thetaleft = theta[0:,0:widthcenter]
 
 	#test array subsets to reduce processing time
-	Chileft = Chi[427:432,530:widthcenter]
-	u0left = u0[427:432,530:widthcenter]
-	l_OCleft = l_OC[427:432,530:widthcenter]
-	thetaleft = theta[427:432,530:widthcenter]
-	abetaleft = theta[427:432,530:widthcenter]
+	# Chileft = Chi[300:432,530:widthcenter]
+	# u0left = u0[300:432,530:widthcenter]
+	# l_OCleft = l_OC[300:432,530:widthcenter]
+	# thetaleft = theta[300:432,530:widthcenter]
+	# abetaleft = theta[300:432,530:widthcenter]
 	#container for Propogation array
 	PropSumArrayleft = zeros_like(l_OCleft)
 
@@ -251,6 +232,8 @@ def fsum_2d(pflag = 'verbose'):
 
 	# Complete 2d propagation function
 	PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
+	compare_arr(PropSumArray, abeta, 'PropSumArray', 'beta array', True, True)
+	print(PropSumArray.shape)
 	return PropSumArray, time_sec
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
@@ -532,6 +515,25 @@ def varrprint(varrval, varrtext, print_flag):
 		print ',',
 		print varrtext,
 		print 'minimum: {}'.format(ma.minimum(varrval[~isnan(varrval)]))
+def compare_arr(arr1, arr2, title1, title2, pixsize=462.7, norm1=True, norm2=True, compareflag=True):
+	if compareflag == False:
+		return
+	scalebar = ScaleBar(pixsize)
+	if norm1:
+		plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
+		plt.title(title1), plt.xticks([]), plt.yticks([])
+		plt.gca().add_artist(scalebar)
+	else:
+		plt.subplot(121),plt.imshow(arr1, cmap = 'gray')
+		plt.title(title1), plt.xticks([]), plt.yticks([])
+		plt.gca().add_artist(scalebar)
+	if norm2:
+		plt.subplot(122),plt.imshow(arr2, norm = colors.LogNorm(), cmap = 'gray')
+		plt.title(title2), plt.xticks([]), plt.yticks([])
+	else:
+		plt.subplot(122),plt.imshow(arr2, cmap = 'gray')
+		plt.title(title2), plt.xticks([]), plt.yticks([])
+	plt.show()
 
 if __name__ == "__main__":
 	main()
