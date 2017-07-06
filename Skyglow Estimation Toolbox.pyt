@@ -19,6 +19,7 @@ from numpy import *
 import os.path
 import time
 import itertools
+from osgeo import gdal
 
 # Function to streamline parameter creation.
 def parameter(dName,name,datatype,paramtype=None,direction=None):
@@ -91,6 +92,9 @@ class CreateArtificialSkyglowMap(object):
 		if kerneltiffpath is None:
 			# Estimate the 2D propagation function
 			propkernel, time = fsum_2d(lat_arg,ubr_arg,zen_arg,azi_arg)
+			array_to_geotiff(propkernel, kerneltiffpath)
+			varrprint(propkernel,"propagation array")
+			AddMessage("Time for propagation function ubreak 10: {}".format(time))
 		return
 
 # Function for 2D light propagation
@@ -168,6 +172,13 @@ def fsum_2d(lat,ubr,zen,azi):
 	l_OCleft = l_OC[0:,0:widthcenter]
 	thetaleft = theta[0:,0:widthcenter]
 
+	# Test array subsets to reduce processing time.
+	chileft = chi[427:432,530:widthcenter]
+	u0left = u0[427:432,530:widthcenter]
+	l_OCleft = l_OC[427:432,530:widthcenter]
+	thetaleft = theta[427:432,530:widthcenter]
+	abetaleft = theta[427:432,530:widthcenter] # Is this correct?
+
 	# Container for propagation array
 	PropSumArrayleft = zeros_like(l_OCleft)
 
@@ -242,7 +253,172 @@ def create_latlon_arrays(R_curve, cent_lat, pix):
 	return src_lat, rel_long, center_row, center_col
 
 # For every single pixel in array, takes elements (D_OC, chi, etc.) as arguments
-def fsum_single():
+def fsum_single(R_T,chi,u0,l_OC,theta,beta_farg,zen_farg,ubrk_farg,K_am_arg = 1.0, du_farg = .2):
+	if isnan(l_OC):
+		return nan
+
+	# Scattering distance increment, delta u (km)
+	du0 = du_farg
+	# Zenith angle at observation site (rad)
+	zen = zen_farg
+	# Horizontal angle at observation site from line-of-sight (OC) to line of incoming scattered light (OQ) (rad)
+	beta = beta_farg
+	# Length of u, scattering ditance, at which the integration increment is relaxed (km)
+	ubrk = ubrk_farg
+	# Parameter for relative importance of aerosols to molecules, REF 1, p.10
+	K_am = K_am_arg
+
+	# Constants:
+	# N_m,0: Molecular density at sea level (cm^-3), REF 2, p.645
+	N_m0 = 2.55e19
+	# c: Inverse scale altitude (km^-1), REF 2, p.645
+	c_isa = 0.104
+	# sigma_m: Integrated Rayleigh scattering cross-section in the V-band (cm^-2*sr^-1), REF 2, p. 646
+	sig_m = 1.136e-26
+
+	# Falchi best fit parameters for normalized emission
+	# Weights for angular distributions, REF 1, p.21
+	W_a = 1.9e-3
+	W_b = 5.2e-4
+	W_c = 7.6e-5
+	# Light loss per night hour after midnight
+	d_ll = -0.045
+
+	# Containers for variables that update in loop
+	u_OQ = u0 # km
+	total_sum = 0
+	df_prop = 1
+
+	# Total Propagation stable to 3 significant figures
+	stability_limit = 0.001
+
+	# Loop counter
+	lc = 1
+
+	# START OF "u" LOOP, REF 2, Eq. (3)
+	while u_OQ < 30.0:
+		if u_OQ < ubrk:
+			du = du0
+		else:
+			du = du0 * 10.0
+
+		# Distance from source to scattering (CQ) (km), s, REF 2, Appendix A (A1), p.656
+		# Equation is wrong in REF 2 (Cinzano). Changed angle from chi to theta, REF 3, p. 308, Equation 7 (Garstang)
+		s_CQ = sqrt((u_OQ - l_OC)**2 + 4*u_OQ*l_OC*sin(theta/2)**2)
+
+		# Height of scattering above Earth reference surface Q (km), h, REF 2, Appendix A (A1), p. 656
+		h_Q = R_T*(sqrt(1 + (u_OQ**2 + 2*u_OQ*R_T*cos(zen))/R_T**2) - 1)
+
+		# Elevation angle of emission from C to Q over line from C to O (QCO) (rad), phi, REF 2, Appendix A (A1), p.656
+		phi = arccos((l_OC**2 + s_CQ**2 - u_OQ**2)/(2*l_OC*s_CQ))
+		phi_deg = phi*180/pi
+
+		# Scattering angle at Q (rad), omega, REF 2, Appendix A (A1), p. 656
+		omega = theta + phi
+		omega_deg = omega*180/pi
+
+		# Intermediate quantity (km), q3, REF 2, Appendix A (A1), p. 656
+		q3 = u_OQ*cos(zen)*cos(chi) - 2*R_T*sin(chi/2)**2
+		# Intermediate quantity (km), q2, (q2=q3 if z=0), REF 2, Appendix A (A1), p. 656
+		q2 = u_OQ*sin(zen)*cos(beta)*sin(chi) + q3
+
+		# Emission angle from source (rad), psi, REF 2, Appendix A (A1), p. 656
+		psi = arccos(q2/s_CQ)
+		psi_deg = psi*180/pi
+
+		# Scale height of aerosols (km^-1), a, REF 2, p. 646
+		a_sha = 0.657 + 0.059*K_am
+
+		# Intermediate quantity u-path, p4, REF 2, Appendix A (A2), p. 656
+		p4 = (a_sha**2*u_OQ**2*cos(zen)**2 + 2*a_sha*u_OQ*cos(zen) + 2)*exp(-a_sha*u_OQ*cos(zen)) - 2
+		# Intermediate quantity u-path, p3, REF 2, Appendix A (A2), p. 656
+		p3 = (c_isa**2*u_OQ**2*cos(zen)**2 + 2*c_isa*u_OQ*cos(zen) + 2)*exp(-c_isa*u_OQ*cos(zen)) - 2
+		# Intermediate quantity u-path, p2, REF 2, Appendix A (A2), p. 656
+		p2 = a_sha**-1*cos(zen*(1 - exp(-a_sha*u_OQ*cos(zen)) + ((16*p4*tan(zen)**2)/(9*pi*2*a_sha*R_T))))**-1
+		# Intermediate quantity u-path, p1, REF 2, Appendix A (A2), p. 656
+		p1 = c_isa**-1*cos(zen*(1 - exp(-c_isa*u_OQ*cos(zen)) + ((16*p3*tan(zen)**2)/(9*pi*2*c_isa*R_T))))**-1
+
+		# Extinction of light along u-path from scatter at Q to observation at O, ksi1, REF 2, Appendix A (A2), p. 656
+		ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2)) 
+
+		# Intermediate quantity s-path, f4, REF 2, Appendix A (A2), p. 657
+		f4 = (a_sha**2*s_CQ**2*cos(psi)**2 + 2*a_sha*s_CQ*cos(psi) + 2)*exp(-a_sha*s_CQ*cos(psi)) - 2
+		# Intermediate quantity s-path, f3, REF 2, Appendix A (A2), p. 657
+		f3 = (c_isa**2*s_CQ**2*cos(psi)**2 + 2*c_isa*s_CQ*cos(psi) + 2)*exp(-c_isa*s_CQ*cos(psi)) - 2
+		# Intermediate quantity s-path, f2, REF 2, Appendix A (A2), p. 657
+		f2 = a_sha**-1*cos(psi*(1 - exp(-a_sha*s_CQ*cos(psi)) + ((16*f4*tan(psi)**2)/(9*pi*2*a_sha*R_T))))**-1
+		# Intermediate quantity s-path, f1, REF 2, Appendix A (A2), p. 657
+		f1 = c_isa**-1*cos(psi*(1 - exp(-c_isa*s_CQ*cos(psi)) + ((16*f3*tan(psi)**2)/(9*pi*2*c_isa*R_T))))**-1
+
+		# Extinction of light along s-path from emission at C to scatter at Q, ksi2, REF 2, Appendix A (A2), p. 656
+		ksi2 = exp(-N_m0*sig_m*(f1 + 11.778*K_am*f2))
+
+		# Normalized emission function, I(psi), MODIFIED FROM REF 1, p. 13 (leaving out natural sky brightness)
+		I_ne = 1/(2*pi)*(W_a*2*cos(psi) + W_b*0.554*psi**4 + W_c*sin(3*psi))
+
+		# Illuminance per unit flux, i(psi,s), REF 2, Eq. 6, p. 644
+		i_ps = I_ne*ksi2/s_CQ**2
+
+		# Number density of gaseous component of atmosphere as function of altitude, N_m(h), REF 2, Eq. 10, p. 645
+		N_m = N_m0*exp(-c_isa*h_Q)
+
+		# Total integrated scattering cross-section, N_a*sig_a, REF 2, Eq. 12, p. 645 **REARRANGED**
+		Na_x_siga = K_am*N_m*sig_m*11.11
+
+		# Angular scattering function for molecular Rayleigh scattering, f_m, REF 2, Eq. 13, p. 646
+		f_m = 3*(1 + cos(omega)**2)/(16*pi)
+
+		# Angular scattering function for aerosol Mie scattering, f_a, REF 2, Eq. 14, p. 646
+		if omega_deg >= 0.0 and omega_deg <= 10.0:
+			f_a = 7.5*exp(-0.1249*omega_deg**2/(1 + 0.04996*omega_deg**2))
+		elif omega_deg > 10.0 and omega_deg <= 124.0:
+			f_a = 1.88*exp(-0.07226*omega_deg + 0.0002406*omega_deg**2)
+		elif omega_deg > 124.0 and omega_deg <= 180.0:
+			f_a = 0.025 + 0.015*sin((2.25*omega_deg - 369.0)*(pi/180))
+
+		# Luminous flux per unit solid angle per unit upward flux (directly from source), S_d, REF 2, Eq. 5, p. 644
+		S_d = (N_m*sig_m*f_m + Na_x_siga*f_a)*i_ps
+
+		# Double scattering correction factor, D_S, REF 2, Eq. 20, p. 647
+		D_S = 1 + N_m0*sig_m*(11.11*K_am*f2 + (f1/3))
+
+		# Total illumance as a function of u, S(u), REF 2, Eq. 8, p. 645
+		S_u = S_d*D_S
+		
+		# Integrand of propagation function, REF 2, Eq. 3, p. 644
+		df_prop = S_u*ksi1*du
+		total_sum += df_prop
+		u_OQ += du
+		lc += 1
+
+	return total_sum
+
+def array_to_geotiff(arr,outfilename,refVIIRS="20140901_20140930_75N180W_C.tif"):
+	imdata = gdal.Open(refVIIRS)
+
+	# Save out to a GeoTIFF
+	[col,row] = arr.shape
+	trans = imdata.GetGeoTransform()
+	proj = imdata.GetProjection()
+	nodatav = 0
+	outfile = outfilename
+
+	# Create the georeferenced file using the information from the VIIRS image
+	outdriver = gdal.GetDriverByName("GTiff")
+	outdata = outdriver.Create(str(outfile), row, col, 1, gdal.GDT_Float32)
+
+	# Write data to the file, which is the kernel array in this example
+	outdata.GetRasterBand(1).WriteArray(arr)
+
+	# Set a no data value
+	outdata.GetRasterBand(1).SetNoDataValue(nodatav)
+
+	# Georeference the image
+	outdata.SetGeoTransform(trans)
+
+	# Write projection information
+	outdata.SetProjection(proj)
+
 
 def varrprint(varrval, varrtext):
 	AddMessage("******************** {} :".format(varrtext))
