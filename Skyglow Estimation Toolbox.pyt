@@ -177,13 +177,15 @@ def fsum_2d(lat,ubr,zen,azi):
 	u0left = u0[427:432,530:widthcenter]
 	l_OCleft = l_OC[427:432,530:widthcenter]
 	thetaleft = theta[427:432,530:widthcenter]
-	abetaleft = theta[427:432,530:widthcenter] # Is this correct?
+	abetaleft = abeta[427:432,530:widthcenter]
 
 	# Container for propagation array
 	PropSumArrayleft = zeros_like(l_OCleft)
 
 	AddMessage("Time for iterations, no threads")
 	start = time.time()
+
+	##################### VERONICA: PERCENT COMPLETE/PROGRESS BAR CODE
 
 	# 2d iteration for integrating from u0 to infinity to create propagation function for each element
 	for p,c,u,l,t,b in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),
