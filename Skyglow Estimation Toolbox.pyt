@@ -20,6 +20,10 @@ import os.path
 import time
 import itertools
 from osgeo import gdal
+from matplotlib import pyplot as plt
+import matplotlib.colors as colors
+from matplotlib_scalebar.scalebar import ScaleBar
+
 
 # Function to streamline parameter creation.
 def parameter(dName,name,datatype,paramtype=None,direction=None):
@@ -82,6 +86,7 @@ class CreateArtificialSkyglowMap(object):
 
 	# Source code
 	def execute(self,params,messages):
+		vImage = params[0].valueAsText
 		lat_arg = float(params[1].valueAsText)
 		ubr_arg = float(params[2].valueAsText)
 		zen_arg = float(params[3].valueAsText)
@@ -95,6 +100,32 @@ class CreateArtificialSkyglowMap(object):
 			array_to_geotiff(propkernel, kerneltiffpath)
 			varrprint(propkernel,"propagation array")
 			AddMessage("Time for propagation function ubreak 10: {}".format(time))
+
+		kerneldata = gdal.Open(kerneltiffpath)
+		propkernel = kerneldata.ReadAsArray()
+		varrprint(propkernel,"kernel")
+
+		filein = vImage
+		viirsraster = gdal.Open(filein)
+		imagearr = viirsraster.ReadAsArray()
+		varrprint(imagearr,"VIIRS")
+
+		# Convert to float 32 for Fourier, scale, and round
+		# falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
+		# Not sure if this is correct scaling factor, I assume that this makes the output prop image in units of cd/m^2
+		viirs_scaling_factor = 10**9
+		imagearr *= viirs_scaling_factor
+		propkernel = float32(nan_to_num(propkernel))
+
+		# generalized padding of kernel so that fft can run
+		pad_left = (imagearr.shape[0] - propkernel.shape[0])//2
+		pad_right = (imagearr.shape[0] - propkernel.shape[0])//2 + 1
+		pad_up = (imagearr.shape[1] - propkernel.shape[1])//2
+		pad_down = (imagearr.shape[1] - propkernel.shape[1])//2
+		padded_prop = pad(propkernel,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
+		varrprint(padded_prop, 'kernel scaled and padded')
+		varrprint(imagearr, 'VIIRSscaled')
+
 		return
 
 # Function for 2D light propagation
@@ -420,7 +451,6 @@ def array_to_geotiff(arr,outfilename,refVIIRS="20140901_20140930_75N180W_C.tif")
 
 	# Write projection information
 	outdata.SetProjection(proj)
-
 
 def varrprint(varrval, varrtext):
 	AddMessage("******************** {} :".format(varrtext))
