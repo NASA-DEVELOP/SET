@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Program Overview &mdash; SET 0.0.1 documentation</title>
+    <title>Program Overview &#8212; SET 0.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,18 +15,20 @@
         VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="SET 0.0.1 documentation" href="index.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="installation.html" />
     <link rel="prev" title="Welcome to Skyglow’s documentation!" href="index.html" />
 <meta charset='utf-8'>
@@ -36,7 +37,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 
   </head>
-  <body role="document">
+  <body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -66,7 +67,7 @@
       role="menu"
       aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">User Documentation</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="">Program Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Program Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="gettingdata.html">Getting the Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
@@ -125,7 +126,7 @@
             
               <li class="hidden-sm">
 <div id="sourcelink">
-  <a href="_sources/overview.txt"
+  <a href="_sources/overview.rst.txt"
      rel="nofollow">Source</a>
 </div></li>
             
@@ -170,7 +171,7 @@
 
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The Sky Glow Estimation Toolbox is currently in it&#8217;s early <a href="#id1"><span class="problematic" id="id2">*</span></a>beta*phase, and requires additional work. See the Github page for a list of Issues we are currently working on.</p>
+<p class="last">The Sky Glow Estimation Toolbox is currently in it’s early <a href="#id1"><span class="problematic" id="id2">*</span></a>beta*phase, and requires additional work. See the Github page for a list of Issues we are currently working on.</p>
 </div>
 <p>The Toolbox currently contains a number of great features:</p>
 <ul class="simple">
@@ -179,22 +180,20 @@
 <li>Calculates skyglow for a given zenith and azimuth angle (this takes more than twice as long as zenith when first run to create the kernel)</li>
 </ul>
 <p>A geotiff file from VIIRS Day/Night Band data is read as a numpy array in order to apply the kernel that is created from user-supplied parameters. Users can create kernels for different zenith angles, azimuth angles, regional latitudes, and input VIIRS imagery.</p>
-<p>Once a kernel is created, the tool then applies the kernel to the VIIRS data using numpy&#8217;s Fast Fourier Tranform algorithm to compute the convolved image. Kernel&#8217;s are stored in their own directory and can be called to make the code run in a matter of seconds rather than hours.</p>
+<p>Once a kernel is created, the tool then applies the kernel to the VIIRS data using numpy’s Fast Fourier Tranform algorithm to compute the convolved image. Kernel’s are stored in their own directory and can be called to make the code run in a matter of seconds rather than hours.</p>
 <p>Additional features are still to come!</p>
 </div>
 <div class="section" id="additional-information">
 <h2>Additional Information<a class="headerlink" href="#additional-information" title="Permalink to this headline">¶</a></h2>
-<ul>
+<ul class="simple">
 <li><dl class="first docutils">
 <dt><strong>Study Area:</strong></dt>
-<dd><p class="first last">Regional (National Park Scale), can be applied anywhere</p>
-</dd>
+<dd>Regional (National Park Scale), can be applied anywhere</dd>
 </dl>
 </li>
 <li><dl class="first docutils">
 <dt><strong>Earth Observations &amp; Parameters:</strong></dt>
-<dd><p class="first last">Suomi NPP VIIRS Day/Night Band</p>
-</dd>
+<dd>Suomi NPP VIIRS Day/Night Band</dd>
 </dl>
 </li>
 </ul>
@@ -214,7 +213,7 @@
     </p>
     <p>
         &copy; Copyright 2017, Ryan Avery, Kenton Ross, Veronica Warda, Stanley Yu, Steven Chao.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.<br/>
     </p>
   </div>
 </footer>
