@@ -16,35 +16,36 @@ from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from matplotlib_scalebar.scalebar import ScaleBar
 from osgeo import gdal
+import logging
+import warnings
+warnings.filterwarnings("error")
+logger = logging.getLogger()
 
 regionlat_arg = 40.8797
 ubr_arg = 10.0
-zen_arg = 30.0
-azimuth_arg = 30.0
+zen_arg = 0.0
+azimuth_arg = 0.0
 
 
 def main():
-    # Print flag
-    pflag = "verbose"
     kerneltiffpath = 'kernel_' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
         # top lat= 46.755666
-        propkernel, time = fsum_2d(pflag)
+        propkernel, totaltime = fsum_2d()
+        logger.debug('propagation array: %s', propkernel)
         array_to_geotiff(propkernel, kerneltiffpath)
-        varrprint(propkernel,'propagation array', pflag)
-        print("time for prop function ubreak 10")
-        print(time)
+        logger.info("time for prop function ubreak 10: %s", totaltime)
 
     kerneldata = gdal.Open(kerneltiffpath)
     propkernel = kerneldata.ReadAsArray()
-    varrprint(propkernel, 'kernel',pflag)
+    logger.debug('propagation array: %s', propkernel)
 
     filein = "20140901_20140930_75N180W_C.tif"
     viirsraster = gdal.Open(filein)
     imagearr = viirsraster.ReadAsArray()
-    varrprint(imagearr, 'VIIRS', pflag)
+    logger.debug('VIIRS: %s', imagearr)
 
     ######### Convert to float 32 for Fourier, scale, and round
     # falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
@@ -58,9 +59,6 @@ def main():
     pad_up = (imagearr.shape[1] - propkernel.shape[1])//2
     pad_down = (imagearr.shape[1] - propkernel.shape[1])//2
     padded_prop = pad(propkernel,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
-    varrprint(padded_prop, 'kernel scaled and padded',pflag)
-    varrprint(imagearr, 'VIIRSscaled', pflag)
-
     ################# for convolution FFT comparison
     # subset = 50
     # prows = padded_prop.shape[0]
@@ -70,8 +68,6 @@ def main():
 
     # padded_prop = padded_prop[(prows//2)-subset:(prows//2)+subset, (pcols//2)-subset:(pcols//2)+subset]
     # imagearr = imagearr[(irows//2)-subset:(irows//2)+subset, (icols//2)-subset:(icols//2)+subset]
-    # varrprint(padded_prop, "subsetted prop", pflag)
-    # varrprint(imagearr, "subsetted viirs", pflag)
 
     ######################## Fourier Transform Method ################################
 
@@ -80,20 +76,17 @@ def main():
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
     compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
     compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False)
-    varrprint(np_dft_prop_im, 'np_dft_kernel', pflag)
 
     np_dft_viirs_im = fft.fft2(imagearr)
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
     compare_arr(imagearr, np_magnitude_spectrum_viirs,'VIIRS Image', 'Fast Fourier Transformed VIIRS', 462.7)
-    varrprint(np_dft_viirs_im, 'np_dft_viirs', pflag)
 
     kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
     FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
     compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
-    varrprint(FFT_product_inverse, 'FFT_product_inverse', pflag)
 
     # Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
     # apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
@@ -109,10 +102,9 @@ def main():
 
 
 # Function that creates 2d propagation function
-def fsum_2d(pflag = 'verbose'):
+def fsum_2d():
     # Input Variables
-    print('**INPUTS**')
-
+    logger.info('**INPUTS**')
     # arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
     # bottom bottom_lat = 40.8797
     # top lat= 46.755666
@@ -123,22 +115,22 @@ def fsum_2d(pflag = 'verbose'):
 
     # z, Zenith angle site, REF 2, Fig. 6, p. 648
     zen = zen_arg
-    print('z, Site zenith (deg): {}'.format(zen))
+    logger.info('z, Site zenith (deg): {}'.format(zen))
 
     # ubr, Length of u for relaxing integration increment
     ubr = ubr_arg
-    print('ubr, Length of u for relaxing integration increment (km): {}'.format(ubr))
+    logger.info('ubr, Length of u for relaxing integration increment (km): {}'.format(ubr))
 
     # Earth radius at latitude 43.7904 (grand teton)
     R_teton = 6367.941 # km  (c)
-    print('R_teton, Radius of curvature of the Earth at Teton (km): {}'.format(R_teton))
+    logger.info('R_teton, Radius of curvature of the Earth at Teton (km): {}'.format(R_teton))
 
     # Gaussian Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
     R_T = gauss_earth_curvature_radius(cent_lat)
-    print('R_T, Radius of curvature of the Earth (km): {}'.format(R_T))
+    logger.info('R_T, Radius of curvature of the Earth (km): {}'.format(R_T))
 
     # Create latitude/longitude arrays
-    source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cent_lat, p_rad, pflag)
+    source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cent_lat, p_rad)
 
     # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
     # using haversine formula
@@ -148,29 +140,22 @@ def fsum_2d(pflag = 'verbose'):
     D_OC[D_OC > 201] = numpy.NaN
 
     # Check of D_OC shape after assigning NaNs outside of 200 km
-    print('kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0]))
-    print('kernel width in pixels, trimmed: {}'.format(D_OC.shape[1]))
+    logger.info('kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0]))
+    logger.info('kernel width in pixels, trimmed: {}'.format(D_OC.shape[1]))
     widthcenter = (D_OC.shape[1] + 1)//2
     heigthcenter = (D_OC.shape[0] +1)//2
     # reassignment of center value, need to use better method
     D_OC[cent_row,cent_col] = .01
 
-    # print "center area ##################################################################"
-    # print D_OC[heigthcenter-2:heigthcenter+1,widthcenter-2:widthcenter+1]
     # Earth angle from source to site, REF 3, p. 308\
     Chi = D_OC/R_T
 
     # beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
     # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
-    print('*********************************************************************')
     beta = arcsin(sin(pi/2-source_lat)* sin(rltv_long)/ sin(Chi))
-    varrprint(beta, 'beta, Relative azimuth line-of-sight to scatter (rad)', pflag)
-    test = beta*180/pi
-    print(beta[cent_row-2:cent_row+3, cent_col-2:cent_col+3])
     abeta = beta - azimuth_arg
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
     u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
-    varrprint(u0,'u0', pflag)
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
     # l_OC and D_OC are similar as expected
     l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
@@ -196,7 +181,7 @@ def fsum_2d(pflag = 'verbose'):
         # container for Propogation array
         PropSumArrayleft = zeros_like(l_OCleft)
 
-        print("Time for iterations")
+        logger.info("Time for iterations")
         start = time.time()
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
@@ -218,7 +203,7 @@ def fsum_2d(pflag = 'verbose'):
         # container for Propagation array
         PropSumArray = zeros_like(l_OC)
 
-        print("Time for iterations, no symmetry")
+        logger.info("Time for iterations, no symmetry")
         start = time.time()
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
@@ -246,7 +231,7 @@ def gauss_earth_curvature_radius(center_lat):
 
 
 # Function does initial array sizing and create latitude/longitude arrays
-def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
+def create_latlon_arrays(R_curve, center_lat, pix_rad):
     p_h = R_curve*pix_rad
     p_w = cos(center_lat)*R_curve*pix_rad
 
@@ -257,8 +242,8 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
         kernel_cols += 1
     if kernel_rows%2 == 0:
         kernel_rows += 1
-    print("kernel width in columns, untrimmed: {}".format(kernel_cols))
-    print("kernel height in rows, untrimmed: {}".format(kernel_rows))
+    logger.info("kernel width in columns, untrimmed: {}".format(kernel_cols))
+    logger.info("kernel height in rows, untrimmed: {}".format(kernel_rows))
 
     # Create vectors of column and row counts
     col_count = array(range(kernel_cols))
@@ -270,17 +255,10 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad, pf):
 
     # Create vecotrs of relative longitude and latitudes (in radians)
     rel_long_vec = array(pix_rad*(col_count - center_col))
-
     rel_lat_vec = -pix_rad*(row_count - center_row)
-
     rel_long = tile(rel_long_vec,(kernel_rows,1))
     rel_lat = transpose(tile(rel_lat_vec,(kernel_cols,1)))
-    varrprint(rel_long,'rel_long',pf)
-    varrprint(rel_lat,'rel_lat',pf)
-
     src_lat = rel_lat + center_lat
-    varrprint(src_lat,'src_lat',pf)
-
     return src_lat, rel_long, center_row, center_col
 
 
@@ -289,9 +267,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     if isnan(l_OC):
         return nan
 
-    # Scattering distance increment
+    # Scattering distance increment for finite integration over u (km)
     del_u0 = del_u_farg
-    # print 'delta_u, Scattering distance increment for finite integration over u (km): {}'.format(del_u)
 
     # zenith angle at observation site
     zen = zen_farg # radians
@@ -384,8 +361,14 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         p1 = c_isa**-1*cos(zen*(1 - exp(-c_isa*u_OQ*cos(zen)) + ((16*p3*tan(zen)**2)/(9*pi*2*c_isa*R_T))))**-1
 
         # ksi1, Extinction of light along u-path from scatter at Q to observation at O, REF 2, Appendix A (A2), p. 656
-        ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2))
-
+        try:
+            ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2))
+        except RuntimeWarning:
+            logger.debug("ksi1: %s", ksi1)
+            logger.debug("p1: %s", p1)
+            logger.debug("p2: %s", p2)
+            logger.debug("N_m0: %s", N_m0)
+            logger.debug("sig_m: %s", sig_m)
         # f4, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
         f4 = (a_sha**2*s_CQ**2*cos(Psi)**2 + 2*a_sha*s_CQ*cos(Psi) + 2)*exp(-a_sha*s_CQ*cos(Psi)) - 2
 
@@ -435,10 +418,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
         df_prop = S_u*ksi1*del_u
         # integrand of propogation function, REF 2, Eq. 3, p. 644
-        total_sum = df_prop + total_sum
+        total_sum += df_prop
         u_OQ += del_u
-        lc += 1
-        # print lc,
 
     return total_sum
 
@@ -450,14 +431,14 @@ def array_to_geotiff(array, outfilename, referenceVIIRS="20140901_20140930_75N18
     arr = array
     # First of all, gather some information from VIIRS image
     [cols,rows] = arr.shape
-    trans       = imdata.GetGeoTransform()
-    proj        = imdata.GetProjection()
-    nodatav     = 0
-    outfile     = outfilename
+    trans = imdata.GetGeoTransform()
+    proj = imdata.GetProjection()
+    nodatav = 0
+    outfile = outfilename
 
     # Create the georeffed file, using the information from the VIIRS image
     outdriver = gdal.GetDriverByName("GTiff")
-    outdata   = outdriver.Create(str(outfile), rows, cols, 1, gdal.GDT_Float32)
+    outdata = outdriver.Create(str(outfile), rows, cols, 1, gdal.GDT_Float32)
 
     # Write data to the file, which is the kernel array in this example
     outdata.GetRasterBand(1).WriteArray(arr)
@@ -472,41 +453,27 @@ def array_to_geotiff(array, outfilename, referenceVIIRS="20140901_20140930_75N18
     outdata.SetProjection(proj)
 
 
-# array variable check print function
-def varrprint(varrval, varrtext, print_flag):
-    if print_flag != 'quiet':
-        print('********************')
-        print(varrtext)
-        print(':')
-        print(varrval.shape)
-        print(varrval.dtype)
-        print(varrtext)
-        print('maximum: {}'.format(ma.maximum(varrval[~isnan(varrval)])))
-        print(',')
-        print(varrtext)
-        print('minimum: {}'.format(ma.minimum(varrval[~isnan(varrval)])))
-
-
 def compare_arr(arr1, arr2, title1, title2, pixsize=462.7, norm1=True, norm2=True, compareflag=True):
     if compareflag is False:
         return
     scalebar = ScaleBar(pixsize)
     if norm1:
-        plt.subplot(121),plt.imshow(arr1, norm = colors.LogNorm(), cmap = 'gray')
+        plt.subplot(121),plt.imshow(arr1, norm=colors.LogNorm(), cmap='gray')
         plt.title(title1), plt.xticks([]), plt.yticks([])
         plt.gca().add_artist(scalebar)
     else:
-        plt.subplot(121),plt.imshow(arr1, cmap = 'gray')
+        plt.subplot(121),plt.imshow(arr1, cmap='gray')
         plt.title(title1), plt.xticks([]), plt.yticks([])
         plt.gca().add_artist(scalebar)
     if norm2:
-        plt.subplot(122),plt.imshow(arr2, norm = colors.LogNorm(), cmap = 'gray')
+        plt.subplot(122),plt.imshow(arr2, norm=colors.LogNorm(), cmap='gray')
         plt.title(title2), plt.xticks([]), plt.yticks([])
     else:
-        plt.subplot(122),plt.imshow(arr2, cmap = 'gray')
+        plt.subplot(122),plt.imshow(arr2, cmap='gray')
         plt.title(title2), plt.xticks([]), plt.yticks([])
     plt.show()
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
     main()
