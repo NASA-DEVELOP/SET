@@ -90,6 +90,9 @@ class SkyglowEstimationToolbox:
         file_name = tkFileDialog.askopenfilename(initialdir='/',title="Select file",filetypes=file_types)
         self.file_dialog.insert(0,file_name)
 
+    # def display_image(self):
+
+
 def main():
     # Creates Tkinter root and initializes SET.
     root = Tk()
