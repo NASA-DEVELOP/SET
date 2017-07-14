@@ -19,12 +19,14 @@ class SkyglowEstimationToolbox:
     def __init__(self, parent):
         self.parent = parent
         self.file_dialog = None
-        self.file = None            # *** Make sure to declare variables here that will be
-        self.img = None             # used throughout the program ***
+        self.file = None
+        self.img = None
 
-        # Creates window on screen.
+        # Sets window title and size on screen.
         self.parent.title("Skyglow Estimation Toolbox (SET)")
-        self.parent.geometry('1250x750')
+        sw = self.parent.winfo_screenwidth()
+        sh = self.parent.winfo_screenheight()
+        self.parent.geometry('%dx%d' % (sw*0.75, sh*0.75))
 
         # Creates three paned windows for the main screen.
         base = PanedWindow()
@@ -38,15 +40,12 @@ class SkyglowEstimationToolbox:
         self.input_frame = Frame(sub2)
         sub2.add(self.input_frame)
 
-        # Creates frame for displaying images.
+        # Creates frame for bottom half of main screen.
         self.img_frame = Frame(sub1, bd=2, bg='white', relief=SUNKEN)
         sub1.add(self.img_frame)
 
         # Canvas for displaying images.
-        # *** You should always declare higher level widgets like canvases and frames in the init
-        # if possible. Also, no need to bind the canvas to an action, we'll call the action in
-        # import_tiff ***
-        self.img_canvas = Canvas(self.img_frame, bd=2, relief=GROOVE, width=750, height=500)
+        self.img_canvas = Canvas(self.img_frame, bd=2, relief=GROOVE, width=sw*0.6, height=sh*0.6)
         self.img_canvas.place(relx=.5, rely=.5, anchor=CENTER)
 
     # Sets up input GUI and image display screen.
@@ -54,7 +53,7 @@ class SkyglowEstimationToolbox:
         # VIIRS Image Reference File
         file_label = Label(self.input_frame, text="Image File:", width=15, anchor=E)
         self.file_dialog = Entry(self.input_frame, width=110, bd=2, relief=SUNKEN)
-        browse_button = Button(self.input_frame, text="Browse", command=self.import_tiff)
+        browse_button = Button(self.input_frame, text="Browse", command=self.import_file)
         file_label.grid(column=0, row=0)
         self.file_dialog.grid(column=1, columnspan=3, row=0)
         browse_button.grid(column=4, row=0, sticky=W, padx=3)
@@ -90,26 +89,20 @@ class SkyglowEstimationToolbox:
     ##################################################
 
     # Imports a TIFF file for referencing sky brightness in the region of interest.
-    # *** Its always a good idea to implement some sort of logging for sanity checking and
-    # debugging. I just use print functions here ***
-    def import_tiff(self):
-        print('Importing VIIRS Image...')
+    def import_file(self):
         file_types = [('VIIRS Images', '*.tif'), ('All files', '*')]
         file_name = tkFileDialog.Open(initialdir='/', title="Select file", filetypes=file_types)
         file_name = file_name.show()
-        print('Grabbed ' + str(file_name))
-        if file_name != '':                         # *** Making sure an empty file wasn't chosen
-            self.file = file_name                   # *** Set the permanent variable
-            pilimg = Image.open(self.file)          # *** Open the image
-            print('pilimg = ' + str(pilimg))
-            self.img = ImageTk.PhotoImage(pilimg)   # *** Set the image as a class variable
-            print('img = ' + str(self.img))
-            self.img_canvas.create_image(375, 250, image=self.img)
+        self.file_dialog.insert(0, file_name)
+        if file_name != '':
+            self.file = file_name
+            pilimg = Image.open(self.file)
+            canvas_size = (self.img_canvas.winfo_width(), self.img_canvas.winfo_height())
+            pilimgr = pilimg.resize(canvas_size, Image.ANTIALIAS)
+            self.img = ImageTk.PhotoImage(pilimgr)
+            self.img_canvas.create_image(canvas_size[0]/2, canvas_size[1]/2, image=self.img)
         else:
-            print('Fill is empty')
-        # pilimg = Image.open(self.file_dialog.get())
-        # img = ImageTk.PhotoImage(pilimg)
-        # img_display = self.img_canvas.create_image(image=img)
+            print('File is empty.')
 
 
 def main():
