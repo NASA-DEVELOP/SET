@@ -23,12 +23,12 @@ logger = logging.getLogger()
 
 regionlat_arg = 40.8797
 ubr_arg = 10.0
-zen_arg = 0.0
-azimuth_arg = 0.0
+zen_arg = 30.0
+azimuth_arg = 180.0
 
 
 def main():
-    kerneltiffpath = 'kernel_' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
+    kerneltiffpath = 'kernel3_' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
@@ -40,7 +40,9 @@ def main():
 
     kerneldata = gdal.Open(kerneltiffpath)
     propkernel = kerneldata.ReadAsArray()
-    logger.debug('propagation array: %s', propkernel)
+    logger.debug('Surrounding Indices propkernel post conversion from tif: %s', propkernel[522:525, 470])
+    logger.debug('Problem Index propkernel: %s', propkernel[523, 470])
+    logger.debug('PropSumArray: %s', propkernel)
 
     filein = "20140901_20140930_75N180W_C.tif"
     viirsraster = gdal.Open(filein)
@@ -53,6 +55,9 @@ def main():
     viirs_scaling_factor = 10**9
     imagearr *= viirs_scaling_factor
     propkernel = float32(nan_to_num(propkernel))
+    logger.debug('Surrounding Indices propkernel post data type conv: %s', propkernel[522:525, 470])
+    logger.debug('Problem Index propkernel: %s', propkernel[523, 470])
+    logger.debug('PropSumArray: %s', propkernel)
     # generalized padding of kernel so that fft can run
     pad_left = (imagearr.shape[0] - propkernel.shape[0])//2
     pad_right = (imagearr.shape[0] - propkernel.shape[0])//2 + 1
@@ -152,8 +157,8 @@ def fsum_2d():
 
     # beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
     # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
-    beta = arcsin(sin(pi/2-source_lat)* sin(rltv_long)/ sin(Chi))
-    abeta = beta - azimuth_arg
+    betaarray = arcsin(sin(pi/2-source_lat)* sin(rltv_long)/ sin(Chi))
+    abeta = betaarray - azimuth_arg
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
     u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
@@ -201,6 +206,17 @@ def fsum_2d():
         # theta = theta[300:heigthcenter,530:widthcenter]
         # abeta = theta[300:heigthcenter,530:widthcenter]
         # container for Propagation array
+        logger.debug('Problem Index Chi: %s', Chi[523, 470])
+        logger.debug('Chi: %s', Chi)
+        logger.debug('Problem Index u0: %s', u0[523, 470])
+        logger.debug('u0: %s', u0)
+        logger.debug('Problem Index l_OC: %s', l_OC[523, 470])
+        logger.debug('l_OC: %s', l_OC)
+        logger.debug('Problem Index theta: %s', theta[523, 470])
+        logger.debug('theta: %s', theta)
+        logger.debug('Surrounding Indices abeta: %s', abeta[522:525, 470])
+        logger.debug('Problem Index abeta: %s', abeta[523, 470])
+        logger.debug('abeta: %s', abeta)
         PropSumArray = zeros_like(l_OC)
 
         logger.info("Time for iterations, no symmetry")
@@ -211,6 +227,9 @@ def fsum_2d():
             p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr)
         end = time.time()
         time_sec = end-start
+        logger.debug('Surrounding Indices PropSumArray: %s', PropSumArray[522:525, 470])
+        logger.debug('Problem Index PropSumArray: %s', PropSumArray[523, 470])
+        logger.debug('PropSumArray: %s', PropSumArray)
     return PropSumArray, time_sec
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
@@ -420,7 +439,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         # integrand of propogation function, REF 2, Eq. 3, p. 644
         total_sum += df_prop
         u_OQ += del_u
-
+    if total_sum > 1:
+        print('break!')
     return total_sum
 
 
