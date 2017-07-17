@@ -4,11 +4,12 @@ Authors: Ryan Avery, Dr. Kenton Ross, Stanley Yu
 Description: Python toolbox that generates artificial skyglow maps using data from NASA and NOAA's
              Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor.
 """
-from Tkinter import Tk, PanedWindow, Frame, Label, Entry, Button, Canvas, \
-    BOTH, VERTICAL, HORIZONTAL, CENTER, E, W, \
-    SUNKEN, GROOVE
+from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
+    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, RIGHT, NE, E, W, Y, \
+    END, SUNKEN, GROOVE, RAISED
 import tkFileDialog
 from PIL import Image, ImageTk
+import constants
 
 
 # Main class of the software. Establishes GUI.
@@ -16,20 +17,18 @@ class SkyglowEstimationToolbox:
 
     ##################################################
     # Initialization
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self, root):
+        self.root = root
         self.file_dialog = None
         self.img = None
         self.lat_entry = None
         self.ubr_entry = None
-        self.zen_entry = 0
-        self.azi_entry = 0
+        self.zen_entry = None
+        self.azi_entry = None
 
         # Sets window title and size on screen.
-        self.parent.title("Skyglow Estimation Toolbox (SET)")
-        sw = self.parent.winfo_screenwidth()
-        sh = self.parent.winfo_screenheight()
-        self.parent.geometry('%dx%d' % (sw*0.75, sh*0.75))
+        self.root.title("Skyglow Estimation Toolbox (SET)")
+        self.root.geometry('%dx%d+%d+%d' % (constants.SW*0.75, constants.SH*0.75, 25, 25))
 
         # Creates three paned windows for the main screen.
         base = PanedWindow()
@@ -47,9 +46,21 @@ class SkyglowEstimationToolbox:
         self.img_frame = Frame(sub1, bd=2, bg='white', relief=SUNKEN)
         sub1.add(self.img_frame)
 
-        # Canvas for displaying images.
-        self.img_canvas = Canvas(self.img_frame, bd=2, relief=GROOVE, width=sw*0.6, height=sh*0.6)
+        # Creates canvas for displaying images.
+        self.img_canvas = Canvas(self.img_frame, bd=2, relief=GROOVE,
+                                 width=constants.SW*0.6, height=constants.SH*0.6)
         self.img_canvas.place(relx=.5, rely=.5, anchor=CENTER)
+
+        # Creates help button for link to documentation, instructions, and about.
+        self.help_btn = Menubutton(self.input_frame, text="Help", relief=RAISED,
+                                   bd=2, width=8, pady=1)
+        self.help_btn.place(relx=1, rely=0, anchor=NE)
+        self.help_btn_menu = Menu(self.help_btn, tearoff=0)
+        self.help_btn_menu.add_command(label="Documentation")
+        self.help_btn_menu.add_command(label="Instructions", command=self.instructions)
+        self.help_btn_menu.add_separator()
+        self.help_btn_menu.add_command(label="About", command=self.about)
+        self.help_btn["menu"] = self.help_btn_menu
 
     # Sets up input GUI and image display screen.
     def main_screen(self):
@@ -108,6 +119,29 @@ class SkyglowEstimationToolbox:
             self.img_canvas.create_image(canvas_size[0]/2, canvas_size[1]/2, image=self.img)
         else:
             print('File is empty.')
+
+    def instructions(self):
+        instr_window = Toplevel(self.root)
+        instr_window.geometry('%dx%d' % (constants.SW*0.3, constants.SH*0.3))
+        instr_window.title('Instructions')
+
+        scrollbar = Scrollbar(instr_window)
+        scrollbar.pack(side=RIGHT, fill=Y)
+
+        instr = Text(instr_window)
+        instr_text = "Hello!"
+        instr.insert(END, instr_text)
+        instr.pack()
+
+    def about(self):
+        about_window = Toplevel(self.root)
+        about_window.geometry('390x230')
+        about_window.title('About')
+        about_window.resizable(False, False)
+
+        about = Text(about_window, width=48, height=14)
+        about.insert(END, constants.ABOUT)
+        about.pack()
 
     # Generates artificial skyglow map based on VIIRS reference and local parameters.
     def generate_map(self):
