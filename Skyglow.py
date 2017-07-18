@@ -4,11 +4,12 @@ Authors: Ryan Avery, Dr. Kenton Ross, Stanley Yu
 Description: Python toolbox that generates artificial skyglow maps using data from NASA and NOAA's
              Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor.
 """
-from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
-    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, RIGHT, NE, E, W, Y, \
-    END, SUNKEN, GROOVE, RAISED
-import tkFileDialog
+from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, \
+    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, \
+    WORD, END, SUNKEN, GROOVE, RAISED
 from PIL import Image, ImageTk
+import tkFileDialog
+import webbrowser
 import constants
 
 
@@ -56,7 +57,8 @@ class SkyglowEstimationToolbox:
                                    bd=2, width=8, pady=1)
         self.help_btn.place(relx=1, rely=0, anchor=NE)
         self.help_btn_menu = Menu(self.help_btn, tearoff=0)
-        self.help_btn_menu.add_command(label="Documentation")
+        doc_url = 'https://github.com/NASA-DEVELOP'
+        self.help_btn_menu.add_command(label="Documentation", command=lambda:self.open_url(doc_url))
         self.help_btn_menu.add_command(label="Instructions", command=self.instructions)
         self.help_btn_menu.add_separator()
         self.help_btn_menu.add_command(label="About", command=self.about)
@@ -113,34 +115,45 @@ class SkyglowEstimationToolbox:
             pilimg = Image.open(file_name)
             canvas_size = (self.img_canvas.winfo_width(), self.img_canvas.winfo_height())
             pilimg_r = pilimg.resize(canvas_size, Image.ANTIALIAS)
-            # ### FIGURE OUT HOW TO MAKE TIFF DISPLAY MORE VISIBLE??? ###
-            # pilimg_alt = pilimg_r.convert("RGB", palette='WEB')
             self.img = ImageTk.PhotoImage(pilimg_r)
             self.img_canvas.create_image(canvas_size[0]/2, canvas_size[1]/2, image=self.img)
         else:
             print('File is empty.')
 
+    def open_url(self, url):
+        webbrowser.open_new(url)
+
     def instructions(self):
         instr_window = Toplevel(self.root)
-        instr_window.geometry('%dx%d' % (constants.SW*0.3, constants.SH*0.3))
+        instr_window.geometry('540x660+25+25')
         instr_window.title('Instructions')
+        instr_window.resizable(False, False)
 
-        scrollbar = Scrollbar(instr_window)
-        scrollbar.pack(side=RIGHT, fill=Y)
+        instr_frame = Frame(instr_window, bg='white')
+        instr_frame.pack(fill=BOTH, expand=1)
 
-        instr = Text(instr_window)
-        instr_text = "Hello!"
-        instr.insert(END, instr_text)
-        instr.pack()
+        instr = Text(instr_frame, width=65, height=15, padx=10, pady=5, bd=0, wrap=WORD)
+        instr.insert(END, constants.INSTR)
+        instr.tag_add("here", "1.0", "1.10")
+        instr.tag_config("here")
+        gdiagram_file = Image.open("GarstangGeometryDiagram.PNG")
+        gdiagram_file = gdiagram_file.resize((525, 400), Image.ANTIALIAS)
+        gdiagram = ImageTk.PhotoImage(gdiagram_file)
+        image_box = Label(instr_frame, image=gdiagram)
+        image_box.image = gdiagram
+        instr.grid(column=0, row=0)
+        image_box.grid(column=0, row=1)
 
     def about(self):
         about_window = Toplevel(self.root)
-        about_window.geometry('390x230')
+        about_window.geometry('400x250+25+25')
         about_window.title('About')
         about_window.resizable(False, False)
 
-        about = Text(about_window, width=48, height=14)
+        about = Text(about_window, width=50, height=20, padx=10, pady=3)
         about.insert(END, constants.ABOUT)
+        about.tag_add("here", "1.0", "3.15")
+        about.tag_config("here", justify=CENTER)
         about.pack()
 
     # Generates artificial skyglow map based on VIIRS reference and local parameters.
