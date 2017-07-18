@@ -23,9 +23,9 @@ logger = logging.getLogger()
 
 regionlat_arg = 40.8797
 ubr_arg = 10.0
-zen_arg = 30.0
-azimuth_arg = 180.0
-
+zen_arg = 0.0
+azimuth_arg = 0.0
+filein = "20140901_20140930_75N180W_C.tif"
 
 def main():
     kerneltiffpath = 'kernel3_' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
@@ -44,7 +44,6 @@ def main():
     logger.debug('Problem Index propkernel: %s', propkernel[523, 470])
     logger.debug('PropSumArray: %s', propkernel)
 
-    filein = "20140901_20140930_75N180W_C.tif"
     viirsraster = gdal.Open(filein)
     imagearr = viirsraster.ReadAsArray()
     logger.debug('VIIRS: %s', imagearr)
