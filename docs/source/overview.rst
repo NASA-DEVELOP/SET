@@ -17,7 +17,7 @@ Features
 
 .. class:: left: VIIRS Day/Night Band Image, right: shapes form around selected areas of the plot
 
-   .. image:: _static/program.png
+   .. image:: _static/adjusted-convolved-map.png
       :scale: 22%
 
    .. image:: _static/programShapesActive.png
