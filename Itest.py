@@ -282,7 +282,7 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad):
 
 
 # Function that takes elements of the arrays of D_OC, Chi, etc. as arguments.
-def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2):
+def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2, lhr_viirs = 1.5):
     if isnan(l_OC):
         return nan
 
@@ -310,6 +310,11 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
     # sigma_m - Integrated Rayleigh scattering cross-section in the V-band, REF 2, p. 646
     sig_m = 1.136e-26 # cm^-2*sr^-1
+
+    # Cinzano shape parameters, REF 2, p. 646
+    a1_sp = 0.46
+    a2_sp = 0.54
+    a3_sp = 0.5 # assumed. No shape factor given in Falchi or Cinzano
 
     # Falchi best fit parameters for normalzied emssion
     # Weights for angular distributions. REF 1, p. 21
@@ -404,7 +409,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         ksi2 = exp(-N_m0*sig_m*(f1 + 11.778*K_am*f2))
 
         # I(Psi), Normalized emission function, MODIFIED FROM REF 1, p. 13 (leaving out natural sky brightness)
-        I_ne = 1/(2*pi)*(W_a*2*cos(Psi) + W_b*0.554*Psi**4 + W_c*sin(3*Psi))
+        # There is no indication in References of a shape parameter for the W_c term of the equation
+        I_ne = 1/(2*pi)*(W_a*2*a1_sp*cos(Psi) + W_b*0.554*a2_sp*Psi**4 + W_c*a3_sp*sin(3*Psi))+lhr_viirs*d_ll
 
         # i(Psi,s), Illuminance per unit flux, REF 2, Eq. 6, p. 644
         i_ps = I_ne*ksi2/s_CQ**2

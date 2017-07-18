@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Coding Conventions &#8212; SET 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development Enviroment" href="enviroment.html" />
+    <link rel="prev" title="Getting Started" href="../tutorial.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          SET</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Index <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">User Documentation</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Program Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../gettingdata.html">Getting the Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorial.html">Getting Started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Developer Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Coding Conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enviroment.html">Development Enviroment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docs.html">Building and Writing Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="site.html">Updating The Site</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../doc/modules.html">Code Documentation</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Support</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../trouble/faq.html">Troubleshoot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble/issuetracker.html">Submit Bugs or Issues</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble/contact.html">Contact</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">Coding Conventions</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="../tutorial.html" title="Previous Chapter: Getting Started"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Getting Started</span>
+    </a>
+  </li>
+  <li>
+    <a href="enviroment.html" title="Next Chapter: Development Enviroment"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Development E... &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/dev/conventions.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="coding-conventions">
+<h1>Coding Conventions<a class="headerlink" href="#coding-conventions" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We are now using the <code class="docutils literal"><span class="pre">pep-0008</span></code> style guide as referenced <a class="reference external" href="https://www.python.org/dev/peps/pep-0008/">here</a> . See the link for a full
+list of conventions</p>
+</div>
+<p>Below is list of coding conventions agreed upon by Nathan and I(Grant). Please adhere to these
+conventions to create a more readable codebase.</p>
+<p class="rubric">Column Width</p>
+<p>Code should be no longer than 100 characters, in the case your statement goes <strong>over</strong>, use a
+new line or split your statement up.</p>
+<p class="rubric">String Literals</p>
+<p>String Literals are denoated with <code class="docutils literal"><span class="pre">''</span></code>, docstring should be double quotes <code class="docutils literal"><span class="pre">&quot;&quot;</span></code></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="o">=</span> <span class="s1">&#39;Heres a string&#39;</span>
+<span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Heres a docstring</span>
+<span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p class="rubric">Variables</p>
+<p>Variables should be lowercase and word separated with <code class="docutils literal"><span class="pre">_</span></code></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">another_var</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">more_words_than_previous_var</span> <span class="o">=</span> <span class="mi">5</span>
+</pre></div>
+</div>
+<p class="rubric">Functions</p>
+<p>The same format as Variables, lowercase with <code class="docutils literal"><span class="pre">_</span></code> separating words should be used.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">func</span><span class="p">():</span>
+   <span class="c1"># ...</span>
+<span class="k">def</span> <span class="nf">adheres_to_coding_convention_func</span><span class="p">():</span>
+   <span class="c1"># ...</span>
+</pre></div>
+</div>
+<p class="rubric">Classes</p>
+<p>Uppercase <code class="docutils literal"><span class="pre">CamelCase</span></code> should be used to repesent classes.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Shape</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<span class="k">class</span> <span class="nc">SquareObject</span><span class="p">(</span><span class="n">Shape</span><span class="p">):</span>
+</pre></div>
+</div>
+<p class="rubric">Tabs</p>
+<p>Currently should use spaces as opposed to tabs.:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">var</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="n">v</span>        <span class="c1"># 4 space indent</span>
+</pre></div>
+</div>
+<p class="rubric">General Rules</p>
+<p>No spaces should be left between conditional statements and loops code blocks.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">y</span><span class="p">:</span>
+   <span class="c1"># ...</span>
+
+<span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">:</span>
+   <span class="c1"># ...</span>
+</pre></div>
+</div>
+<p>Simple comments should be placed to the right of the line when possible, or one comment should
+be placed above a segment shortly explaning it’s function</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="o">+</span> <span class="n">r</span><span class="o">*</span><span class="mi">2</span>           <span class="c1"># calculate ___ and place in var</span>
+<span class="n">doFunc</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>                 <span class="c1"># do some func with var param</span>
+<span class="k">if</span> <span class="n">var</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">var</span><span class="p">[:</span><span class="mi">3</span><span class="p">]:</span>
+   <span class="n">err</span><span class="p">()</span>                   <span class="c1"># error is var does not match criteria</span>
+
+<span class="c1"># does this and this and this</span>
+<span class="n">var</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">var</span> <span class="o">-</span> <span class="mi">5</span>
+<span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+   <span class="n">err</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This documentation website is generated using docstrings from source, so <strong>document</strong> as you
+code! The docstring markdown is reStructedText Primer and sphinx, when the doc chain is
+generated it will use these docstrings from the code for the webpage.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Foo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Class description is placed here</span>
+
+<span class="sd">:param &lt;name&gt;: description of param &#39;name&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+      <span class="c1">#...</span>
+
+   <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+   <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">   Description of function here</span>
+
+<span class="sd">   :param int x: parameter x is an integer and does ....</span>
+<span class="sd">   :param int y: parameter y is an integer and does ....</span>
+<span class="sd">   :rtype: returns int</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>The auto documentation tool chain will generate this as:</p>
+<dl class="class">
+<dt>
+<em class="property">class </em><code class="descname">Foo</code></dt>
+<dd><p>Class description is placed here</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> – description of param ‘name’</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt>
+<code class="descname">foo</code><span class="sig-paren">(</span><em>self</em>, <em>x</em>, <em>y</em><span class="sig-paren">)</span></dt>
+<dd><p>Description of function here</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – parameter x is an integer and does…</li>
+<li><strong>y</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – parameter y is an integer and does…</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">returns int</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<p>If you are developing in an existing file , the doc chain <em>should</em> find your new function/class
+automatically. In the case you are creating a new module, determine whether it is in the
+<code class="docutils literal"><span class="pre">general</span></code>, <code class="docutils literal"><span class="pre">polygon</span></code> or <code class="docutils literal"><span class="pre">tools</span></code> package, and create a <code class="docutils literal"><span class="pre">.rst</span></code> file in the corresponding
+doc/ folder specifying your new module. You can refer to the exisiting .rst files for how to
+populate the docs. You can also refer to the <a class="reference internal" href="docs.html"><span class="doc">Documentation Page</span></a> for
+writing your own docs.</p>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2017, Ryan Avery, Kenton Ross, Veronica Warda, Stanley Yu, Steven Chao.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
