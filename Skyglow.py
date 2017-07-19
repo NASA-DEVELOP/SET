@@ -163,9 +163,10 @@ class SkyglowEstimationToolbox:
         ubr_in = self.ubr_entry.get()
         zen_in = self.zen_entry.get()
         azi_in = self.azi_entry.get()
-        # file_in = self.file_dialog.get()
+        file_in = self.file_dialog.get()
 
         print(lat_in, ubr_in, zen_in, azi_in)
+        print(file_in)
 
 
 def main():
