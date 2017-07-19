@@ -4,7 +4,7 @@ Program Overview
 
 The Wyoming Cross-Cutting team at NASA DEVELOP aims to create a tool with the ability to accurately model sky glow from artificial sources using publicly available Suomi NPP VIIRS Day/Night Band imagery. We hope that this open source tool informs future research and decision making to mitigate light pollution and to inform the public of the phenomenon.
 
-.. rubric:: Key reasons for the Sky Glow Estiamtion Toolbox:
+.. rubric:: Key reasons for the Sky Glow Estimation Toolbox:
 * The NPS currently monitors the night sky using in situ surveys with Unihedron Sky Quality Meters. While these cameras take detailed images of the hemisphere, it is costly to travel to these sites and set up the equipment. These observations also only contain information from a single vantage point and at a single point in time. The park service desires a tool that allows them to continually monitor the quality of the night sky at a regional scale.
 * Light pollution disrupts circadian rhythms and the production of the hormone melatonin in humans and has been linked to various health disorders such as obesity, tumor growth, depression, and insomnia.
 * Light regulates the day-night cycles of plants and animals, therefore light pollution affects the growth of plants, disorients and confuses animals, and impacts breeding cycles.
