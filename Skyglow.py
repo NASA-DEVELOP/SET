@@ -11,6 +11,7 @@ from PIL import Image, ImageTk
 import tkFileDialog
 import webbrowser
 import constants
+import Itest
 
 
 # Main class of the software. Establishes GUI.
@@ -58,7 +59,7 @@ class SkyglowEstimationToolbox:
         self.help_btn.place(relx=1, rely=0, anchor=NE)
         self.help_btn_menu = Menu(self.help_btn, tearoff=0)
         doc_url = 'https://github.com/NASA-DEVELOP'
-        self.help_btn_menu.add_command(label="Documentation", command=lambda:self.open_url(doc_url))
+        self.help_btn_menu.add_command(label="Documentation", command=lambda: self.open_url(doc_url))
         self.help_btn_menu.add_command(label="Instructions", command=self.instructions)
         self.help_btn_menu.add_separator()
         self.help_btn_menu.add_command(label="About", command=self.about)
@@ -120,7 +121,8 @@ class SkyglowEstimationToolbox:
         else:
             print('File is empty.')
 
-    def open_url(self, url):
+    @staticmethod
+    def open_url(url):
         webbrowser.open_new(url)
 
     def instructions(self):
@@ -159,14 +161,13 @@ class SkyglowEstimationToolbox:
     # Generates artificial skyglow map based on VIIRS reference and local parameters.
     def generate_map(self):
         # Acquires input arguments.
-        lat_in = self.lat_entry.get()
-        ubr_in = self.ubr_entry.get()
-        zen_in = self.zen_entry.get()
-        azi_in = self.azi_entry.get()
+        lat_in = float(self.lat_entry.get())
+        ubr_in = float(self.ubr_entry.get())
+        zen_in = float(self.zen_entry.get())
+        azi_in = float(self.azi_entry.get())
         file_in = self.file_dialog.get()
 
-        print(lat_in, ubr_in, zen_in, azi_in)
-        print(file_in)
+        Itest.main(lat_in, ubr_in, zen_in, azi_in)
 
 
 def main():

@@ -20,19 +20,24 @@ import matplotlib.colors as colors
 from matplotlib_scalebar.scalebar import ScaleBar
 from osgeo import gdal
 
-def main():
+
+def main(lat, ubr, zen, azi):
 	# Print flag
 	pflag = "verbose"
+	lat_in = lat
+	ubr_in = ubr
+	zen_in = zen
+	azi_in = azi
 	kerneltiffpath = 'kernel_' + str(40.8797) +'_'+ str(10.0) +'_'+ str(0.0) +'_'+str(0.0)+'.tif'
 	if os.path.isfile(kerneltiffpath)==False:
 		# Estimate the 2d propagation function and calc time and accuracy
 		#bottom bottom_lat = 40.8797
 		#top lat= 46.755666
-		propagation_array1, time_1 = fsum_2d(pflag, 40.8797, 30.0)
+		propagation_array1, time_1 = fsum_2d(lat_in, ubr_in, zen_in, azi_in)
 		proparray_to_geotiff(propagation_array1, kerneltiffpath)
 		varrprint(propagation_array1,'propagation_array1', pflag)
 
-		propagation_array2, time_2 = fsum_2d(pflag, 40.8797, 10.0)
+		propagation_array2, time_2 = fsum_2d(lat_in, ubr_in, zen_in, azi_in)
 		print "Time Factor Improvement!: {}".format(time_1/time_2)
 		varrprint(propagation_array2,'propagation_array2', pflag)
 		differencearray_perc = amax((abs(propagation_array1 - propagation_array2))/propagation_array1)
@@ -131,7 +136,7 @@ def main():
 	proparray_to_geotiff(FFT_product_inverse, FFTpath)
 
 # Function that creates 2d propagation function
-def fsum_2d(pflag = 'verbose', latitude = 40.8797, ubr_arg = 10.0, zen_arg = 0.0, azimuth = 0.0):
+def fsum_2d(latitude, ubr_arg, zen_arg, azimuth, pflag="verbose"):
 	# Input Variables
 	print '**INPUTS**'
 
