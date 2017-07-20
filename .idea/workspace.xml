@@ -2,418 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6178739c-ca27-49d4-b7c2-c21033b931d0" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/dev/conventions.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/dev/docs.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/dev/enviroment.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/dev/site.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/general/attributes.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/general/calipso.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/general/consts.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/general/db.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/general/general.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/general/import.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/general/toolswindow.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/modules.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/polygon/manager.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/polygon/polygon.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/polygon/reader.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/polygon/shape.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/tools/navigationtoolbar2calipso.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/tools/toggleablebutton.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/tools/tools.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/tools/tooltip.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/doc/tools/treelistbox.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/environment.pickle" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/gettingdata.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/index.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/installation.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/overview.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/packages.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/trouble/contact.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/trouble/faq.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/trouble/issuetracker.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.doctrees/tutorial.doctree" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/alt.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/attributes_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/backscattered_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/browse_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/csv_example.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_advanced_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_advanced_results.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_advanced_search.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_advanced_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_attr_cb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_csv_rb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_delete.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_export.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_export_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_file_cb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_filter.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_import.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_search.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_searched.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_shape_imported.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/db_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/depolarized_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/erase_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/exampleIssue.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/exporting_archive_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/exporting_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/extract_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/focus_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/freedraw_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/hide_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/home_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/importing_archive_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/importing_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/issueSelection.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/load_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/load_hdf.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/magnify_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/move_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/paint_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/program.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/programShapesActive.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/properties_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/rect_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/redo_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/render_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/reset_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/save_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/select_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/selection_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/startup.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/step_entry.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/to_be_exported.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_images/undo_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/advanced_day_entry.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/ajax-loader.gif" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/alt.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/attributes_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/backscattered_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/img/glyphicons-halflings-white.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/img/glyphicons-halflings.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/fonts/glyphicons-halflings-regular.eot" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/fonts/glyphicons-halflings-regular.ttf" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/fonts/glyphicons-halflings-regular.woff" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/fonts/glyphicons-halflings-regular.woff2" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/img/glyphicons-halflings-white.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/img/glyphicons-halflings.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/fonts/glyphicons-halflings-regular.eot" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/fonts/glyphicons-halflings-regular.ttf" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/fonts/glyphicons-halflings-regular.woff" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/fonts/glyphicons-halflings-regular.woff2" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/browse_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/clouds.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/clouds2.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/clouds3.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/comment-bright.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/comment-close.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/comment.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/csv_example.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/database.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/database_import.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_advanced_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_advanced_results.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_advanced_search.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_advanced_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_attr_cb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_csv_rb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_delete.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_export.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_export_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_file_cb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_filter.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_import.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_search.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_searched.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_shape_imported.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/db_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/depolarized_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/down-pressed.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/down.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/erase_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/exampleIssue.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/exporting_archive_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/exporting_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/extract_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/file.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/focus_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/freedraw_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/hide_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/home_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/importing_archive_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/importing_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/issueSelection.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/jumbotron.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/load_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/load_hdf.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/magnify_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/minus.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/move_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/ocean.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/paint_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/plus.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/program.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/programShapesActive.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/properties_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/rect_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/redo_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/render_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/reset_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/save_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/select_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/selection_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/startup.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/step_entry.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/to_be_exported.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/undo_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/up-pressed.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/up.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/objects.inv" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/.index.rst.swp" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/advanced_day_entry.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/alt.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/attributes_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/backscattered_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/browse_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/clouds.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/clouds2.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/clouds3.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/comment-bright.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/comment-close.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/comment.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/csv_example.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/database.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/database_import.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_advanced_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_advanced_results.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_advanced_search.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_advanced_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_attr_cb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_csv_rb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_delete.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_export.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_export_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_file_cb.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_filter.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_import.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_search.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_searched.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_shape_imported.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/db_window.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/depolarized_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/down-pressed.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/down.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/erase_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/exampleIssue.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/exporting_archive_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/exporting_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/extract_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/file.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/focus_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/freedraw_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/hide_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/home_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/importing_archive_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/importing_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/issueSelection.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/jumbotron.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/load_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/load_hdf.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/magnify_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/minus.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/move_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/ocean.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/paint_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/plus.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/program.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/programShapesActive.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/properties_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/rect_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/redo_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/render_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/reset_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/save_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/select_menu.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/selection_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/startup.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/step_entry.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/to_be_exported.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/undo_button.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/up-pressed.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/up.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/.buildinfo" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/dev/conventions.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/dev/docs.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/dev/enviroment.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/dev/site.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/general/attributes.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/general/calipso.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/general/consts.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/general/db.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/general/general.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/general/import.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/general/toolswindow.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/modules.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/polygon/manager.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/polygon/polygon.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/polygon/reader.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/polygon/shape.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/tools/navigationtoolbar2calipso.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/tools/toggleablebutton.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/tools/tools.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/tools/tooltip.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/doc/tools/treelistbox.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/gettingdata.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/index.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/installation.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/overview.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/packages.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/trouble/contact.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/trouble/faq.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/trouble/issuetracker.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_sources/tutorial.rst.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/basic.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/css/bootstrap-responsive.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/css/bootstrap-responsive.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/css/bootstrap.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/css/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/js/bootstrap.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-2.3.2/js/bootstrap.min.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap-theme.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap-theme.css.map" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap-theme.min.css.map" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap.css.map" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/css/bootstrap.min.css.map" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/fonts/glyphicons-halflings-regular.svg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/js/bootstrap.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/js/bootstrap.min.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-3.3.6/js/npm.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-sphinx.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootstrap-sphinx.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/amelia/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/cerulean/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/cosmo/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/cyborg/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/flatly/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/journal/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/readable/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/simplex/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/slate/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/spacelab/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/spruce/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/superhero/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-2.3.2/united/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/cerulean/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/cosmo/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/custom/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/cyborg/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/darkly/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/flatly/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/fonts/glyphicons-halflings-regular.svg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/journal/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/lumen/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/paper/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/readable/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/sandstone/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/simplex/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/slate/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/spacelab/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/superhero/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/united/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/bootswatch-3.3.6/yeti/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/cloud_graphic.svg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/doctools.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/earth.svg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/intro.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/introjs.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/jquery-3.1.0.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/jquery.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/js/jquery-1.11.0.min.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/js/jquery-fix.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/pygments.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/searchtools.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/style.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/underscore-1.3.1.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/underscore.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/_static/websupport.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/dev/conventions.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/dev/docs.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/dev/enviroment.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/dev/site.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/general/attributes.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/general/calipso.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/general/consts.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/general/db.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/general/general.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/general/import.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/general/toolswindow.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/modules.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/polygon/manager.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/polygon/polygon.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/polygon/reader.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/polygon/shape.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/tools/navigationtoolbar2calipso.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/tools/toggleablebutton.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/tools/tools.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/tools/tooltip.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/doc/tools/treelistbox.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/genindex.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/gettingdata.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/installation.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/overview.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/packages.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/py-modindex.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/search.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/searchindex.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/trouble/contact.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/trouble/faq.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/trouble/issuetracker.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/build/tutorial.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/cloud_graphic.svg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/earth.svg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/intro.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/introjs.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_static/style.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/_templates/footer.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/conf.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/dev/conventions.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/dev/docs.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/dev/enviroment.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/dev/site.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/general/attributes.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/general/calipso.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/general/consts.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/general/db.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/general/general.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/general/import.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/general/toolswindow.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/modules.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/polygon/manager.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/polygon/polygon.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/polygon/reader.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/polygon/shape.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/tools/navigationtoolbar2calipso.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/tools/toggleablebutton.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/tools/tools.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/tools/tooltip.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/doc/tools/treelistbox.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/gettingdata.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/icon_license.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/index.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/installation.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/overview.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/packages.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/r_index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/trouble/contact.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/trouble/faq.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/trouble/issuetracker.rst" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/docs/source/tutorial.rst" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/20140901_20140930_75N180W_C_40.8797_10.0_0.0_0.0convolved.tif" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/20140901_20140930_75N180W_C_40.8797_10.0_30.0_180.0convolved.tif" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel2_40.8797_10.0_30.0_180.0.tif" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel3_40.8797_10.0_30.0_180.0.tif" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel_40.8797_10.0_0.0_0.0.tif" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel_40.8797_10.0_30.0_180.0.tif" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Itest.py" afterPath="$PROJECT_DIR$/Itest.py" />
     </list>
@@ -439,8 +33,8 @@
       <file leaf-file-name="Itest.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Itest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-565">
-              <caret line="412" column="83" selection-start-line="412" selection-start-column="83" selection-end-line="412" selection-end-column="83" />
+            <state relative-caret-position="366">
+              <caret line="414" column="34" selection-start-line="414" selection-start-column="34" selection-end-line="414" selection-end-column="34" />
               <folding />
             </state>
           </provider>
@@ -508,6 +102,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -529,7 +124,6 @@
         </subPane>
       </pane>
       <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -724,7 +318,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32982087" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40800866" sideWeight="0.5021075" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972974" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -733,7 +327,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973656" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972974" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.41450217" sideWeight="0.49789253" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5974026" sideWeight="0.49789253" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -762,24 +356,26 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" type="python-line">
-          <url>file://$PROJECT_DIR$/Itest.py</url>
-          <line>448</line>
-          <log-expression disabled="true" expression="'total sum breakpoint, q2 breakpoint not reached?'" language="Python" />
-          <option name="timeStamp" value="9" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" log-message="true" type="python-line">
           <condition expression="df_prop &gt; 1" language="Python" />
           <url>file://$PROJECT_DIR$/Itest.py</url>
-          <line>445</line>
+          <line>441</line>
           <log-expression expression="'df_prop too big!!'" language="Python" />
           <option name="timeStamp" value="12" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="python-line">
-          <condition expression="df_prop &gt; 1" language="Python" />
+        <line-breakpoint enabled="true" log-message="true" type="python-line">
+          <condition expression="df_prop &lt; 0" language="Python" />
           <url>file://$PROJECT_DIR$/Itest.py</url>
-          <line>348</line>
-          <option name="timeStamp" value="14" />
+          <line>442</line>
+          <log-expression expression="'df_prop negative!'" language="Python" />
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" log-message="true" type="python-line">
+          <condition expression="I_ne &lt; 0" language="Python" />
+          <url>file://$PROJECT_DIR$/Itest.py</url>
+          <line>411</line>
+          <log-expression expression="'I_ne negative'" language="Python" />
+          <option name="timeStamp" value="24" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -797,7 +393,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="19" />
+      <option name="time" value="25" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -811,6 +407,14 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/Itest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Itest.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -858,8 +462,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Itest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-565">
-          <caret line="412" column="83" selection-start-line="412" selection-start-column="83" selection-end-line="412" selection-end-column="83" />
+        <state relative-caret-position="366">
+          <caret line="414" column="34" selection-start-line="414" selection-start-column="34" selection-end-line="414" selection-end-column="34" />
           <folding />
         </state>
       </provider>
