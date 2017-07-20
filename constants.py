@@ -6,6 +6,8 @@ Description: Module for all constants, links, and text.
 SW = 1680
 SH = 1050
 
+ICO = './ico/satellite.ico'
+
 INSTR = "Welcome to the Skyglow Estimation Toolbox (SET)!\n" \
         "Produce an artificial skyglow map using local inputs and data" \
         "from NASA and NOAA's Suomi NPP Visible Infrared Imaging Radiometer Suite" \
@@ -28,4 +30,7 @@ ABOUT = "Skyglow Estimation Toolbox (SET) v0.0.1\n" \
         "Ryan Avery, Steven Chao, Stanley Yu\n\n" \
         "WC Spring 2017 Term\n" \
         "Team Leads: Veronica Warda, Benjamin Marcovitz\n" \
-        "Aubrey Hilte, Christine Stevens, Eric White\n\n" \
+        "Aubrey Hilte, Christine Stevens, Eric White\n" \
+        "===============================================\n\n" \
+        "Icon made by Madebyoliver <https://www.flaticon.com/authors/madebyoliver> " \
+        "from www.flaticon.com is licensed by CC 3.0 BY <https://creativecommons.org/licenses/by/3.0/>" \

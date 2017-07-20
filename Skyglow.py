@@ -28,9 +28,10 @@ class SkyglowEstimationToolbox:
         self.zen_entry = None
         self.azi_entry = None
 
-        # Sets window title and size on screen.
+        # Sets window title, size, and icon on screen.
         self.root.title("Skyglow Estimation Toolbox (SET)")
         self.root.geometry('%dx%d+%d+%d' % (constants.SW*0.75, constants.SH*0.75, 25, 25))
+        self.root.wm_iconbitmap(constants.ICO)
 
         # Creates three paned windows for the main screen.
         base = PanedWindow()
@@ -127,8 +128,9 @@ class SkyglowEstimationToolbox:
 
     def instructions(self):
         instr_window = Toplevel(self.root)
-        instr_window.geometry('540x660+25+25')
+        instr_window.geometry('540x700+25+25')
         instr_window.title('Instructions')
+        instr_window.wm_iconbitmap(constants.ICO)
         instr_window.resizable(False, False)
 
         instr_frame = Frame(instr_window, bg='white')
@@ -139,7 +141,7 @@ class SkyglowEstimationToolbox:
         instr.tag_add("here", "1.0", "1.10")
         instr.tag_config("here")
         gdiagram_file = Image.open("GarstangGeometryDiagram.PNG")
-        gdiagram_file = gdiagram_file.resize((525, 400), Image.ANTIALIAS)
+        gdiagram_file = gdiagram_file.resize((525, 450), Image.ANTIALIAS)
         gdiagram = ImageTk.PhotoImage(gdiagram_file)
         image_box = Label(instr_frame, image=gdiagram)
         image_box.image = gdiagram
@@ -148,11 +150,12 @@ class SkyglowEstimationToolbox:
 
     def about(self):
         about_window = Toplevel(self.root)
-        about_window.geometry('400x250+25+25')
+        about_window.geometry('400x350+25+25')
         about_window.title('About')
+        about_window.wm_iconbitmap(constants.ICO)
         about_window.resizable(False, False)
 
-        about = Text(about_window, width=50, height=20, padx=10, pady=3)
+        about = Text(about_window, width=50, height=30, padx=10, pady=3)
         about.insert(END, constants.ABOUT)
         about.tag_add("here", "1.0", "3.15")
         about.tag_config("here", justify=CENTER)
@@ -167,7 +170,7 @@ class SkyglowEstimationToolbox:
         azi_in = float(self.azi_entry.get())
         file_in = self.file_dialog.get()
 
-        Itest.main(lat_in, ubr_in, zen_in, azi_in)
+        Itest.main(lat_in, ubr_in, zen_in, azi_in, file_in)
 
 
 def main():

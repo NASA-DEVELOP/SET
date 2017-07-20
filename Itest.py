@@ -21,7 +21,7 @@ from matplotlib_scalebar.scalebar import ScaleBar
 from osgeo import gdal
 
 
-def main(lat, ubr, zen, azi):
+def main(lat, ubr, zen, azi, file_in):
 	# Print flag
 	pflag = "verbose"
 	lat_in = lat
@@ -34,7 +34,7 @@ def main(lat, ubr, zen, azi):
 		#bottom bottom_lat = 40.8797
 		#top lat= 46.755666
 		propagation_array1, time_1 = fsum_2d(lat_in, ubr_in, zen_in, azi_in)
-		proparray_to_geotiff(propagation_array1, kerneltiffpath)
+		proparray_to_geotiff(propagation_array1, kerneltiffpath, filein)
 		varrprint(propagation_array1,'propagation_array1', pflag)
 
 		propagation_array2, time_2 = fsum_2d(lat_in, ubr_in, zen_in, azi_in)
@@ -52,7 +52,7 @@ def main(lat, ubr, zen, azi):
 	propagation_array1 = kerneldata.ReadAsArray()
 	varrprint(propagation_array1, 'kernel',pflag)
 
-	filein = "20140901_20140930_75N180W_C.tif"
+	filein = file_in
 	viirsraster = gdal.Open(filein)
 	imagearr = viirsraster.ReadAsArray()
 	varrprint(imagearr, 'VIIRS', pflag)
@@ -133,7 +133,7 @@ def main(lat, ubr, zen, azi):
 	# plt.show()
 	###############################################################################	
 	FFTpath = filein[:-4]+str(40.8797) +'_'+ str(10.0) +'_'+ str(0.0) +'_'+str(0.0)+'convolved'+'.tif'
-	proparray_to_geotiff(FFT_product_inverse, FFTpath)
+	proparray_to_geotiff(FFT_product_inverse, FFTpath, filein)
 
 # Function that creates 2d propagation function
 def fsum_2d(latitude, ubr_arg, zen_arg, azimuth, pflag="verbose"):
@@ -497,7 +497,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
 	return total_sum
 
-def proparray_to_geotiff(array, outfilename, referenceVIIRS="20140901_20140930_75N180W_C.tif"):
+def proparray_to_geotiff(array, outfilename, referenceVIIRS):
 	imdata = gdal.Open(referenceVIIRS)
 
 	# Save out to a GeoTiff
