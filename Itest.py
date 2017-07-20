@@ -28,7 +28,7 @@ azimuth_arg = 0.0
 filein = "20140901_20140930_75N180W_C.tif"
 
 def main():
-    kerneltiffpath = 'kernel3_' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
+    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
@@ -170,7 +170,6 @@ def fsum_2d():
 
     if zen == 0.0:
         # Get left arrays to cut processing time in half
-        abetaleft = abeta[0:, 0:widthcenter]
         Chileft = Chi[0:, 0:widthcenter]
         u0left = u0[0:, 0:widthcenter]
         l_OCleft = l_OC[0:, 0:widthcenter]
@@ -181,7 +180,6 @@ def fsum_2d():
         # u0left = u0[300:432, 530:widthcenter]
         # l_OCleft = l_OC[300:432, 530:widthcenter]
         # thetaleft = theta[300:432, 530:widthcenter]
-        # abetaleft = abeta[300:432, 530:widthcenter]
         # container for Propogation array
         PropSumArrayleft = zeros_like(l_OCleft)
 
@@ -189,8 +187,8 @@ def fsum_2d():
         start = time.time()
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
-        for p,c,u,l,t,b in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite']), nditer(abetaleft, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr)
+        for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
+            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr)
         end = time.time()
         time_sec = end-start
         PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
@@ -409,8 +407,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
         # I(Psi), Normalized emission function, MODIFIED FROM REF 1, p. 13 (leaving out natural sky brightness)
         # There is no indication in References of a shape parameter for the W_c term of the equation
-        I_ne = 1/(2*pi)*(W_a*2*a1_sp*cos(Psi) + W_b*0.554*a2_sp*Psi**4 + W_c*a3_sp*sin(3*Psi))+lhr_viirs*d_ll
-
+        I_ne = 1/(2*pi)*(W_a*2*a1_sp*cos(Psi) + W_b*0.554*a2_sp*Psi**4 + W_c*a3_sp*sin(3*Psi))*(1+lhr_viirs*d_ll)
         # i(Psi,s), Illuminance per unit flux, REF 2, Eq. 6, p. 644
         i_ps = I_ne*ksi2/s_CQ**2
 
