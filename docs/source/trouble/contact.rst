@@ -1,38 +1,25 @@
-======================
-Contact
-======================
+**Contact**
+===========
 
-.. rubric:: User Issues
+.. rubric:: User Issues & SET Development Help/Questions
 
-* Grant Mercer
+* Ryan Avery
 
-  - gmercer015@gmail.com 
-  - `github.com/Syntaf`_
+  - rba.eos@gmail.com
+  - `github.com/rbavery`_
 
-* Nathan Qian
+* Stanley Yu
 
-  - ntqian@gmail.wm.edu
-  - `github.com/stapleCamel`_
+  - stanley98yu@gmail.com
+  - `github.com/stanley98yu`_
 
-.. rubric:: VOCAL Development Help/Questions
+.. rubric:: NASA DEVELOP National Program
 
-* Grant Mercer
+* Contact
 
-  - gmercer015@gmail.com 
-  - `github.com/Syntaf`_
+  - NASA-DL-DEVELOP@mail.nasa.gov
+  - `develop.larc.nasa.gov`_
 
-* Nathan Qian
-
-  - ntqian@email.wm.edu
-  - `github.com/stapleCamel`_
-
-
-.. rubric:: Documentation/Website Questions
-
-* Grant Mercer
-
-  - gmercer015@gmail.com
-  - `github.com/Syntaf`_
-
-.. _github.com/Syntaf: https://github.com/Syntaf
-.. _github.com/stapleCamel: https://github.com/stapleCamel
+.. _github.com/rbavery: https://github.com/rbavery
+.. _github.com/stanley98yu: https://github.com/stanley98yu
+.. _develop.larc.nasa.gov: https://develop.larc.nasa.gov

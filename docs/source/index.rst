@@ -24,6 +24,10 @@ All the Toolbox's user and developer documentation can be found on this website.
 **Contents**
 ------------
 
+.. image:: _static/suominpp.png
+   :scale: 35%
+   :align: right
+
 .. toctree::
    :maxdepth: 2
 
