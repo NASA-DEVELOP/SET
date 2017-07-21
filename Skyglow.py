@@ -4,12 +4,13 @@ Authors: Ryan Avery, Dr. Kenton Ross, Stanley Yu
 Description: Python toolbox that generates artificial skyglow maps using data from NASA and NOAA's
              Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor.
 """
-from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, \
-    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, \
+from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
+    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, LEFT, RIGHT, NE, E, W, Y, \
     WORD, END, SUNKEN, GROOVE, RAISED
 from PIL import Image, ImageTk
 import tkFileDialog
 import webbrowser
+import threading
 import constants
 import Itest
 import logging
@@ -25,6 +26,7 @@ class SkyglowEstimationToolbox:
         self.root = root
         self.file_dialog = None
         self.img = None
+        self.cdiag = None
         self.lat_entry = None
         self.ubr_entry = None
         self.zen_entry = None
@@ -34,6 +36,7 @@ class SkyglowEstimationToolbox:
         self.root.title("Skyglow Estimation Toolbox (SET)")
         self.root.geometry('%dx%d+%d+%d' % (constants.SW*0.75, constants.SH*0.75, 25, 25))
         self.root.wm_iconbitmap(constants.ICO)
+        self.root.resizable(False, False)
 
         # Creates three paned windows for the main screen.
         base = PanedWindow()
@@ -130,38 +133,47 @@ class SkyglowEstimationToolbox:
 
     def instructions(self):
         instr_window = Toplevel(self.root)
-        instr_window.geometry('540x700+25+25')
+        instr_window.geometry('550x575+25+25')
         instr_window.title('Instructions')
         instr_window.wm_iconbitmap(constants.ICO)
         instr_window.resizable(False, False)
 
-        instr_frame = Frame(instr_window, bg='white')
-        instr_frame.pack(fill=BOTH, expand=1)
+        instr_scroll = Scrollbar(instr_window)
+        instr_scroll.pack(fill=Y, side=RIGHT)
 
-        instr = Text(instr_frame, width=65, height=15, padx=10, pady=5, bd=0, wrap=WORD)
+        instr_frame = Frame(instr_window, bg='white')
+        instr_frame.pack(fill=BOTH, side=LEFT)
+
+        instr = Text(instr_frame, width=65, height=40, padx=10, pady=5, bd=0, wrap=WORD)
         instr.insert(END, constants.INSTR)
-        instr.tag_add("here", "1.0", "1.10")
-        instr.tag_config("here")
-        gdiagram_file = Image.open("GarstangGeometryDiagram.PNG")
-        gdiagram_file = gdiagram_file.resize((525, 450), Image.ANTIALIAS)
-        gdiagram = ImageTk.PhotoImage(gdiagram_file)
-        image_box = Label(instr_frame, image=gdiagram)
-        image_box.image = gdiagram
-        instr.grid(column=0, row=0)
-        image_box.grid(column=0, row=1)
+        cdiagram_file = Image.open("cinzano_diagram.PNG")
+        cdiagram_file = cdiagram_file.resize((500, 450), Image.ANTIALIAS)
+        self.cdiag = ImageTk.PhotoImage(cdiagram_file)
+        instr.image_create(END, image=self.cdiag)
+        instr.tag_add("top", "1.0", "4.10")
+        instr.tag_config("top", font='Times 12 bold')
+        instr.tag_add("body", "5.0", "19.20")
+        instr.tag_config("body", font='Times 12')
+        instr.insert(END, constants.CDIAG)
+        instr.pack()
+        instr_scroll.config(command=instr.yview)
 
     def about(self):
         about_window = Toplevel(self.root)
-        about_window.geometry('400x350+25+25')
+        about_window.geometry('350x335+25+25')
         about_window.title('About')
         about_window.wm_iconbitmap(constants.ICO)
         about_window.resizable(False, False)
 
         about = Text(about_window, width=50, height=30, padx=10, pady=3)
         about.insert(END, constants.ABOUT)
-        about.tag_add("here", "1.0", "3.15")
-        about.tag_config("here", justify=CENTER)
+        about.tag_add("abt", "1.0", "21.30")
+        about.tag_config("abt", font='Times 10 bold', justify=CENTER)
         about.pack()
+
+    def update_root(self):
+        self.root.update()
+        self.root.after(1000, self.update_root)
 
     # Generates artificial skyglow map based on VIIRS reference and local parameters.
     def generate_map(self):
@@ -172,8 +184,15 @@ class SkyglowEstimationToolbox:
         azi_in = float(self.azi_entry.get())
         file_in = self.file_dialog.get()
 
-        logger.info('Running Itest')
-        Itest.main(lat_in, ubr_in, zen_in, azi_in, file_in)
+        # Create new threads
+        r_thread = threading.Thread(target=self.update_root)
+        t_thread = threading.Thread(target=Itest.main, 
+                                    args=(lat_in, ubr_in, zen_in, azi_in, file_in))
+
+        # Start new threads
+        logger.info('Starting threads, running Itest')
+        r_thread.start()
+        t_thread.start()
 
 
 def main():
@@ -191,5 +210,5 @@ def main():
     logger.info('Terminated SET Program')
 
 if __name__ == '__main__':
-	logging.basicConfig(level=logging.DEBUG)
-	main()
+    logging.basicConfig(level=logging.DEBUG)
+    main()
