@@ -21,19 +21,13 @@ import warnings
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
-regionlat_arg = 40.8797
-ubr_arg = 10.0
-zen_arg = 0.0
-azimuth_arg = 0.0
-filein = "20140901_20140930_75N180W_C.tif"
-
-def main():
+def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein):
     kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
         # top lat= 46.755666
-        propkernel, totaltime = fsum_2d()
+        propkernel, totaltime = fsum_2d(regionlat_arg, ubr_arg, zen_arg, azimuth_arg)
         logger.debug('propagation array: %s', propkernel)
         array_to_geotiff(propkernel, kerneltiffpath)
         logger.info("time for prop function ubreak 10: %s", totaltime)
@@ -106,7 +100,7 @@ def main():
 
 
 # Function that creates 2d propagation function
-def fsum_2d():
+def fsum_2d(regionlat_arg, ubr_arg, zen_arg, azimuth_arg):
     # Input Variables
     logger.info('**INPUTS**')
     # arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?

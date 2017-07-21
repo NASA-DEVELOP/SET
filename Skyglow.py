@@ -12,6 +12,8 @@ import tkFileDialog
 import webbrowser
 import constants
 import Itest
+import logging
+logger = logging.getLogger()
 
 
 # Main class of the software. Establishes GUI.
@@ -59,8 +61,8 @@ class SkyglowEstimationToolbox:
                                    bd=2, width=8, pady=1)
         self.help_btn.place(relx=1, rely=0, anchor=NE)
         self.help_btn_menu = Menu(self.help_btn, tearoff=0)
-        doc_url = 'https://github.com/NASA-DEVELOP'
-        self.help_btn_menu.add_command(label="Documentation", command=lambda: self.open_url(doc_url))
+        doc = 'https://github.com/NASA-DEVELOP'
+        self.help_btn_menu.add_command(label="Documentation", command=lambda: self.open_url(doc))
         self.help_btn_menu.add_command(label="Instructions", command=self.instructions)
         self.help_btn_menu.add_separator()
         self.help_btn_menu.add_command(label="About", command=self.about)
@@ -170,19 +172,24 @@ class SkyglowEstimationToolbox:
         azi_in = float(self.azi_entry.get())
         file_in = self.file_dialog.get()
 
+        logger.info('Running Itest')
         Itest.main(lat_in, ubr_in, zen_in, azi_in, file_in)
 
 
 def main():
     # Creates Tkinter root and initializes SET.
+    logger.info('Starting SET program')
     root = Tk()
     tbox = SkyglowEstimationToolbox(root)
 
     # Sets up main screen of SET window.
+    logger.info('Setting up main screen')
     tbox.main_screen()
 
     # Runs program.
     root.mainloop()
+    logger.info('Terminated SET Program')
 
 if __name__ == '__main__':
-    main()
+	logging.basicConfig(level=logging.DEBUG)
+	main()
