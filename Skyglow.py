@@ -114,10 +114,13 @@ class SkyglowEstimationToolbox:
 
     # Imports a TIFF file for referencing sky brightness in the region of interest.
     def import_file(self):
+        # Allows user to search through his directory for VIIRS Image file.
         file_types = [('VIIRS Images', '*.tif'), ('All files', '*')]
         file_name = tkFileDialog.Open(initialdir='/', title="Select file", filetypes=file_types)
         file_name = file_name.show()
         self.file_dialog.insert(0, file_name)
+
+        # Checks to see if file is empty. If not, displays image on canvas.
         if file_name != '':
             pilimg = Image.open(file_name)
             canvas_size = (self.img_canvas.winfo_width(), self.img_canvas.winfo_height())
@@ -127,23 +130,27 @@ class SkyglowEstimationToolbox:
         else:
             print('File is empty.')
 
+    # Simple function for opening URLs.
     @staticmethod
     def open_url(url):
         webbrowser.open_new(url)
 
+    # Opens an instruction window that guides the user through the inputs.
     def instructions(self):
+        # Instantiates separate Toplevel instruction window.
         instr_window = Toplevel(self.root)
         instr_window.geometry('550x575+25+25')
         instr_window.title('Instructions')
         instr_window.wm_iconbitmap(constants.ICO)
         instr_window.resizable(False, False)
 
+        # Creatse Scrollbar and Frame for containing other widgets.
         instr_scroll = Scrollbar(instr_window)
         instr_scroll.pack(fill=Y, side=RIGHT)
-
         instr_frame = Frame(instr_window, bg='white')
         instr_frame.pack(fill=BOTH, side=LEFT)
 
+        # Adds instruction text from constants and adds image of Cinzano's diagram.
         instr = Text(instr_frame, width=65, height=40, padx=10, pady=5, bd=0, wrap=WORD)
         instr.insert(END, constants.INSTR)
         cdiagram_file = Image.open("cinzano_diagram.PNG")
@@ -158,19 +165,23 @@ class SkyglowEstimationToolbox:
         instr.pack()
         instr_scroll.config(command=instr.yview)
 
+    # Opens an about window that gives authors, SET version number, and icon credit.
     def about(self):
+        # Instantiates a new Toplevel about window.
         about_window = Toplevel(self.root)
         about_window.geometry('350x335+25+25')
         about_window.title('About')
         about_window.wm_iconbitmap(constants.ICO)
         about_window.resizable(False, False)
 
+        # Adds text to about window.
         about = Text(about_window, width=50, height=30, padx=10, pady=3)
         about.insert(END, constants.ABOUT)
         about.tag_add("abt", "1.0", "21.30")
         about.tag_config("abt", font='Times 10 bold', justify=CENTER)
         about.pack()
 
+    # Updates the root window to prevent it from freezing.
     def update_root(self):
         self.root.update()
         self.root.after(1000, self.update_root)
@@ -184,15 +195,33 @@ class SkyglowEstimationToolbox:
         azi_in = float(self.azi_entry.get())
         file_in = self.file_dialog.get()
 
-        # Create new threads
+        # Create new threads to run light propagation model simultaneously.
         r_thread = threading.Thread(target=self.update_root)
-        t_thread = threading.Thread(target=Itest.main, 
+        t_thread = threading.Thread(target=Itest.main,
                                     args=(lat_in, ubr_in, zen_in, azi_in, file_in))
 
-        # Start new threads
+        # Start threads.
         logger.info('Starting threads, running Itest')
         r_thread.start()
         t_thread.start()
+
+        # Instantiates a new Toplevel window for progress bar and loading log.
+        prg_window = Toplevel(self.root)
+        prg_window.geometry('450x375+200+200')
+        prg_window.title('Generating Artificial Skyglow Map...')
+        prg_window.wm_iconbitmap(constants.ICO)
+        prg_window.resizable(False, False)
+
+        # Creates Scrollbar for scrolling and Frame for containing other widgets.
+        prg_scroll = Scrollbar(prg_window)
+        prg_scroll.pack(fill=Y, side=RIGHT)
+        prg_frame = Frame(prg_window)
+        prg_frame.pack(fill=BOTH, side=LEFT)
+
+        # Displays message log.
+        prg_log = Text(prg_frame)
+        prg_log.insert(END, "********************Progress Log********************")
+        prg_log.pack()
 
 
 def main():
