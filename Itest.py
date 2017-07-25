@@ -17,7 +17,9 @@ import matplotlib.colors as colors
 from matplotlib_scalebar.scalebar import ScaleBar
 from osgeo import gdal
 import logging
+import sys
 import warnings
+import Skyglow
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
@@ -29,7 +31,7 @@ def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein):
         # top lat= 46.755666
         propkernel, totaltime = fsum_2d(regionlat_arg, ubr_arg, zen_arg, azimuth_arg)
         logger.debug('propagation array: %s', propkernel)
-        array_to_geotiff(propkernel, kerneltiffpath)
+        array_to_geotiff(propkernel, kerneltiffpath, filein)
         logger.info("time for prop function ubreak 10: %s", totaltime)
 
     kerneldata = gdal.Open(kerneltiffpath)
@@ -96,7 +98,7 @@ def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein):
     # plt.show()
     ###############################################################################
     FFTpath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'convolved'+'.tif'
-    array_to_geotiff(FFT_product_inverse, FFTpath)
+    array_to_geotiff(FFT_product_inverse, FFTpath, filein)
 
 
 # Function that creates 2d propagation function
@@ -440,7 +442,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     return total_sum
 
 
-def array_to_geotiff(array, outfilename, referenceVIIRS="20140901_20140930_75N180W_C.tif"):
+def array_to_geotiff(array, outfilename, referenceVIIRS):
     imdata = gdal.Open(referenceVIIRS)
 
     # Save out to a GeoTiff

@@ -5,12 +5,14 @@ Description: Python toolbox that generates artificial skyglow maps using data fr
              Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor.
 """
 from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
-    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, LEFT, RIGHT, NE, E, W, Y, \
-    WORD, END, SUNKEN, GROOVE, RAISED
+    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, \
+    WORD, GROOVE, RAISED
+import ttk
 from PIL import Image, ImageTk
 import tkFileDialog
 import webbrowser
 import threading
+import sys
 import constants
 import Itest
 import logging
@@ -31,6 +33,7 @@ class SkyglowEstimationToolbox:
         self.ubr_entry = None
         self.zen_entry = None
         self.azi_entry = None
+        self.txt_redir = None
 
         # Sets window title, size, and icon on screen.
         self.root.title("Skyglow Estimation Toolbox (SET)")
@@ -51,7 +54,7 @@ class SkyglowEstimationToolbox:
         sub2.add(self.input_frame)
 
         # Creates frame for bottom half of main screen.
-        self.img_frame = Frame(sub1, bd=2, bg='white', relief=SUNKEN)
+        self.img_frame = Frame(sub1, bd=2, bg='white', relief="sunken")
         sub1.add(self.img_frame)
 
         # Creates canvas for displaying images.
@@ -75,7 +78,7 @@ class SkyglowEstimationToolbox:
     def main_screen(self):
         # VIIRS Image Reference File
         file_label = Label(self.input_frame, text="Image File:", width=15, anchor=E)
-        self.file_dialog = Entry(self.input_frame, width=109, bd=2, relief=SUNKEN)
+        self.file_dialog = Entry(self.input_frame, width=109, bd=2, relief="sunken")
         browse_button = Button(self.input_frame, text="Browse", command=self.import_file)
         file_label.grid(column=0, row=0)
         self.file_dialog.grid(column=1, columnspan=3, row=0)
@@ -84,26 +87,26 @@ class SkyglowEstimationToolbox:
         # Region Latitude (deg), Grand Teton National park = 43.7904 degrees N
         lat_label = Label(self.input_frame, text="Latitude (deg):", width=15, anchor=E)
         lat_label.grid(column=0, row=1)
-        self.lat_entry = Entry(self.input_frame, width=30, bd=2, relief=SUNKEN)
+        self.lat_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
         self.lat_entry.grid(column=1, row=1)
 
         # Distance of Increasing Integration Increment (km), ubr, REF 2, Fig. 6, p.648
         ubr_label = Label(self.input_frame, text="Distance at which Integration Speed Increases"
                                                  " (km):", width=40, anchor=E)
         ubr_label.grid(column=2, row=1)
-        self.ubr_entry = Entry(self.input_frame, width=30, bd=2, relief=SUNKEN)
+        self.ubr_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
         self.ubr_entry.grid(column=3, row=1)
 
         # Zenith angle (deg), z, REF 2, Fig. 6, p.648
         zen_label = Label(self.input_frame, text="Zenith Angle (deg):", width=15, anchor=E)
         zen_label.grid(column=0, row=2)
-        self.zen_entry = Entry(self.input_frame, width=30, bd=2, relief=SUNKEN)
+        self.zen_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
         self.zen_entry.grid(column=1, row=2)
 
         # Azimuth angle (deg)
         azi_label = Label(self.input_frame, text="Azimuth Angle (deg):", width=40, anchor=E)
         azi_label.grid(column=2, row=2)
-        self.azi_entry = Entry(self.input_frame, width=30, bd=2, relief=SUNKEN)
+        self.azi_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
         self.azi_entry.grid(column=3, row=2)
 
         # Generate Artificial Skyglow Map
@@ -146,22 +149,22 @@ class SkyglowEstimationToolbox:
 
         # Creatse Scrollbar and Frame for containing other widgets.
         instr_scroll = Scrollbar(instr_window)
-        instr_scroll.pack(fill=Y, side=RIGHT)
+        instr_scroll.pack(fill=Y, side="right")
         instr_frame = Frame(instr_window, bg='white')
-        instr_frame.pack(fill=BOTH, side=LEFT)
+        instr_frame.pack(fill=BOTH, side="left")
 
         # Adds instruction text from constants and adds image of Cinzano's diagram.
         instr = Text(instr_frame, width=65, height=40, padx=10, pady=5, bd=0, wrap=WORD)
-        instr.insert(END, constants.INSTR)
+        instr.insert("end", constants.INSTR)
         cdiagram_file = Image.open("cinzano_diagram.PNG")
         cdiagram_file = cdiagram_file.resize((500, 450), Image.ANTIALIAS)
         self.cdiag = ImageTk.PhotoImage(cdiagram_file)
-        instr.image_create(END, image=self.cdiag)
+        instr.image_create("end", image=self.cdiag)
         instr.tag_add("top", "1.0", "4.10")
         instr.tag_config("top", font='Times 12 bold')
         instr.tag_add("body", "5.0", "19.20")
         instr.tag_config("body", font='Times 12')
-        instr.insert(END, constants.CDIAG)
+        instr.insert("end", constants.CDIAG)
         instr.pack()
         instr_scroll.config(command=instr.yview)
 
@@ -176,7 +179,7 @@ class SkyglowEstimationToolbox:
 
         # Adds text to about window.
         about = Text(about_window, width=50, height=30, padx=10, pady=3)
-        about.insert(END, constants.ABOUT)
+        about.insert("end", constants.ABOUT)
         about.tag_add("abt", "1.0", "21.30")
         about.tag_config("abt", font='Times 10 bold', justify=CENTER)
         about.pack()
@@ -199,29 +202,47 @@ class SkyglowEstimationToolbox:
         r_thread = threading.Thread(target=self.update_root)
         t_thread = threading.Thread(target=Itest.main,
                                     args=(lat_in, ubr_in, zen_in, azi_in, file_in))
-
-        # Start threads.
-        logger.info('Starting threads, running Itest')
+        t_thread.setDaemon(True)
         r_thread.start()
-        t_thread.start()
 
-        # Instantiates a new Toplevel window for progress bar and loading log.
+        # Instantiates a new Toplevel window and frame for progress bar and loading log.
         prg_window = Toplevel(self.root)
-        prg_window.geometry('450x375+200+200')
+        prg_window.geometry('650x375+250+250')
         prg_window.title('Generating Artificial Skyglow Map...')
         prg_window.wm_iconbitmap(constants.ICO)
         prg_window.resizable(False, False)
-
-        # Creates Scrollbar for scrolling and Frame for containing other widgets.
-        prg_scroll = Scrollbar(prg_window)
-        prg_scroll.pack(fill=Y, side=RIGHT)
         prg_frame = Frame(prg_window)
-        prg_frame.pack(fill=BOTH, side=LEFT)
+        prg_frame.pack(fill=BOTH)
 
-        # Displays message log.
+        # Creates Scrollbar and progress bar.
+        prg_scroll = Scrollbar(prg_frame)
+        prg_scroll.pack(fill=Y, side="right")
+        prg_bar = ttk.Progressbar(prg_frame, orient=HORIZONTAL, length=750, mode='indeterminate')
+        prg_bar.pack()
+
+        # Displays message log that prints from log file and starts Itest.
         prg_log = Text(prg_frame)
-        prg_log.insert(END, "********************Progress Log********************")
         prg_log.pack()
+        prg_log.insert("end", "*****Progress Log*****\n")
+        prg_log.tag_add("abt", "1.0", "2.0")
+        prg_log.tag_config("abt", font='Courier 12 bold', justify=CENTER)
+        self.txt_redir = TextRedirector(prg_log)
+        logger.addHandler(self.txt_redir)
+        t_thread.start()
+        prg_bar.start()
+
+
+# Redirects formatted lines from the log file to a widget.
+class TextRedirector(logging.Handler):
+    def __init__(self, widget):
+        logging.Handler.__init__(self)
+        self.widget = widget
+
+    def emit(self, record):
+        self.widget.config(state='normal')
+        self.widget.insert("end", self.format(record) + '\n')
+        self.widget.see("end")
+        self.widget.config(state='disabled')
 
 
 def main():
@@ -236,6 +257,7 @@ def main():
 
     # Runs program.
     root.mainloop()
+    logger.removeHandler(tbox.txt_redir)
     logger.info('Terminated SET Program')
 
 if __name__ == '__main__':
