@@ -2,12 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="6178739c-ca27-49d4-b7c2-c21033b931d0" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/20140901_20140930_75N180W_C_40.8797_10.0_0.0_0.0convolved.tif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/20140901_20140930_75N180W_C_40.8797_10.0_30.0_180.0convolved.tif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel2_40.8797_10.0_30.0_180.0.tif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel3_40.8797_10.0_30.0_180.0.tif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel_40.8797_10.0_0.0_0.0.tif" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/kernel_40.8797_10.0_30.0_180.0.tif" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Itest.py" afterPath="$PROJECT_DIR$/Itest.py" />
     </list>
@@ -33,9 +27,11 @@
       <file leaf-file-name="Itest.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Itest.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="366">
-              <caret line="414" column="34" selection-start-line="414" selection-start-column="34" selection-end-line="414" selection-end-column="34" />
-              <folding />
+            <state relative-caret-position="334">
+              <caret line="382" column="81" selection-start-line="382" selection-start-column="81" selection-end-line="382" selection-end-column="91" />
+              <folding>
+                <element signature="e#536#567#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -103,6 +99,7 @@
     </navigator>
     <panes>
       <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -123,11 +120,12 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.tools" />
+    <property name="settings.editor.splitter.proportion" value="0.2" />
   </component>
   <component name="RunManager" selected="Python.Itest">
     <configuration default="false" name="Itest" type="PythonConfigurationType" factoryName="Python" temporary="true">
@@ -318,7 +316,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32982087" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1849315" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.40800866" sideWeight="0.5021075" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972974" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -327,7 +325,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24973656" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32972974" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.5974026" sideWeight="0.49789253" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.16432433" sideWeight="0.49789253" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -359,23 +357,23 @@
         <line-breakpoint enabled="true" log-message="true" type="python-line">
           <condition expression="df_prop &gt; 1" language="Python" />
           <url>file://$PROJECT_DIR$/Itest.py</url>
-          <line>441</line>
+          <line>439</line>
           <log-expression expression="'df_prop too big!!'" language="Python" />
           <option name="timeStamp" value="12" />
         </line-breakpoint>
         <line-breakpoint enabled="true" log-message="true" type="python-line">
           <condition expression="df_prop &lt; 0" language="Python" />
           <url>file://$PROJECT_DIR$/Itest.py</url>
-          <line>442</line>
+          <line>440</line>
           <log-expression expression="'df_prop negative!'" language="Python" />
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" log-message="true" type="python-line">
-          <condition expression="I_ne &lt; 0" language="Python" />
+          <condition expression="Psi == 90.0" language="Python" />
           <url>file://$PROJECT_DIR$/Itest.py</url>
-          <line>411</line>
-          <log-expression expression="'I_ne negative'" language="Python" />
-          <option name="timeStamp" value="24" />
+          <line>369</line>
+          <log-expression expression="'Psi is 90.0!'" language="Python" />
+          <option name="timeStamp" value="27" />
         </line-breakpoint>
       </breakpoints>
       <breakpoints-dialog>
@@ -393,16 +391,26 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="25" />
+      <option name="time" value="28" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
-        <watch expression="q2" />
         <watch expression="df_prop" language="Python" />
+        <watch expression="Psi_deg" language="Python" />
+        <watch expression="pie" language="Python" />
+        <watch expression="pi_t" language="Python" />
+        <watch expression="q3" language="Python" />
+        <watch expression="q3_t1" language="Python" />
+        <watch expression="q3_t2" language="Python" />
+        <watch expression="q2" />
+        <watch expression="beta" language="Python" />
+        <watch expression="u_OQ" language="Python" />
+        <watch expression="Chi" language="Python" />
+        <watch expression="ksi1" language="Python" />
         <watch expression="p1" language="Python" />
         <watch expression="p2" language="Python" />
-        <watch expression="beta" language="Python" />
-        <watch expression="q3" language="Python" />
+        <watch expression="p2_t1" language="Python" />
+        <watch expression="p2_t2" language="Python" />
       </configuration>
     </watches-manager>
   </component>
@@ -411,7 +419,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -419,7 +429,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -427,7 +439,9 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -435,7 +449,39 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Itest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Itest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Itest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -462,9 +508,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Itest.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="366">
-          <caret line="414" column="34" selection-start-line="414" selection-start-column="34" selection-end-line="414" selection-end-column="34" />
-          <folding />
+        <state relative-caret-position="334">
+          <caret line="382" column="81" selection-start-line="382" selection-start-column="81" selection-end-line="382" selection-end-column="91" />
+          <folding>
+            <element signature="e#536#567#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
