@@ -5,14 +5,15 @@ Description: Python toolbox that generates artificial skyglow maps using data fr
              Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor.
 """
 from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
-    Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, \
-    WORD, GROOVE, RAISED
+    Text, Menubutton, Menu, Checkbutton, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, \
+    StringVar, IntVar
 import ttk
 from PIL import Image, ImageTk
 import tkFileDialog
 import webbrowser
 import threading
 import sys
+import time
 import constants
 import Itest
 import logging
@@ -26,14 +27,18 @@ class SkyglowEstimationToolbox:
     # Initialization
     def __init__(self, root):
         self.root = root
-        self.file_dialog = None
+        self.file_log_var = StringVar()
+        self.krn_ent_var = StringVar()
+        self.krn_var = IntVar()
         self.img = None
         self.cdiag = None
-        self.lat_entry = None
-        self.ubr_entry = None
-        self.zen_entry = None
-        self.azi_entry = None
+        self.lat_lbl, self.lat_entry = None, None
+        self.ubr_lbl, self.ubr_entry = None, None
+        self.zen_lbl, self.zen_entry = None, None
+        self. azi_lbl, self.azi_entry = None, None
+        self. krn_lvl, self.krn_entry, self.krn_btn = None, None, None
         self.txt_redir = None
+        self.map_btn = None
 
         # Sets window title, size, and icon on screen.
         self.root.title("Skyglow Estimation Toolbox (SET)")
@@ -58,12 +63,12 @@ class SkyglowEstimationToolbox:
         sub1.add(self.img_frame)
 
         # Creates canvas for displaying images.
-        self.img_canvas = Canvas(self.img_frame, bd=2, relief=GROOVE,
+        self.img_canvas = Canvas(self.img_frame, bd=2, relief="groove",
                                  width=constants.SW*0.6, height=constants.SH*0.6)
         self.img_canvas.place(relx=.5, rely=.5, anchor=CENTER)
 
         # Creates help button for link to documentation, instructions, and about.
-        self.help_btn = Menubutton(self.input_frame, text="Help", relief=RAISED,
+        self.help_btn = Menubutton(self.input_frame, text="Help", relief="raised",
                                    bd=2, width=8, pady=1)
         self.help_btn.place(relx=1, rely=0, anchor=NE)
         self.help_btn_menu = Menu(self.help_btn, tearoff=0)
@@ -77,51 +82,66 @@ class SkyglowEstimationToolbox:
     # Sets up input GUI and image display screen.
     def main_screen(self):
         # VIIRS Image Reference File
-        file_label = Label(self.input_frame, text="Image File:", width=15, anchor=E)
-        self.file_dialog = Entry(self.input_frame, width=109, bd=2, relief="sunken")
-        browse_button = Button(self.input_frame, text="Browse", command=self.import_file)
-        file_label.grid(column=0, row=0)
-        self.file_dialog.grid(column=1, columnspan=3, row=0)
-        browse_button.grid(column=4, row=0, sticky=W, padx=3)
+        file_lbl = Label(self.input_frame, text="Image File:", width=15, anchor=E)
+        file_log = Entry(self.input_frame, width=110, bd=2, relief="sunken",
+                         textvariable=self.file_log_var)
+        browse_btn = Button(self.input_frame, text="Browse", command=self.import_viirs)
+        file_lbl.grid(column=0, row=0)
+        file_log.grid(column=1, columnspan=3, row=0)
+        browse_btn.grid(column=4, row=0, sticky=W, padx=3)
 
+        # Import Kernel Checkbutton
+        check_lbl = Label(self.input_frame, text="Import Kernel:", width=15, anchor=E)
+        check_lbl.grid(column=0, row=1)
+        krn_chk = Checkbutton(self.input_frame, anchor=W, variable=self.krn_var,
+                              command=self.checkbtn_val)
+        krn_chk.place(relx=.1, rely=.31, anchor=CENTER)
+        
         # Region Latitude (deg), Grand Teton National park = 43.7904 degrees N
-        lat_label = Label(self.input_frame, text="Latitude (deg):", width=15, anchor=E)
-        lat_label.grid(column=0, row=1)
+        self.lat_lbl = Label(self.input_frame, text="Latitude (deg):", width=15, anchor=E)
         self.lat_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
-        self.lat_entry.grid(column=1, row=1)
 
         # Distance of Increasing Integration Increment (km), ubr, REF 2, Fig. 6, p.648
-        ubr_label = Label(self.input_frame, text="Distance at which Integration Speed Increases"
-                                                 " (km):", width=40, anchor=E)
-        ubr_label.grid(column=2, row=1)
+        self.ubr_lbl = Label(self.input_frame, text="Distance at which Integration Speed Increases"
+                                                     " (km):", width=39, anchor=E)
         self.ubr_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
-        self.ubr_entry.grid(column=3, row=1)
 
         # Zenith angle (deg), z, REF 2, Fig. 6, p.648
-        zen_label = Label(self.input_frame, text="Zenith Angle (deg):", width=15, anchor=E)
-        zen_label.grid(column=0, row=2)
+        self.zen_lbl = Label(self.input_frame, text="Zenith Angle (deg):", width=15, anchor=E)
         self.zen_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
-        self.zen_entry.grid(column=1, row=2)
 
         # Azimuth angle (deg)
-        azi_label = Label(self.input_frame, text="Azimuth Angle (deg):", width=40, anchor=E)
-        azi_label.grid(column=2, row=2)
+        self.azi_lbl = Label(self.input_frame, text="Azimuth Angle (deg):", width=39, anchor=E)
         self.azi_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
-        self.azi_entry.grid(column=3, row=2)
 
-        # Generate Artificial Skyglow Map
-        map_button = Button(self.input_frame, text="Generate Artificial Skyglow Map", width=93,
-                            command=self.generate_map)
-        map_button.grid(column=1, columnspan=3, row=3)
+        self.krn_lbl = Label(self.input_frame, text="Kernel File:", width=15, anchor=E)
+        self.krn_ent = Entry(self.input_frame, width=110, bd=2, relief="sunken",
+                             textvariable=self.krn_ent_var)
+        self.krn_btn = Button(self.input_frame, text="Browse", command=self.import_krn)
+
+        # Generate Artificial Skyglow Map Button
+        self.map_btn = Button(self.input_frame, text="Generate Artificial Skyglow Map", 
+                                 width=93, command=self.generate_map)
+
+        # Places widgets.
+        self.lat_lbl.grid(column=0, row=2)
+        self.lat_entry.grid(column=1, row=2)
+        self.ubr_lbl.grid(column=2, row=2)
+        self.ubr_entry.grid(column=3, row=2)
+        self.zen_lbl.grid(column=0, row=3)
+        self.zen_entry.grid(column=1, row=3)
+        self.azi_lbl.grid(column=2, row=3)
+        self.azi_entry.grid(column=3, row=3)
+        self.map_btn.grid(column=1, columnspan=3, row=4)
     ##################################################
 
     # Imports a TIFF file for referencing sky brightness in the region of interest.
-    def import_file(self):
+    def import_viirs(self):
         # Allows user to search through his directory for VIIRS Image file.
-        file_types = [('VIIRS Images', '*.tif'), ('All files', '*')]
+        file_types = [('TIFF Files', '*.tif'), ('All files', '*')]
         file_name = tkFileDialog.Open(initialdir='/', title="Select file", filetypes=file_types)
         file_name = file_name.show()
-        self.file_dialog.insert(0, file_name)
+        self.file_log_var.set(file_name)
 
         # Checks to see if file is empty. If not, displays image on canvas.
         if file_name != '':
@@ -132,6 +152,45 @@ class SkyglowEstimationToolbox:
             self.img_canvas.create_image(canvas_size[0]/2, canvas_size[1]/2, image=self.img)
         else:
             print('File is empty.')
+
+    # Imports a TIFF file containing the kernel data from previous input parameters.
+    def import_krn(self):
+        # Allows user to search through his directory for kernel file.
+        file_types = [('TIFF Files', '*.tif'), ('All files', '*')]
+        file_name = tkFileDialog.Open(initialdir='/', title="Select file", filetypes=file_types)
+        file_name = file_name.show()
+        self.krn_ent_var.set(file_name)
+
+    # Changes interface based on whether Kernel Checkbutton is selected.
+    def checkbtn_val(self):
+        # Import Kernel File widgets when Kernel Checkbutton is marked.
+        if self.krn_var.get():
+            self.lat_lbl.grid_remove()
+            self.lat_entry.grid_remove()
+            self.ubr_lbl.grid_remove()
+            self.ubr_entry.grid_remove()
+            self.zen_lbl.grid_remove()
+            self.zen_entry.grid_remove()
+            self.azi_lbl.grid_remove()
+            self.azi_entry.grid_remove()
+            self.krn_lbl.grid(column=0, row=2)
+            self.krn_ent.grid(column=1, columnspan=3, row=2)
+            self.krn_btn.grid(column=4, row=2, sticky=W, padx=3)
+            self.map_btn.grid(column=1, columnspan=3, row=3)
+        # Input parameter widgets when Kernel Checkbuttton is unmarked
+        else:
+            self.krn_lbl.grid_remove()
+            self.krn_ent.grid_remove()
+            self.krn_btn.grid_remove()
+            self.lat_lbl.grid(column=0, row=2)
+            self.lat_entry.grid(column=1, row=2)
+            self.ubr_lbl.grid(column=2, row=2)
+            self.ubr_entry.grid(column=3, row=2)
+            self.zen_lbl.grid(column=0, row=3)
+            self.zen_entry.grid(column=1, row=3)
+            self.azi_lbl.grid(column=2, row=3)
+            self.azi_entry.grid(column=3, row=3)
+            self.map_btn.grid(column=1, columnspan=3, row=4)
 
     # Simple function for opening URLs.
     @staticmethod
@@ -154,7 +213,7 @@ class SkyglowEstimationToolbox:
         instr_frame.pack(fill=BOTH, side="left")
 
         # Adds instruction text from constants and adds image of Cinzano's diagram.
-        instr = Text(instr_frame, width=65, height=40, padx=10, pady=5, bd=0, wrap=WORD)
+        instr = Text(instr_frame, width=65, height=40, padx=10, pady=5, bd=0, wrap="word")
         instr.insert("end", constants.INSTR)
         cdiagram_file = Image.open("cinzano_diagram.PNG")
         cdiagram_file = cdiagram_file.resize((500, 450), Image.ANTIALIAS)
@@ -192,42 +251,53 @@ class SkyglowEstimationToolbox:
     # Generates artificial skyglow map based on VIIRS reference and local parameters.
     def generate_map(self):
         # Acquires input arguments.
-        lat_in = float(self.lat_entry.get())
-        ubr_in = float(self.ubr_entry.get())
-        zen_in = float(self.zen_entry.get())
-        azi_in = float(self.azi_entry.get())
-        file_in = self.file_dialog.get()
+        lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in = 0, 0, 0, 0, '', ''
+        if self.krn_var.get():
+            krn_file_in = self.krn_ent_var.get()
+        else:
+            lat_in = float(self.lat_entry.get())
+            ubr_in = float(self.ubr_entry.get())
+            zen_in = float(self.zen_entry.get())
+            azi_in = float(self.azi_entry.get())
+        file_in = self.file_log_var.get()
 
         # Create new threads to run light propagation model simultaneously.
         r_thread = threading.Thread(target=self.update_root)
         t_thread = threading.Thread(target=Itest.main,
-                                    args=(lat_in, ubr_in, zen_in, azi_in, file_in))
+                                    args=(lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in))
         t_thread.setDaemon(True)
         r_thread.start()
 
         # Instantiates a new Toplevel window and frame for progress bar and loading log.
         prg_window = Toplevel(self.root)
-        prg_window.geometry('650x375+250+250')
+        prg_window.geometry('650x325+250+250')
         prg_window.title('Generating Artificial Skyglow Map...')
         prg_window.wm_iconbitmap(constants.ICO)
         prg_window.resizable(False, False)
         prg_frame = Frame(prg_window)
         prg_frame.pack(fill=BOTH)
 
-        # Creates Scrollbar and progress bar.
+        # Creates Scrollbar, Progressbar, and Label for checking progress..
         prg_scroll = Scrollbar(prg_frame)
         prg_scroll.pack(fill=Y, side="right")
         prg_bar = ttk.Progressbar(prg_frame, orient=HORIZONTAL, length=750, mode='indeterminate')
         prg_bar.pack()
+        prg_lbl_txt = StringVar()
+        prg_lbl = Label(prg_frame, textvariable=prg_lbl_txt)
+        prg_lbl.pack()
+
 
         # Displays message log that prints from log file and starts Itest.
-        prg_log = Text(prg_frame)
+        prg_log = Text(prg_frame, width=90, padx=5, pady=5, relief="sunken")
         prg_log.pack()
-        prg_log.insert("end", "*****Progress Log*****\n")
-        prg_log.tag_add("abt", "1.0", "2.0")
+        prg_log.insert("end", "*****Progress Log*****\n=======================\n")
+        prg_log.tag_add("abt", "1.0", "3.0")
         prg_log.tag_config("abt", font='Courier 12 bold', justify=CENTER)
         self.txt_redir = TextRedirector(prg_log)
         logger.addHandler(self.txt_redir)
+
+        # Starts Itest and progress bar. Also notes start time.
+        prg_lbl_txt.set("Start time: " + str(time.asctime()))
         t_thread.start()
         prg_bar.start()
 

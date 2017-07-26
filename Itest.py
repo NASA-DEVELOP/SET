@@ -23,8 +23,8 @@ import Skyglow
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
-def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein):
-    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
+def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein, krn_filein):
+    kerneltiffpath = krn_filein
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
