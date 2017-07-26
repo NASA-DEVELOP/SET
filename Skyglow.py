@@ -8,7 +8,7 @@ from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canv
     Text, Menubutton, Menu, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, \
     WORD, GROOVE, RAISED
 import ttk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageOps
 import tkFileDialog
 import webbrowser
 import threading
@@ -117,7 +117,7 @@ class SkyglowEstimationToolbox:
 
     # Imports a TIFF file for referencing sky brightness in the region of interest.
     def import_file(self):
-        # Allows user to search through his directory for VIIRS Image file.
+        # Allows user to search through directory for VIIRS Image file.
         file_types = [('VIIRS Images', '*.tif'), ('All files', '*')]
         file_name = tkFileDialog.Open(initialdir='/', title="Select file", filetypes=file_types)
         file_name = file_name.show()
@@ -128,7 +128,9 @@ class SkyglowEstimationToolbox:
             pilimg = Image.open(file_name)
             canvas_size = (self.img_canvas.winfo_width(), self.img_canvas.winfo_height())
             pilimg_r = pilimg.resize(canvas_size, Image.ANTIALIAS)
-            self.img = ImageTk.PhotoImage(pilimg_r)
+            pilimg_col = ImageOps.colorize(ImageOps.grayscale(pilimg_r), (0,0,0), (255,255,255))
+            pilimg_cont = ImageOps.autocontrast(pilimg_col, cutoff=.4, ignore=None)
+            self.img = ImageTk.PhotoImage(pilimg_cont)
             self.img_canvas.create_image(canvas_size[0]/2, canvas_size[1]/2, image=self.img)
         else:
             print('File is empty.')
