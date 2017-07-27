@@ -2,10 +2,28 @@
 **Installation**
 ================
 
-SET is still in its early stages of development, and does not yet offer a double-click
+.. image:: _static/wrench.jpeg
+   :scale: 20%
+   :align: right
+
+SET is still in its early stages of development and does not yet offer a double-click
 installer. As a result, running the program requires you to setup the development environment,
-which can be tricky for those not well-versed in programming. We've tried to be as
+which can be tricky for those not familiar with programming in the command line. We've tried to be as
 descriptive as possible in our installation guide for our users. If you have any questions or trouble installing, feel free to ask for help from the :doc:`support page <trouble/contact>` and describe your issue to us.
+
+**Windows**
+-----------
+
+1. Download `Python Anaconda 2.7 <https://www.continuum.io/downloads>`_
+2. Download `Git Bash <https://git-scm.com/downloads>`_
+3. Open a terminal, navigate to the directory you would like to contain the files for the Toolbox
+   ``git clone <insert link to SkyglowGithubhere>``
+
+4. Run (need to double check that this is right)
+    ``conda create env geospatial.yml``
+
+5. Run
+    ``python Itest.py``
 
 **Required Packages**
 ----------------------
@@ -57,17 +75,3 @@ descriptive as possible in our installation guide for our users. If you have any
 - pip:
   - archook==1.1.0
 prefix: C:\Users\rbavery\AppData\Local\Continuum\Anaconda3\envs\geospatial
-
-**Windows**
------------
-
-1. Download `Python Anaconda 2.7 <https://www.continuum.io/downloads>`_
-2. Download `Git Bash <https://git-scm.com/downloads>`_
-3. Open a terminal, navigate to the directory you would like to contain the files for the Toolbox
-   ``git clone <insert link to SkyglowGithubhere>``
-
-4. Run (need to double check that this is right)
-    ``conda create env geospatial.yml``
-
-5. Run
-    ``python Itest.py``
