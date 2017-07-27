@@ -14,7 +14,7 @@
    :align: right
    :figwidth: 500
 
-   *Summer 2017 Wyoming Cross-Cutting II Team Website Image. Teton Range, WY displayed below a processed artificial skyglow map around Grand Teton National Park, generated from a nine-month composite image.*
+   *Summer 2017 Wyoming Cross-Cutting II Team Website Image. Teton Range, WY, displayed below a processed artificial skyglow map around Grand Teton National Park, generated from a nine-month composite image.*
 
 Skyglow is the brightening of the sky caused by various illuminated sources, including anthropogenic lighting, atmospheric factors, and celestial light. With the unprecedented growth of urbanization, artificial lighting has been rapidly increasing the brightness of the night sky around the world. This problem has attracted serious concerns from researchers, scientists, and communities to address the ramifications of what is now known as light pollution.
 
