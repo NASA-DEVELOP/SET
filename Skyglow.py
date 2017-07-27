@@ -30,14 +30,13 @@ class SkyglowEstimationToolbox:
         self.file_log_var = StringVar()
         self.krn_ent_var = StringVar()
         self.krn_var = IntVar()
-        self.img = None
-        self.cdiag = None
+        self.img, self.cdiag = None, None
         self.lat_lbl, self.lat_entry = None, None
         self.ubr_lbl, self.ubr_entry = None, None
         self.zen_lbl, self.zen_entry = None, None
         self. azi_lbl, self.azi_entry = None, None
         self. krn_lvl, self.krn_entry, self.krn_btn = None, None, None
-        self.txt_redir = None
+        self.txt_redir, self.prg_log = None, None
         self.map_btn = None
 
         # Sets window title, size, and icon on screen.
@@ -245,31 +244,8 @@ class SkyglowEstimationToolbox:
         about.tag_config("abt", font='Times 10 bold', justify=CENTER)
         about.pack()
 
-    # Updates the root window to prevent it from freezing.
-    def update_root(self):
-        self.root.update()
-        self.root.after(1000, self.update_root)
-
-    # Generates artificial skyglow map based on VIIRS reference and local parameters.
-    def generate_map(self):
-        # Acquires input arguments.
-        lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in = 0, 0, 0, 0, '', ''
-        if self.krn_var.get():
-            krn_file_in = self.krn_ent_var.get()
-        else:
-            lat_in = float(self.lat_entry.get())
-            ubr_in = float(self.ubr_entry.get())
-            zen_in = float(self.zen_entry.get())
-            azi_in = float(self.azi_entry.get())
-        file_in = self.file_log_var.get()
-
-        # Create new threads to run light propagation model simultaneously.
-        r_thread = threading.Thread(target=self.update_root)
-        t_thread = threading.Thread(target=Itest.main,
-                                    args=(lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in))
-        t_thread.setDaemon(True)
-        r_thread.start()
-
+    # Constructs a progress window to monitor Itest.
+    def progress(self):
         # Instantiates a new Toplevel window and frame for progress bar and loading log.
         prg_window = Toplevel(self.root)
         prg_window.geometry('650x325+250+250')
@@ -284,24 +260,48 @@ class SkyglowEstimationToolbox:
         prg_scroll.pack(fill=Y, side="right")
         prg_bar = ttk.Progressbar(prg_frame, orient=HORIZONTAL, length=750, mode='indeterminate')
         prg_bar.pack()
+        prg_bar.start()
         prg_lbl_txt = StringVar()
         prg_lbl = Label(prg_frame, textvariable=prg_lbl_txt)
         prg_lbl.pack()
 
-
         # Displays message log that prints from log file and starts Itest.
-        prg_log = Text(prg_frame, width=90, padx=5, pady=5, relief="sunken")
-        prg_log.pack()
-        prg_log.insert("end", "*****Progress Log*****\n=======================\n")
-        prg_log.tag_add("abt", "1.0", "3.0")
-        prg_log.tag_config("abt", font='Courier 12 bold', justify=CENTER)
-        self.txt_redir = TextRedirector(prg_log)
+        self.prg_log = Text(prg_frame, width=90, padx=5, pady=5, relief="sunken")
+        self.prg_log.pack()
+        self.prg_log.insert("end", "*****Progress Log*****\n=======================\n")
+        self.prg_log.tag_add("abt", "1.0", "3.0")
+        self.prg_log.tag_config("abt", font='Courier 12 bold', justify=CENTER)
+        self.txt_redir = TextRedirector(self.prg_log)
         logger.addHandler(self.txt_redir)
-
-        # Starts Itest and progress bar. Also notes start time.
         prg_lbl_txt.set("Start time: " + str(time.asctime()))
+
+    # Updates progress window to prevent it from freezing.
+    def update_progress(self):
+        self.prg_log.update()
+        self.root.after(1000, self.update_progress)
+
+    # Generates artificial skyglow map based on VIIRS reference and local parameters.
+    def generate_map(self):
+        # Acquires input arguments.
+        lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in = 0, 0, 0, 0, '', ''
+        if self.krn_var.get():
+            krn_file_in = self.krn_ent_var.get()
+        else:
+            lat_in = float(self.lat_entry.get())
+            ubr_in = float(self.ubr_entry.get())
+            zen_in = float(self.zen_entry.get())
+            azi_in = float(self.azi_entry.get())
+        file_in = self.file_log_var.get()
+
+        self.progress()
+
+        # Create new threads to run light propagation model simultaneously.
+        p_thread = threading.Thread(target=self.update_progress())
+        t_thread = threading.Thread(target=Itest.main,
+                                    args=(lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in))
+        t_thread.setDaemon(True)
+        p_thread.start()
         t_thread.start()
-        prg_bar.start()
 
 
 # Redirects formatted lines from the log file to a widget.

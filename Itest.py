@@ -74,19 +74,19 @@ def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein, krn_filein):
     np_dft_prop_im = fft.fft2(padded_prop)
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
-    compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
-    compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False)
+    #compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
+    #compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False)
 
     np_dft_viirs_im = fft.fft2(imagearr)
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
-    compare_arr(imagearr, np_magnitude_spectrum_viirs,'VIIRS Image', 'Fast Fourier Transformed VIIRS', 462.7)
+    #compare_arr(imagearr, np_magnitude_spectrum_viirs,'VIIRS Image', 'Fast Fourier Transformed VIIRS', 462.7)
 
     kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
     FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
-    compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
+    #compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
 
     # Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
     # apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
@@ -99,6 +99,7 @@ def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein, krn_filein):
     ###############################################################################
     FFTpath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'convolved'+'.tif'
     array_to_geotiff(FFT_product_inverse, FFTpath, filein)
+    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
 
 
 # Function that creates 2d propagation function
@@ -470,7 +471,7 @@ def array_to_geotiff(array, outfilename, referenceVIIRS):
     # Write projection information
     outdata.SetProjection(proj)
 
-
+"""
 def compare_arr(arr1, arr2, title1, title2, pixsize=462.7, norm1=True, norm2=True, compareflag=True):
     if compareflag is False:
         return
@@ -490,6 +491,7 @@ def compare_arr(arr1, arr2, title1, title2, pixsize=462.7, norm1=True, norm2=Tru
         plt.subplot(122),plt.imshow(arr2, cmap='gray')
         plt.title(title2), plt.xticks([]), plt.yticks([])
     plt.show()
+"""
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
