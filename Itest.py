@@ -33,6 +33,7 @@ def main(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
         # top lat= 46.755666
         propkernel, totaltime = fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg)
         logger.debug('propagation array: %s', propkernel)
+        kerneltiffpath = 'kernel_' + str(regionlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
         logger.info("time for prop function ubreak 10: %s", totaltime)
 
