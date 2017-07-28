@@ -267,9 +267,10 @@ class SkyglowEstimationToolbox:
         # Creates Scrollbar, Progressbar, and Label for checking progress..
         prg_scroll = Scrollbar(prg_frame)
         prg_scroll.pack(fill=Y, side="right")
-        prg_bar = ttk.Progressbar(prg_frame, orient=HORIZONTAL, length=750, mode='indeterminate')
-        prg_bar.pack()
-        prg_bar.start()
+        self.prg_bar = ttk.Progressbar(prg_frame, orient=HORIZONTAL, length=750,
+                                  mode='indeterminate')
+        self.prg_bar.pack()
+        self.prg_bar.start()
         prg_lbl_txt = StringVar()
         prg_lbl = Label(prg_frame, textvariable=prg_lbl_txt)
         prg_lbl.pack()
@@ -280,8 +281,9 @@ class SkyglowEstimationToolbox:
         self.prg_log.insert("end", "*****Progress Log*****\n=======================\n")
         self.prg_log.tag_add("abt", "1.0", "3.0")
         self.prg_log.tag_config("abt", font='Courier 12 bold', justify=CENTER)
-        self.txt_redir = TextRedirector(self.prg_log)
+        self.txt_redir = LogRedirector(self.prg_log)
         logger.addHandler(self.txt_redir)
+        sys.stderr = StderrRedirector(self.prg_log)
         prg_lbl_txt.set("Start time: " + str(time.asctime()))
 
     # Updates progress window to prevent it from freezing.
@@ -314,7 +316,7 @@ class SkyglowEstimationToolbox:
 
 
 # Redirects formatted lines from the log file to a widget.
-class TextRedirector(logging.Handler):
+class LogRedirector(logging.Handler):
     def __init__(self, widget):
         logging.Handler.__init__(self)
         self.widget = widget
@@ -324,6 +326,15 @@ class TextRedirector(logging.Handler):
         self.widget.insert("end", self.format(record) + '\n')
         self.widget.see("end")
         self.widget.config(state='disabled')
+
+
+class StderrRedirector(object):
+    def __init__(self, widget):
+        self.widget = widget
+
+    def write(self, msg):
+        self.widget.insert("end", msg)
+        self.widget.see("end")
 
 
 def main():

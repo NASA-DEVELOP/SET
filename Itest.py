@@ -187,7 +187,7 @@ def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
         for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr)
+            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am_arg)
         end = time.time()
         time_sec = end-start
         PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
