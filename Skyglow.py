@@ -3,6 +3,15 @@ Name: Skyglow Estimation Toolbox
 Authors: Ryan Avery, Dr. Kenton Ross, Stanley Yu
 Description: Python toolbox that generates artificial skyglow maps using data from NASA and NOAA's
              Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor.
+References:
+(1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A.
+	  Rybnikov and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness.
+	  Sci. Adv. 2.
+(2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial night sky
+	  brightness mapped from DMSP satellite Operational Linescan System measurements. Mon.
+	  Not. R. Astron. Soc. 318.
+(3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc.
+	  Pac. 101.
 """
 from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
     Text, Menubutton, Menu, Checkbutton, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, \
@@ -32,7 +41,7 @@ class SkyglowEstimationToolbox:
         self.krn_var = IntVar()
         self.img, self.cdiag = None, None
         self.lat_lbl, self.lat_entry = None, None
-        self.ubr_lbl, self.ubr_entry = None, None
+        self.k_lbl, self.k_entry = None, None
         self.zen_lbl, self.zen_entry = None, None
         self. azi_lbl, self.azi_entry = None, None
         self. krn_lvl, self.krn_entry, self.krn_btn = None, None, None
@@ -82,7 +91,7 @@ class SkyglowEstimationToolbox:
     def main_screen(self):
         # VIIRS Image Reference File
         file_lbl = Label(self.input_frame, text="Image File:", width=15, anchor=E)
-        file_log = Entry(self.input_frame, width=110, bd=2, relief="sunken",
+        file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
                          textvariable=self.file_log_var)
         browse_btn = Button(self.input_frame, text="Browse", command=self.import_viirs)
         file_lbl.grid(column=0, row=0)
@@ -100,33 +109,33 @@ class SkyglowEstimationToolbox:
         self.lat_lbl = Label(self.input_frame, text="Latitude (deg):", width=15, anchor=E)
         self.lat_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
 
-        # Distance of Increasing Integration Increment (km), ubr, REF 2, Fig. 6, p.648
-        self.ubr_lbl = Label(self.input_frame, text="Distance at which Integration Speed Increases"
-                                                     " (km):", width=39, anchor=E)
-        self.ubr_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
+        # Atmospheric Clarity Parameter, REF 2, Eq. 12, p. 645
+        self.k_lbl = Label(self.input_frame, text="Atmospheric Clarity Parameter:", 
+        				   width=25, anchor=E)
+        self.k_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
 
         # Zenith angle (deg), z, REF 2, Fig. 6, p.648
         self.zen_lbl = Label(self.input_frame, text="Zenith Angle (deg):", width=15, anchor=E)
         self.zen_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
 
         # Azimuth angle (deg)
-        self.azi_lbl = Label(self.input_frame, text="Azimuth Angle (deg):", width=39, anchor=E)
+        self.azi_lbl = Label(self.input_frame, text="Azimuth Angle (deg):", width=25, anchor=E)
         self.azi_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
 
         self.krn_lbl = Label(self.input_frame, text="Kernel File:", width=15, anchor=E)
-        self.krn_ent = Entry(self.input_frame, width=110, bd=2, relief="sunken",
+        self.krn_ent = Entry(self.input_frame, width=93, bd=2, relief="sunken",
                              textvariable=self.krn_ent_var)
         self.krn_btn = Button(self.input_frame, text="Browse", command=self.import_krn)
 
         # Generate Artificial Skyglow Map Button
         self.map_btn = Button(self.input_frame, text="Generate Artificial Skyglow Map", 
-                                 width=93, command=self.generate_map)
+                                 width=79, command=self.generate_map)
 
         # Places widgets.
         self.lat_lbl.grid(column=0, row=2)
         self.lat_entry.grid(column=1, row=2)
-        self.ubr_lbl.grid(column=2, row=2)
-        self.ubr_entry.grid(column=3, row=2)
+        self.k_lbl.grid(column=2, row=2)
+        self.k_entry.grid(column=3, row=2)
         self.zen_lbl.grid(column=0, row=3)
         self.zen_entry.grid(column=1, row=3)
         self.azi_lbl.grid(column=2, row=3)
@@ -168,8 +177,8 @@ class SkyglowEstimationToolbox:
         if self.krn_var.get():
             self.lat_lbl.grid_remove()
             self.lat_entry.grid_remove()
-            self.ubr_lbl.grid_remove()
-            self.ubr_entry.grid_remove()
+            self.k_lbl.grid_remove()
+            self.k_entry.grid_remove()
             self.zen_lbl.grid_remove()
             self.zen_entry.grid_remove()
             self.azi_lbl.grid_remove()
@@ -185,8 +194,8 @@ class SkyglowEstimationToolbox:
             self.krn_btn.grid_remove()
             self.lat_lbl.grid(column=0, row=2)
             self.lat_entry.grid(column=1, row=2)
-            self.ubr_lbl.grid(column=2, row=2)
-            self.ubr_entry.grid(column=3, row=2)
+            self.k_lbl.grid(column=2, row=2)
+            self.k_entry.grid(column=3, row=2)
             self.zen_lbl.grid(column=0, row=3)
             self.zen_entry.grid(column=1, row=3)
             self.azi_lbl.grid(column=2, row=3)
@@ -283,12 +292,12 @@ class SkyglowEstimationToolbox:
     # Generates artificial skyglow map based on VIIRS reference and local parameters.
     def generate_map(self):
         # Acquires input arguments.
-        lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in = 0, 0, 0, 0, '', ''
+        lat_in, k_in, zen_in, azi_in, file_in, krn_file_in = 0, 0, 0, 0, '', ''
         if self.krn_var.get():
             krn_file_in = self.krn_ent_var.get()
         else:
             lat_in = float(self.lat_entry.get())
-            ubr_in = float(self.ubr_entry.get())
+            k_in = float(self.k_entry.get())
             zen_in = float(self.zen_entry.get())
             azi_in = float(self.azi_entry.get())
         file_in = self.file_log_var.get()
@@ -298,7 +307,7 @@ class SkyglowEstimationToolbox:
         # Create new threads to run light propagation model simultaneously.
         p_thread = threading.Thread(target=self.update_progress())
         t_thread = threading.Thread(target=Itest.main,
-                                    args=(lat_in, ubr_in, zen_in, azi_in, file_in, krn_file_in))
+                                    args=(lat_in, k_in, zen_in, azi_in, file_in, krn_file_in))
         t_thread.setDaemon(True)
         p_thread.start()
         t_thread.start()

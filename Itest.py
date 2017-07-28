@@ -23,13 +23,15 @@ import Skyglow
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
-def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein, krn_filein):
+ubr_arg = 10.0
+
+def main(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
     kerneltiffpath = krn_filein
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
         # top lat= 46.755666
-        propkernel, totaltime = fsum_2d(regionlat_arg, ubr_arg, zen_arg, azimuth_arg)
+        propkernel, totaltime = fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg)
         logger.debug('propagation array: %s', propkernel)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
         logger.info("time for prop function ubreak 10: %s", totaltime)
@@ -103,7 +105,7 @@ def main(regionlat_arg, ubr_arg, zen_arg, azimuth_arg, filein, krn_filein):
 
 
 # Function that creates 2d propagation function
-def fsum_2d(regionlat_arg, ubr_arg, zen_arg, azimuth_arg):
+def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
     # Input Variables
     logger.info('**INPUTS**')
     # arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
@@ -218,7 +220,7 @@ def fsum_2d(regionlat_arg, ubr_arg, zen_arg, azimuth_arg):
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
         for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(abeta, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr)
+            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am_arg)
         end = time.time()
         time_sec = end-start
         logger.debug('Surrounding Indices PropSumArray: %s', PropSumArray[522:525, 470])
@@ -276,7 +278,7 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad):
 
 
 # Function that takes elements of the arrays of D_OC, Chi, etc. as arguments.
-def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2, lhr_viirs = 1.5):
+def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg, del_u_farg = .2, lhr_viirs = 1.5):
     if isnan(l_OC):
         return nan
 

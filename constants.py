@@ -19,9 +19,11 @@ INSTR = "Welcome to the Skyglow Estimation Toolbox (SET)!\n" \
         "create a new kernel. If kernel is already created, input the TIFF file.\n" \
         "3. Click the \"Generate Artificial Skyglow Map\" button. Select destination " \
         "directory.\n\n" \
-        "Zenith Angle: z (deg)\n" \
-        "Azimuth Angle: beta (deg)\n" \
-        "Distance at which Integration Speed Increases: u0 (km)\n\n"
+        "Zenith Angle (z): The angle measured from the vertical to the point of interest " \
+        "in the sky.\n" \
+        "Azimuth Angle (beta): A horizontal angle measured clockwise from a north base line.\n" \
+        "Atmospheric Clarity Parameter (K): Measures the relative importance of aerosols" \
+        " and molecules for scattering light in the V band.\n\n"
         
 CDIAG = "REF: Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial " \
         "night sky brightness mapped from DMSP satellite Operational Linescan System " \
