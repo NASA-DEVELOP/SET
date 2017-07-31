@@ -2,8 +2,8 @@
 **Installation**
 ================
 
-.. image:: _static/wrench.jpeg
-   :scale: 20%
+.. image:: _static/adult_install.jpeg
+   :scale: 8%
    :align: right
 
 SET is still in its early stages of development and does not yet offer a double-click
@@ -15,18 +15,34 @@ descriptive as possible in our installation guide for our users. If you have any
 -----------
 
 1. Download `Python Anaconda 2.7 <https://www.continuum.io/downloads>`_
-2. Download `Git Bash <https://git-scm.com/downloads>`_
-3. Open a terminal, navigate to the directory you would like to contain the files for the Toolbox
-   ``git clone <insert link to SkyglowGithubhere>``
 
-4. Run (need to double check that this is right)
-    ``conda create env geospatial.yml``
+2. Download `Git <https://git-scm.com/downloads>`_
 
-5. Run
-    ``python Itest.py``
+3. Open Git Bash and clone the SET repository by typing::
+	
+	$ git clone <SET Repository Link> skyglow
+
+.. figure:: _static/install_git_clone.PNG
+   :figwidth: 750
+
+   *Example of cloning the repository from Bitbucket. SET's repository link can be found on its Github page, under the green "Clone or download" button. Your link will be unique to your account.*
+
+4. Install the geospatial environment, which contains all the necessary packages::
+
+	$ conda env create -f geospatial_env.yml
+
+5. Activate the environment (must be done every time you open Git Bash)::
+
+	$ source activate geospatial
+
+6. Run the program::
+
+	$ python Skyglow.py
 
 **Required Packages**
 ----------------------
+
+This list contains all the packages contained in the geospatial environment. See above for instructions on how to install geospatial.
 
 - bzip2=1.0.6=vc9_3
 - curl=7.52.1=vc9_0
