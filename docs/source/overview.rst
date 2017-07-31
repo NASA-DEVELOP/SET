@@ -50,3 +50,14 @@ Go ahead and try SET now! Follow the installation instructions and begin making 
 
 * Esri's ArcGIS -- raster manipulation, statistical interpretation, and map creation
 * Python -- development of light propagation model, user interface
+
+**Literature**
+--------------
+
+**Foundational Papers**
+
+Falchi et al,. 2016.
+
+**Other Methodology Papers**
+
+**Light Pollution Impact Studies**
