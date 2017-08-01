@@ -35,21 +35,17 @@ All the Toolbox's user and developer documentation can be found on this website.
    :maxdepth: 2
 
    overview
-   installation
-   tutorial
+   usr/installation
+   usr/tutorial
 
 .. toctree::
    :maxdepth: 2
 
-   dev/conventions
-   dev/enviroment
    dev/docs
    dev/site
-   doc/modules
 
 .. toctree::
    :maxdepth: 2
 
    trouble/faq
-   trouble/issuetracker
    trouble/contact

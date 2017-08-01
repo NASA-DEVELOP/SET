@@ -7,7 +7,7 @@ The following tutorial will help guide you on how to use the Skyglow Estimation 
 **Getting Started**
 -------------------
 
-Starting the program is a simple two-step process. Making sure that you are in the "skyglow" directory in Git Bash, all you have to do is activate the geospatial environment and then run the program::
+Starting the program is a simple two-step process. Making sure that you are in the "skyglow" directory in Git Bash, activate the geospatial environment and then run the program::
 
   $ source activate geospatial
   $ python Skyglow.py

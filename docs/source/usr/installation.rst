@@ -14,7 +14,7 @@ descriptive as possible in our installation guide for our users. If you have any
 **Windows**
 -----------
 
-1. Download `Python Anaconda 2.7 <https://www.continuum.io/downloads>`_
+1. Download `Anaconda - Python 2.7 version <https://www.continuum.io/downloads>`_
 
 .. warning::
 
@@ -31,17 +31,17 @@ descriptive as possible in our installation guide for our users. If you have any
 
    *Example of cloning the repository from Bitbucket. SET's repository link can be found on its Github page, under the green "Clone or download" button. Your link will be unique to your account.*
 
-4. Install the geospatial environment, which contains all the necessary packages::
+4. Switch into skyglow and install the geospatial environment, which contains all the necessary packages::
 
+	$ cd skyglow
 	$ conda env create -f geospatial_env.yml
 
 5. Activate the environment (must be done every time you open Git Bash)::
 
 	$ source activate geospatial
 
-6. Switch into the skyglow directory and run the program::
+6. Run the program::
 
-	$ cd skyglow
 	$ python Skyglow.py
 
 **Required Packages**
