@@ -1,12 +1,16 @@
-===============
-Tutorial
-===============
+============
+**Tutorial**
+============
 
-This tutorial provides an overview on how to use the CALIPSO Visualization 
-Tool program.
+The following tutorial will help guide you on how to use the Skyglow Estimation Toolbox. SET's interface is designed to be as easy and simple to use as possible. Don't hesitate to contact us about an issue or suggestion you might have!
 
-Getting the Data
-----------------
+**Getting Started**
+-------------------
+
+Starting the program is a simple two-step process. Making sure that you are in the "skyglow" directory in Git Bash, all you have to do is activate the geospatial environment and then run the program::
+
+  $ source activate geospatial
+  $ python Skyglow.py
 
 Data collected by the Suomi NPP VIIRS instrument is free to the public, all it takes is going through a couple
 of steps to download the data. **NOAA NCEI's Earth Observation Group** is the primary distributor for the monthly composites of VIIRS Day/Night band data, you can find their webpage `here`__ and download data from `here`__
