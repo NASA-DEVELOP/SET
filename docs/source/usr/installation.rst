@@ -2,14 +2,14 @@
 **Installation**
 ================
 
-.. image:: _static/adult_install.jpeg
+.. image:: ../_static/adult_install.jpeg
    :scale: 7%
    :align: right
 
 SET is still in its early stages of development and does not yet offer a double-click
 installer. As a result, running the program requires you to setup the development environment,
 which can be tricky for those not familiar with programming in the command line. We've tried to be as
-descriptive as possible in our installation guide for our users. If you have any questions or trouble installing, feel free to ask for help from the :doc:`support page <trouble/contact>` and describe your issue to us.
+descriptive as possible in our installation guide for our users. This step-by-step guide should be enough to setup the program correctly, but if you have any questions or trouble installing, feel free to ask for help from the :doc:`support page <trouble/contact>` and describe your issue to us.
 
 **Windows**
 -----------
@@ -26,7 +26,7 @@ descriptive as possible in our installation guide for our users. If you have any
 	
 	$ git clone <SET Repository Link> skyglow
 
-.. figure:: _static/install_git_clone.PNG
+.. figure:: ../_static/install_git_clone.PNG
    :figwidth: 750
 
    *Example of cloning the repository from Bitbucket. SET's repository link can be found on its Github page, under the green "Clone or download" button. Your link will be unique to your account.*
@@ -47,7 +47,7 @@ descriptive as possible in our installation guide for our users. If you have any
 **Required Packages**
 ----------------------
 
-You must install the following packages for the program to run properly. For help with installation, check the FAQ or contact the developers on the :doc:`support page <trouble/contact>`.
+The following dependencies are needed for the program to run properly. For help with installation, check the FAQ or contact the developers on the :doc:`support page <trouble/contact>`.
 
 * `anaconda`_
 * `numpy`_ via ``conda``

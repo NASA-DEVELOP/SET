@@ -1,6 +1,6 @@
-=========================
-Building and Writing Docs
-=========================
+===================
+**Developer Guide**
+===================
 
 One of the most important aspects of writing *good* software is clarity and readability.
 We hope as other developers find themselves tasked with improving this tool, documentation

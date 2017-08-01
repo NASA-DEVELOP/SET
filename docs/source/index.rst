@@ -41,7 +41,7 @@ All the Toolbox's user and developer documentation can be found on this website.
 .. toctree::
    :maxdepth: 2
 
-   dev/docs
+   dev/dev
    dev/site
 
 .. toctree::

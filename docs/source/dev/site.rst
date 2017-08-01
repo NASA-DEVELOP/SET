@@ -1,5 +1,6 @@
-Updating The Site
-=================
+=====================
+**Updating the Site**
+=====================
 
 To build the docs, you'll need a couple of packages:
 
