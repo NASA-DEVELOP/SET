@@ -37,6 +37,7 @@ All the Toolbox's user and developer documentation can be found on this website.
    overview
    usr/installation
    usr/tutorial
+   method
 
 .. toctree::
    :maxdepth: 2
