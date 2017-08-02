@@ -31,16 +31,20 @@ descriptive as possible in our installation guide for our users. This step-by-st
 
    *Example of cloning the repository from Bitbucket. SET's repository link can be found on its Github page, under the green "Clone or download" button. Your link will be unique to your account.*
 
-4. Switch into skyglow and install the geospatial environment, which contains all the necessary packages::
+4. Install GDAL::
+
+    $ conda install GDAL
+
+5. Switch into skyglow and install the geospatial environment, which contains all the necessary packages::
 
 	$ cd skyglow
 	$ conda env create -f geospatial_env.yml
 
-5. Activate the environment (must be done every time you open Git Bash)::
+6. Activate the environment (must be done every time you open Git Bash)::
 
 	$ source activate geospatial
 
-6. Run the program::
+7. Run the program::
 
 	$ python Skyglow.py
 
