@@ -22,7 +22,7 @@ warnings.filterwarnings("error")
 logger = logging.getLogger()
 
 regionlat_arg = 40.8797
-ubr_arg = 10.0
+ubr_arg = 30.0
 zen_arg = 0.0
 azimuth_arg = 0.0
 filein = "20140901_20140930_75N180W_C.tif"

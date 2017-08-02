@@ -27,10 +27,11 @@
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="_static/satellite.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Installation" href="installation.html" />
-    <link rel="prev" title="Welcome to Skyglow’s documentation!" href="index.html" />
+    <link rel="prev" title="Skyglow Estimation Toolbox" href="index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -65,14 +66,11 @@
      href="index.html">Index <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">User Documentation</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Program Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gettingdata.html">Getting the Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>Program Overview</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer Documentation</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="dev/conventions.html">Coding Conventions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dev/enviroment.html">Development Enviroment</a></li>
@@ -80,11 +78,10 @@
 <li class="toctree-l1"><a class="reference internal" href="dev/site.html">Updating The Site</a></li>
 <li class="toctree-l1"><a class="reference internal" href="doc/modules.html">Code Documentation</a></li>
 </ul>
-<p class="caption"><span class="caption-text">Support</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="trouble/faq.html">Troubleshoot</a></li>
 <li class="toctree-l1"><a class="reference internal" href="trouble/issuetracker.html">Submit Bugs or Issues</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html"><strong>Contact</strong></a></li>
 </ul>
 </ul>
 </li>
@@ -98,9 +95,10 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">Program Overview</a><ul>
-<li><a class="reference internal" href="#features">Features</a></li>
-<li><a class="reference internal" href="#additional-information">Additional Information</a></li>
+<li><a class="reference internal" href="#"><strong>Program Overview</strong></a><ul>
+<li><a class="reference internal" href="#features"><strong>Features</strong></a></li>
+<li><a class="reference internal" href="#research-parameters"><strong>Research Parameters</strong></a></li>
+<li><a class="reference internal" href="#literature"><strong>Literature</strong></a></li>
 </ul>
 </li>
 </ul>
@@ -112,7 +110,7 @@
               
                 
   <li>
-    <a href="index.html" title="Previous Chapter: Welcome to Skyglow’s documentation!"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Welcome to Sk...</span>
+    <a href="index.html" title="Previous Chapter: Skyglow Estimation Toolbox"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Skyglow Estim...</span>
     </a>
   </li>
   <li>
@@ -151,9 +149,10 @@
     <div class="col-md-12 content">
       
   <div class="section" id="program-overview">
-<h1>Program Overview<a class="headerlink" href="#program-overview" title="Permalink to this headline">¶</a></h1>
-<p>The Wyoming Cross-Cutting team at NASA DEVELOP aims to create a tool with the ability to accurately model sky glow from artificial sources using publicly available Suomi NPP VIIRS Day/Night Band imagery. We hope that this open source tool informs future research and decision making to mitigate light pollution and to inform the public of the phenomenon.</p>
-<p class="rubric">Key reasons for the Sky Glow Estiamtion Toolbox:</p>
+<h1><strong>Program Overview</strong><a class="headerlink" href="#program-overview" title="Permalink to this headline">¶</a></h1>
+<p>The Wyoming Cross-Cutting team at NASA DEVELOP aims to create a tool with the ability to accurately model skyglow from artificial sources using publicly available Suomi NPP VIIRS Day/Night Band imagery. We hope that this open source tool informs future research and decision-making to mitigate light pollution and to inform the public of the phenomenon.</p>
+<a class="reference internal image-reference" href="_images/develop_logo.png"><img alt="_images/develop_logo.png" class="align-right" src="_images/develop_logo.png" style="width: 331.92px; height: 335.88px;" /></a>
+<p><strong>Key reasons for the Skyglow Estimation Toolbox:</strong></p>
 <ul class="simple">
 <li>The NPS currently monitors the night sky using in situ surveys with Unihedron Sky Quality Meters. While these cameras take detailed images of the hemisphere, it is costly to travel to these sites and set up the equipment. These observations also only contain information from a single vantage point and at a single point in time. The park service desires a tool that allows them to continually monitor the quality of the night sky at a regional scale.</li>
 <li>Light pollution disrupts circadian rhythms and the production of the hormone melatonin in humans and has been linked to various health disorders such as obesity, tumor growth, depression, and insomnia.</li>
@@ -161,42 +160,46 @@
 <li>With nearly 200,000,000 outdoor light fixtures in the United States, an estimated $2 billion in energy costs is wasted every year due to poorly designed fixtures.</li>
 </ul>
 <div class="section" id="features">
-<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt>
-<code class="descname">left: VIIRS Day/Night Band Image, right: shapes form around selected areas of the plot</code></dt>
-<dd><a class="reference internal image-reference" href="_images/program.png"><img alt="_images/program.png" src="_images/program.png" style="width: 331.98px; height: 156.86px;" /></a>
-<a class="reference internal image-reference" href="_images/programShapesActive.png"><img alt="_images/programShapesActive.png" src="_images/programShapesActive.png" style="width: 351.40000000000003px; height: 178.0px;" /></a>
-</dd></dl>
-
+<h2><strong>Features</strong><a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>SET currently offers several key features for measuring light pollution:</p>
+<ul class="simple">
+<li>Read a geoTIFF file from VIIRS Day/Night Band data as a baseline numpy array to calculate skyglow.</li>
+<li>Create a kernel based on various user-defined parameters: zenith angle, azimuth angle, and regional latitude. Save the kernel in the form of a geoTIFF file.</li>
+<li>Calculate sky brightness by convolving the kernel over the VIIRS data and applying numpy’s Fast Fourier Transform algorithm.</li>
+<li>Allow the user to import a previously created kernel to shorten the runtime to a matter of seconds rather than hours.</li>
+<li>Produce an artificial skyglow map in the form of a TIFF image that can support light pollution measurements and decisions.</li>
+</ul>
+<p>This website gives a detailed guideline of the SET program and how to use/edit it. With light pollution rapidly becoming an urgent issue for the community, scientists are increasingly relying on computers to apply methods of precisely measuring sky brightness. In this field, the biggest advantages SET provides is its simple interface, accurate results, and dynamic implementation.</p>
+<p>Go ahead and try SET now! Follow the installation instructions and begin making your own artificial skyglow maps to gauge light pollution wherever you choose. SET is designed to be as user-friendly and accessible to researchers and the public, so please contact the team to let us know how to make SET better!</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The Sky Glow Estimation Toolbox is currently in it’s early <a href="#id1"><span class="problematic" id="id2">*</span></a>beta*phase, and requires additional work. See the Github page for a list of Issues we are currently working on.</p>
+<p class="last">SET is currently in its early <em>beta</em> phase. The program will be continually updated until
+it is released to the public.</p>
 </div>
-<p>The Toolbox currently contains a number of great features:</p>
-<ul class="simple">
-<li>Calculates skyglow at zenith for a given region</li>
-<li>Saves kernel for a given look angle and region in the form of a GeoTiff</li>
-<li>Calculates skyglow for a given zenith and azimuth angle (this takes more than twice as long as zenith when first run to create the kernel)</li>
-</ul>
-<p>A geotiff file from VIIRS Day/Night Band data is read as a numpy array in order to apply the kernel that is created from user-supplied parameters. Users can create kernels for different zenith angles, azimuth angles, regional latitudes, and input VIIRS imagery.</p>
-<p>Once a kernel is created, the tool then applies the kernel to the VIIRS data using numpy’s Fast Fourier Tranform algorithm to compute the convolved image. Kernel’s are stored in their own directory and can be called to make the code run in a matter of seconds rather than hours.</p>
-<p>Additional features are still to come!</p>
 </div>
-<div class="section" id="additional-information">
-<h2>Additional Information<a class="headerlink" href="#additional-information" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="research-parameters">
+<h2><strong>Research Parameters</strong><a class="headerlink" href="#research-parameters" title="Permalink to this headline">¶</a></h2>
+<p><strong>Study Area:</strong></p>
 <ul class="simple">
-<li><dl class="first docutils">
-<dt><strong>Study Area:</strong></dt>
-<dd>Regional (National Park Scale), can be applied anywhere</dd>
-</dl>
-</li>
-<li><dl class="first docutils">
-<dt><strong>Earth Observations &amp; Parameters:</strong></dt>
-<dd>Suomi NPP VIIRS Day/Night Band</dd>
-</dl>
-</li>
+<li>Regional (National Park scale) with 300 km square buffer</li>
+<li>User-defined location</li>
 </ul>
+<p><strong>Earth Observations:</strong></p>
+<ul class="simple">
+<li>Suomi NPP Visible Infrared Imaging Radiometer Suite (VIIRS) Day/Night Band</li>
+</ul>
+<p><strong>Software Utilized:</strong></p>
+<ul class="simple">
+<li>Esri’s ArcGIS – raster manipulation, statistical interpretation, and map creation</li>
+<li>Python – development of light propagation model, user interface</li>
+</ul>
+</div>
+<div class="section" id="literature">
+<h2><strong>Literature</strong><a class="headerlink" href="#literature" title="Permalink to this headline">¶</a></h2>
+<p><strong>Foundational Papers</strong></p>
+<p>Falchi et al,. 2016.</p>
+<p><strong>Other Methodology Papers</strong></p>
+<p><strong>Light Pollution Impact Studies</strong></p>
 </div>
 </div>
 
@@ -205,6 +208,7 @@
       
   </div>
 </div>
+
 <footer class="footer">
   <div class="container">
     <p class="pull-right">
@@ -212,10 +216,13 @@
       
     </p>
     <p>
-        &copy; Copyright 2017, Ryan Avery, Kenton Ross, Veronica Warda, Stanley Yu, Steven Chao.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.<br/>
+        &copy; Copyright 2017, Ryan Avery, Stanley Yu, Kenton Ross, Veronica Warda, Steven Chao.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+Icons made by <a href="http://www.flaticon.com/authors/madebyoliver" title="Madebyoliver">Madebyoliver</a> from <a href="http://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>.<br/>
     </p>
   </div>
 </footer>
+
+
   </body>
 </html>
