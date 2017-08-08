@@ -22,31 +22,27 @@ descriptive as possible in our installation guide for our users. This step-by-st
 
 2. Download `Git <https://git-scm.com/downloads>`_
 
-3. Open Git Bash and clone the SET repository by typing::
+3. Open Anaconda Prompt and clone the SET repository by typing::
 	
-	$ git clone <SET Repository Link> skyglow
+	git clone <SET Repository Link> skyglow
 
 .. figure:: ../_static/install_git_clone.PNG
    :figwidth: 750
 
-   *Example of cloning the repository from Bitbucket. SET's repository link can be found on its Github page, under the green "Clone or download" button. Your link will be unique to your account.*
+   *Example of cloning the repository from Bitbucket, a we-based hsoting service for Git similar to Github. SET's repository link can be found on its Github page, under the green "Clone or download" button. Your link will be unique to your account.*
 
-4. Install GDAL::
+4. Switch into skyglow and install the geospatial environment, which contains all the necessary packages::
 
-    $ conda install GDAL
+	cd skyglow
+	conda env create -f geospatial_env.yml
 
-5. Switch into skyglow and install the geospatial environment, which contains all the necessary packages::
+5. Activate the environment (must be done every time you open the prompt)::
 
-	$ cd skyglow
-	$ conda env create -f geospatial_env.yml
+	activate geospatial
 
-6. Activate the environment (must be done every time you open Git Bash)::
+6. Run the program::
 
-	$ source activate geospatial
-
-7. Run the program::
-
-	$ python Skyglow.py
+	python Skyglow.py
 
 **Required Packages**
 ----------------------
