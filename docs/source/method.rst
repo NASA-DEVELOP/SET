@@ -2,12 +2,12 @@
 **Methodology**
 ===============
 
-This page gives insight into the way the computer model applies the physic and geometry of light propagation. Although not necessary to run the program, understanding the methodology offers benefits for anyone looking to improve SET or use it for academic purposes.
+This page gives insight into the way the computer model applies the physics and geometry of light propagation. Although not necessary to operate the program, understanding the methodology offers benefits for anyone looking to improve SET or use it for academic purposes.
 
 **Kernel Creation**
 -------------------
 
-All of SET's methods for applying its light propagation model are in the file ``Itest.py``, which executes the ``main`` function. In this function, SET first checks if a kernel is already created and, if no kernel is supplied, creates a kernel. A kernel is essentially a matrix with numerical coefficients representing the weight of light scattering from the source to the line of sight of the observer. Each pixel in the kernel thus contains a unitless value that comapres the amount of light emitted from the ground to the amount of light scattered.
+All of SET's methods for applying its light propagation model are in the file ``Itest.py``, which executes the ``main`` function. In this function, SET first checks if a kernel is already created and, if no kernel is supplied, creates a kernel. A kernel is essentially a matrix with numerical coefficients representing the weight of light scattering from the source to the line of sight of the observer. Each pixel in the kernel thus contains a unitless value that compares the amount of light emitted from the ground to the amount of light scattered.
 
 The kernel creation process is executed in ``main`` in lines 30-38::
 
