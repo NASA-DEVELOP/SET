@@ -3,10 +3,16 @@ Created: July 17, 2017
 Author: Stanley Yu
 Description: Module for all constants, links, and text.
 """
+from playsound import playsound
+
+
 SW = 1680
 SH = 1050
 
-ICO = './ico/satellite.ico'
+ICO = './static/satellite.ico'
+
+def ding():
+     playsound('./static/ting.mp3')
 
 INSTR = "Welcome to the Skyglow Estimation Toolbox (SET)!\n" \
         "======================================\n" \

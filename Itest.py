@@ -20,6 +20,7 @@ import logging
 import sys
 import warnings
 import Skyglow
+import constants
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
@@ -103,7 +104,8 @@ def main(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
     FFTpath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'convolved'+'.tif'
     array_to_geotiff(FFT_product_inverse, FFTpath, filein)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
-
+    constants.ding()
+    
 
 # Function that creates 2d propagation function
 def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
