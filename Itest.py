@@ -17,25 +17,26 @@ import matplotlib.colors as colors
 from matplotlib_scalebar.scalebar import ScaleBar
 from osgeo import gdal
 import logging
+import sys
 import warnings
+import Skyglow
+import constants
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
-regionlat_arg = 40.8797
-ubr_arg = 30.0
-zen_arg = 0.0
-azimuth_arg = 0.0
-filein = "20140901_20140930_75N180W_C.tif"
 
-def main():
-    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
+ubr_arg = 10.0
+logger.info(sys.version)
+def main(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
+    kerneltiffpath = krn_filein
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
         # top lat= 46.755666
-        propkernel, totaltime = fsum_2d()
+        propkernel, totaltime = fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg)
         logger.debug('propagation array: %s', propkernel)
-        array_to_geotiff(propkernel, kerneltiffpath)
+        kerneltiffpath = 'kernel_' + str(regionlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg)
+        array_to_geotiff(propkernel, kerneltiffpath, filein)
         logger.info("time for prop function ubreak 10: %s", totaltime)
 
     kerneldata = gdal.Open(kerneltiffpath)
@@ -78,19 +79,19 @@ def main():
     np_dft_prop_im = fft.fft2(padded_prop)
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
-    compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
-    compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False)
+    #compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
+    #compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False)
 
     np_dft_viirs_im = fft.fft2(imagearr)
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
-    compare_arr(imagearr, np_magnitude_spectrum_viirs,'VIIRS Image', 'Fast Fourier Transformed VIIRS', 462.7)
+    #compare_arr(imagearr, np_magnitude_spectrum_viirs,'VIIRS Image', 'Fast Fourier Transformed VIIRS', 462.7)
 
     kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
     FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
-    compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
+    #compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
 
     # Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
     # apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
@@ -102,20 +103,22 @@ def main():
     # plt.show()
     ###############################################################################
     FFTpath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'convolved'+'.tif'
-    array_to_geotiff(FFT_product_inverse, FFTpath)
-
+    array_to_geotiff(FFT_product_inverse, FFTpath, filein)
+    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
+    constants.ding()
+    
 
 # Function that creates 2d propagation function
-def fsum_2d():
+def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
     # Input Variables
     logger.info('**INPUTS**')
     # arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
     # bottom bottom_lat = 40.8797
     # top lat= 46.755666
     cent_lat_deg = regionlat_arg
-    cent_lat = cent_lat_deg*pi/180
+    cent_lat = cent_lat_deg*pi/180.0
     p_deg = .0041666667
-    p_rad = p_deg*pi/180
+    p_rad = p_deg*pi/180.0
 
     # z, Zenith angle site, REF 2, Fig. 6, p. 648
     zen = zen_arg
@@ -138,10 +141,10 @@ def fsum_2d():
 
     # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
     # using haversine formula
-    D_OC = 2*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2)**2 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2)**2))
+    D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2.0)**2.0 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
 
     # Assignment of NaNs or null values outside of 200 km
-    D_OC[D_OC > 201] = numpy.NaN
+    D_OC[D_OC > 201.0] = numpy.NaN
 
     # Check of D_OC shape after assigning NaNs outside of 200 km
     logger.info('kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0]))
@@ -156,13 +159,13 @@ def fsum_2d():
 
     # beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
     # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
-    betaarray = arcsin(sin(pi/2-source_lat)* sin(rltv_long)/ sin(Chi))
+    betaarray = arcsin(sin(pi/2.0-source_lat)*sin(rltv_long)/sin(Chi))
     abeta = betaarray - azimuth_arg
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
-    u0 = 2*R_T*sin(Chi/2)**2/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
+    u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
     # l_OC and D_OC are similar as expected
-    l_OC = sqrt(4*R_T**2*sin(Chi/2)**2) # km
+    l_OC = sqrt(4.0*R_T**2.0*sin(Chi/2.0)**2.0) # km
     # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
     q1 = R_T*(sin(Chi)*sin(zen)*cos(abeta) + cos(Chi)*cos(zen) - cos(zen)) # km
     # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
@@ -188,7 +191,7 @@ def fsum_2d():
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
         for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr)
+            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am_arg)
         end = time.time()
         time_sec = end-start
         PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
@@ -221,7 +224,7 @@ def fsum_2d():
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
         for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(abeta, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr)
+            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am_arg)
         end = time.time()
         time_sec = end-start
         logger.debug('Surrounding Indices PropSumArray: %s', PropSumArray[522:525, 470])
@@ -238,7 +241,7 @@ def gauss_earth_curvature_radius(center_lat):
     R_polar = 6356.7523142 # km (b)
 
     # Gaussian Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-    R_curve = ((R_equator**2)*R_polar)/((R_equator*cos(center_lat))**2 + (R_polar*sin(center_lat))**2)
+    R_curve = ((R_equator**2.0)*R_polar)/((R_equator*cos(center_lat))**2.0 + (R_polar*sin(center_lat))**2.0)
 
     # NOT USED PRESENTLY: Directional Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
     # R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
@@ -279,7 +282,7 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad):
 
 
 # Function that takes elements of the arrays of D_OC, Chi, etc. as arguments.
-def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg = 1.0, del_u_farg = .2, lhr_viirs = 1.5):
+def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg, del_u_farg = .2, lhr_viirs = 1.5):
     if isnan(l_OC):
         return nan
 
@@ -343,73 +346,69 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
         # s, Distance from source to scattering CQ, REF 2, Appendix A (A1), p. 656
         # equation is wrong in Ref 2 (Cinzano). Changed Chi to theta according to Ref 3, p. 308, Equation 7 (Garstang)
-        s_CQ = sqrt((u_OQ - l_OC)**2 + 4*u_OQ*l_OC*sin(theta/2)**2) # km
+        s_CQ = sqrt((u_OQ - l_OC)**2.0 + 4.0*u_OQ*l_OC*sin(theta/2.0)**2.0) # km
 
         # h, Height of scattering above Earth reference surface Q, REF 2, Appendix A (A1), p. 656
-        h_Q = R_T*(sqrt(1 + (u_OQ**2 + 2*u_OQ*R_T*cos(zen))/R_T**2) - 1) # km
+        h_Q = R_T*(sqrt(1.0 + (u_OQ**2.0 + 2.0*u_OQ*R_T*cos(zen))/R_T**2.0) - 1.0) # km
 
         # phi, Elevation angle of emission over line of sight from C to O (QCO), REF 2, Appendix A (A1), p. 656
-        phi = arccos((l_OC**2 + s_CQ**2 - u_OQ**2)/(2*l_OC*s_CQ)) # radians
-        phi_deg = phi*180/pi # degrees
+        phi = arccos((l_OC**2.0 + s_CQ**2.0 - u_OQ**2.0)/(2.0*l_OC*s_CQ)) # radians
+        phi_deg = phi*180.0/pi # degrees
 
         # q3, Intermediate quantity, REF 2, Appendix A (A1), p. 656
-        q3 = u_OQ*cos(zen)*cos(Chi) - 2*R_T*sin(Chi/2)**2 # km
-
+        q3 = u_OQ*cos(zen)*cos(Chi) - 2.0*R_T*sin(Chi/2.0)**2.0 # km
+        q3_t1 = u_OQ*cos(zen)*cos(Chi)
+        q3_t2 = 2.0*R_T*sin(Chi/2.0)**2.0
         # q2, Intermediate quantity (q2=q3 if zenith angle, z=0), REF 2, Appendix A (A1), p. 656
         q2 = u_OQ*sin(zen)*cos(beta)*sin(Chi) + q3 # km
 
         # Psi, emission angle from source, REF 2, Appendix A (A1), p. 656
         Psi = arccos(q2/s_CQ) # radians
-        Psi_deg = Psi*180/pi # degrees
-
+        Psi_deg = Psi*180.0/pi # degrees
+        pie = pi
+        pi_t = 180.0/pi
         # omega, scattering angle at Q, REF 2, Appendix A (A1), p. 656
         omega = theta + phi # radians
-        omega_deg = omega*180/pi # degrees
+        omega_deg = omega*180.0/pi # degrees
 
         # a, Scale height of aerosols, REF 2, p. 646
         a_sha = 0.657 + 0.059*K_am # km^-1
 
         # p4, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p4 = (a_sha**2*u_OQ**2*cos(zen)**2 + 2*a_sha*u_OQ*cos(zen) + 2)*exp(-a_sha*u_OQ*cos(zen)) - 2
+        p4 = (a_sha**2.0*u_OQ**2.0*cos(zen)**2.0 + 2.0*a_sha*u_OQ*cos(zen) + 2.0)*exp(-a_sha*u_OQ*cos(zen)) - 2.0
 
         # p3, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p3 = (c_isa**2*u_OQ**2*cos(zen)**2 + 2*c_isa*u_OQ*cos(zen) + 2)*exp(-c_isa*u_OQ*cos(zen)) - 2
+        p3 = (c_isa**2.0*u_OQ**2.0*cos(zen)**2.0 + 2.0*c_isa*u_OQ*cos(zen) + 2.0)*exp(-c_isa*u_OQ*cos(zen)) - 2.0
 
         # p2, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p2 = a_sha**-1*cos(zen*(1 - exp(-a_sha*u_OQ*cos(zen)) + ((16*p4*tan(zen)**2)/(9*pi*2*a_sha*R_T))))**-1
-
+        p2 = a_sha**-1.0*cos(zen*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
+        p2_t1 = 1 - exp(-a_sha*u_OQ*cos(zen))
+        p2_t2 = ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))
         # p1, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p1 = c_isa**-1*cos(zen*(1 - exp(-c_isa*u_OQ*cos(zen)) + ((16*p3*tan(zen)**2)/(9*pi*2*c_isa*R_T))))**-1
+        p1 = c_isa**-1.0*cos(zen*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
 
         # ksi1, Extinction of light along u-path from scatter at Q to observation at O, REF 2, Appendix A (A2), p. 656
-        try:
-            ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2))
-        except RuntimeWarning:
-            logger.debug("ksi1: %s", ksi1)
-            logger.debug("p1: %s", p1)
-            logger.debug("p2: %s", p2)
-            logger.debug("N_m0: %s", N_m0)
-            logger.debug("sig_m: %s", sig_m)
+        ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2))
         # f4, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f4 = (a_sha**2*s_CQ**2*cos(Psi)**2 + 2*a_sha*s_CQ*cos(Psi) + 2)*exp(-a_sha*s_CQ*cos(Psi)) - 2
+        f4 = (a_sha**2.0*s_CQ**2.0*cos(Psi)**2.0 + 2.0*a_sha*s_CQ*cos(Psi) + 2.0)*exp(-a_sha*s_CQ*cos(Psi)) - 2.0
 
         # f3, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f3 = (c_isa**2*s_CQ**2*cos(Psi)**2 + 2*c_isa*s_CQ*cos(Psi) + 2)*exp(-c_isa*s_CQ*cos(Psi)) - 2
+        f3 = (c_isa**2.0*s_CQ**2.0*cos(Psi)**2.0 + 2.0*c_isa*s_CQ*cos(Psi) + 2.0)*exp(-c_isa*s_CQ*cos(Psi)) - 2.0
 
         # f2, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f2 = a_sha**-1*cos(Psi*(1 - exp(-a_sha*s_CQ*cos(Psi)) + ((16*f4*tan(Psi)**2)/(9*pi*2*a_sha*R_T))))**-1
+        f2 = a_sha**-1.0*cos(Psi*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
 
         # f1, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f1 = c_isa**-1*cos(Psi*(1 - exp(-c_isa*s_CQ*cos(Psi)) + ((16*f3*tan(Psi)**2)/(9*pi*2*c_isa*R_T))))**-1
+        f1 = c_isa**-1.0*cos(Psi*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
 
         # ksi2, Extinction of light along s-path from emission at C to scatter at Q, REF 2, Appendix A (A2), p. 656
         ksi2 = exp(-N_m0*sig_m*(f1 + 11.778*K_am*f2))
 
         # I(Psi), Normalized emission function, MODIFIED FROM REF 1, p. 13 (leaving out natural sky brightness)
         # There is no indication in References of a shape parameter for the W_c term of the equation
-        I_ne = 1/(2*pi)*(W_a*2*a1_sp*cos(Psi) + W_b*0.554*a2_sp*Psi**4 + W_c*a3_sp*sin(3*Psi))*(1+lhr_viirs*d_ll)
+        I_ne = 1.0/(2.0*pi)*(W_a*2.0*a1_sp*cos(Psi) + W_b*0.554*a2_sp*Psi**4.0 + W_c*a3_sp*sin(3.0*Psi))*(1.0+lhr_viirs*d_ll)
         # i(Psi,s), Illuminance per unit flux, REF 2, Eq. 6, p. 644
-        i_ps = I_ne*ksi2/s_CQ**2
+        i_ps = I_ne*ksi2/s_CQ**2.0
 
         # N_m(h), Number density of gaseous component of atmosphere as function of altitude, h, REF 2, Eq. 10, p. 645
         N_m = N_m0*exp(-c_isa*h_Q)
@@ -418,21 +417,21 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         Na_x_siga = K_am*N_m*sig_m*11.11
 
         # f_m, Angular scattering function for molecular Rayleigh scattering, REF 2, Eq. 13, p. 646
-        f_m = 3*(1 + cos(omega)**2)/(16*pi)
+        f_m = 3.0*(1.0 + cos(omega)**2.0)/(16.0*pi)
 
         # f_a, Angular scattering function for aerosol Mie scattering, REF 2, Eq. 14, p. 646
         if 0.0 <= omega_deg <= 10.0:
-            f_a = 7.5*exp(-0.1249*omega_deg**2/(1 + 0.04996*omega_deg**2))
+            f_a = 7.5*exp(-0.1249*omega_deg**2.0/(1.0 + 0.04996*omega_deg**2.0))
         elif 10.0 < omega_deg <= 124.0:
-            f_a = 1.88*exp(-0.07226*omega_deg + 0.0002406*omega_deg**2)
+            f_a = 1.88*exp(-0.07226*omega_deg + 0.0002406*omega_deg**2.0)
         elif 124.0 < omega_deg <= 180.0:
-            f_a = 0.025 + 0.015*sin((2.25*omega_deg - 369.0)*(pi/180))
+            f_a = 0.025 + 0.015*sin((2.25*omega_deg - 369.0)*(pi/180.0))
 
         # S_d, Luminous flux per unit solid angle per unit upward flux (directly from source), REF 2, Eq. 5, p. 644
         S_d = (N_m*sig_m*f_m + Na_x_siga*f_a)*i_ps
 
         # D_S, Double scattering correction factor, REF 2, Eq. 20, p. 647
-        D_S = 1 + N_m0*sig_m*(11.11*K_am*f2 + (f1/3))
+        D_S = 1 + N_m0*sig_m*(11.11*K_am*f2 + (f1/3.0))
 
         # S_u, Total illumance as a function of u, REF 2, Eq. 8, p. 645
         S_u = S_d*D_S
@@ -446,7 +445,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     return total_sum
 
 
-def array_to_geotiff(array, outfilename, referenceVIIRS="20140901_20140930_75N180W_C.tif"):
+def array_to_geotiff(array, outfilename, referenceVIIRS):
     imdata = gdal.Open(referenceVIIRS)
 
     # Save out to a GeoTiff
@@ -474,7 +473,7 @@ def array_to_geotiff(array, outfilename, referenceVIIRS="20140901_20140930_75N18
     # Write projection information
     outdata.SetProjection(proj)
 
-
+"""
 def compare_arr(arr1, arr2, title1, title2, pixsize=462.7, norm1=True, norm2=True, compareflag=True):
     if compareflag is False:
         return
@@ -494,7 +493,7 @@ def compare_arr(arr1, arr2, title1, title2, pixsize=462.7, norm1=True, norm2=Tru
         plt.subplot(122),plt.imshow(arr2, cmap='gray')
         plt.title(title2), plt.xticks([]), plt.yticks([])
     plt.show()
-
+"""
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
