@@ -225,7 +225,7 @@ class SkyglowEstimationToolbox:
         # Adds instruction text from constants and adds image of Cinzano's diagram.
         instr = Text(instr_frame, width=65, height=40, padx=10, pady=5, bd=0, wrap="word")
         instr.insert("end", constants.INSTR)
-        cdiagram_file = Image.open("cinzano_diagram.PNG")
+        cdiagram_file = Image.open("./static/cinzano_diagram.PNG")
         cdiagram_file = cdiagram_file.resize((500, 450), Image.ANTIALIAS)
         self.cdiag = ImageTk.PhotoImage(cdiagram_file)
         instr.image_create("end", image=self.cdiag)
