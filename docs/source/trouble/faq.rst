@@ -1,6 +1,6 @@
-============
-Troubleshoot
-============
+=======
+**FAQ**
+=======
 ::
 
 > how do I actually run this project?
