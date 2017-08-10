@@ -56,8 +56,22 @@ Go ahead and try SET now! Follow the installation instructions and begin making 
 
 **Foundational Papers**
 
-Falchi et al,. 2016.
+Cinzano, P., Falchi, F., & Elvidge, C. D. (2001). The first world atlas of the artificial night sky brightness. *Monthly Notices of the Royal Astronomical Society*, 328(3), 689–707. Retrieved from http://mnras.oxfordjournals.org/content/328/3/689.short
+
+Falchi, F., Cinzano, P., Duriscoe, D., Kyba, C. C. M., Elvidge, C. D., Baugh, K., Furgoni, R. (2016). The new world atlas of artificial night sky brightness. *Science Advances*, 2(6), e1600377. doi:10.1126/sciadv.1600377 
+
+Garstang, R. H. (1989). Night sky brightness at observatories and sites. *Publications of the Astronomical Society of the Pacific*, 101(637), 306. Retrieved from http://iopscience.iop.org/article/10.1086/132436/meta
+
+Jing, X., Shao, X., Cao, C., Fu, X., & Yan, L. (2015). Comparison between the Suomi-NPP Day-Night Band and DMSP-OLS for Correlating Socio-Economic Variables at the Provincial Level in China. *Remote Sensing*, 8(1), 17. https://doi.org/10.3390/rs8010017
 
 **Other Methodology Papers**
+
+Cinzano, P., Falchi, F., Elvidge, C. D., & Baugh, K. E. (2000). The artificial night sky brightness mapped from DMSP satellite Operational Linescan System measurements. *Monthly Notices of the Royal Astronomical Society*, 318(3), 641–657. Retrieved from http://mnras.oxfordjournals.org/content/318/3/641.short
+
+Cinzano, P., Falchi, F., & Elvidge, C. D. (2001). Naked-eye star visibility and limiting magnitude mapped from DMSP-OLS satellite data. *Monthly Notices of the Royal Astronomical Society*, 323(1), 34–46. Retrieved from http://mnras.oxfordjournals.org/content/323/1/34.short
+
+Duriscoe, D. M. (2013). Measuring anthropogenic sky glow using a natural sky brightness model. *Publications of the Astronomical Society of the Pacific*, 125(933), 1370. Retrieved from http://iopscience.iop.org/article/10.1086/673888/meta
+
+Cinzano, P., & Falchi, F. (2012). The propagation of light pollution in the atmosphere. *Monthly Notices of the Royal Astronomical Society*, 427(4), 3337–3357. https://doi.org/10.1111/j.1365-2966.2012.21884.x
 
 **Light Pollution Impact Studies**
