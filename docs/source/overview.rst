@@ -75,3 +75,5 @@ Duriscoe, D. M. (2013). Measuring anthropogenic sky glow using a natural sky bri
 Cinzano, P., & Falchi, F. (2012). The propagation of light pollution in the atmosphere. *Monthly Notices of the Royal Astronomical Society*, 427(4), 3337–3357. https://doi.org/10.1111/j.1365-2966.2012.21884.x
 
 **Light Pollution Impact Studies**
+
+Steven is working on this.
