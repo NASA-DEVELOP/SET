@@ -2,7 +2,7 @@
 **Developer Guide**
 ===================
 
-SET is currently in its early stages of development, so it needs as many people as possible to help improve it. This developer guide is designed to lead programmers through the basics of SET and allow them to contribute to its functionality.
+SET is currently in its early stages of development, so it needs as many people as possible to help improve it. This developer guide is designed to lead programmers through the basics of SET and allow them to contribute to its functionality. Step through each of the tutorials in order to walk through how SET works.
 
 Please reach out to past developers for insight on the program's design and challenges. See the :doc:`contact page </trouble/contact>` for more information on how to get in touch!
 
@@ -17,12 +17,10 @@ This guide assumes that the developer is familiar with Python. There are numerou
 .. toctree::
    :maxdepth: 2
 
-   environment
    PropagationModel
    CreatingKernel
    ApplyingKernel
    UserInterface
-
 
 .. __: https://www.codecademy.com/
 .. __: https://www.coursera.org/
