@@ -356,15 +356,12 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
         # q3, Intermediate quantity, REF 2, Appendix A (A1), p. 656
         q3 = u_OQ*cos(zen)*cos(Chi) - 2.0*R_T*sin(Chi/2.0)**2.0 # km
-        q3_t1 = u_OQ*cos(zen)*cos(Chi)
-        q3_t2 = 2.0*R_T*sin(Chi/2.0)**2.0
         # q2, Intermediate quantity (q2=q3 if zenith angle, z=0), REF 2, Appendix A (A1), p. 656
         q2 = u_OQ*sin(zen)*cos(beta)*sin(Chi) + q3 # km
 
         # Psi, emission angle from source, REF 2, Appendix A (A1), p. 656
         Psi = arccos(q2/s_CQ) # radians
         Psi_deg = Psi*180.0/pi # degrees
-        pie = pi
         pi_t = 180.0/pi
         # omega, scattering angle at Q, REF 2, Appendix A (A1), p. 656
         omega = theta + phi # radians
@@ -380,11 +377,12 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         p3 = (c_isa**2.0*u_OQ**2.0*cos(zen)**2.0 + 2.0*c_isa*u_OQ*cos(zen) + 2.0)*exp(-c_isa*u_OQ*cos(zen)) - 2.0
 
         # p2, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p2 = a_sha**-1.0*cos(zen*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
-        p2_t1 = 1 - exp(-a_sha*u_OQ*cos(zen))
-        p2_t2 = ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))
+        # p2 = a_sha**-1.0*cos(zen*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
+        p2 = a_sha**-1.0*cos(zen)**-1.0*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
+
         # p1, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p1 = c_isa**-1.0*cos(zen*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
+        # p1 = c_isa**-1.0*cos(zen*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
+        p1 = c_isa**-1.0*cos(zen)**-1.0*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
 
         # ksi1, Extinction of light along u-path from scatter at Q to observation at O, REF 2, Appendix A (A2), p. 656
         ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2))
@@ -395,10 +393,12 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         f3 = (c_isa**2.0*s_CQ**2.0*cos(Psi)**2.0 + 2.0*c_isa*s_CQ*cos(Psi) + 2.0)*exp(-c_isa*s_CQ*cos(Psi)) - 2.0
 
         # f2, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f2 = a_sha**-1.0*cos(Psi*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
+        # f2 = a_sha**-1.0*cos(Psi*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
+        f2 = a_sha**-1.0*cos(Psi)**-1.0*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
 
         # f1, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f1 = c_isa**-1.0*cos(Psi*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
+        # f1 = c_isa**-1.0*cos(Psi*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
+        f1 = c_isa**-1.0*cos(Psi)**-1.0*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
 
         # ksi2, Extinction of light along s-path from emission at C to scatter at Q, REF 2, Appendix A (A2), p. 656
         ksi2 = exp(-N_m0*sig_m*(f1 + 11.778*K_am*f2))
