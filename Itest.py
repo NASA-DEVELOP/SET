@@ -26,11 +26,15 @@ regionlat_arg = 40.8797
 ubr_arg = 10.0
 zen_arg = 30.0
 azimuth_arg = 180.0
+PsiZ_cond = 89.5 * pi / 180
 filein = "20140901_20140930_75N180W_C.tif"
+
 print('************************************************************')
 print(sys.version)
 def main():
-    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + '.tif'
+
+    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + str(PsiZ_cond) + '.tif'
+
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
@@ -370,35 +374,53 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         # a, Scale height of aerosols, REF 2, p. 646
         a_sha = 0.657 + 0.059*K_am # km^-1
 
-        # p4, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p4 = (a_sha**2.0*u_OQ**2.0*cos(zen)**2.0 + 2.0*a_sha*u_OQ*cos(zen) + 2.0)*exp(-a_sha*u_OQ*cos(zen)) - 2.0
 
-        # p3, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        p3 = (c_isa**2.0*u_OQ**2.0*cos(zen)**2.0 + 2.0*c_isa*u_OQ*cos(zen) + 2.0)*exp(-c_isa*u_OQ*cos(zen)) - 2.0
+        if zen > PsiZ_cond:
+            # Alternative p2, For zen near 90 degrees, REF 3 p. 309
+            p2 = u_OQ - u_OQ**3.0*(8.0/(27.0*pi))*a_sha/R_T
 
-        # p2, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        # p2 = a_sha**-1.0*cos(zen*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
-        p2 = a_sha**-1.0*cos(zen)**-1.0*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
+            # Alternative p1, For zen near 90 degrees, REF 3 p. 309
+            p1 = u_OQ - u_OQ ** 3.0 * (8.0 / (27.0 * pi)) * c_isa/R_T
 
-        # p1, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-        # p1 = c_isa**-1.0*cos(zen*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
-        p1 = c_isa**-1.0*cos(zen)**-1.0*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
+        else:
+            # p4, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
+            p4 = (a_sha ** 2.0 * u_OQ ** 2.0 * cos(zen) ** 2.0 + 2.0 * a_sha * u_OQ * cos(zen) + 2.0) * exp(-a_sha * u_OQ * cos(zen)) - 2.0
+
+            # p3, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
+            p3 = (c_isa ** 2.0 * u_OQ ** 2.0 * cos(zen) ** 2.0 + 2.0 * c_isa * u_OQ * cos(zen) + 2.0) * exp(-c_isa * u_OQ * cos(zen)) - 2.0
+
+            # p2, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
+            # p2 = a_sha**-1.0*cos(zen*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
+            p2 = a_sha**-1.0*cos(zen)**-1.0*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
+
+            # p1, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
+            # p1 = c_isa**-1.0*cos(zen*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
+            p1 = c_isa**-1.0*cos(zen)**-1.0*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
 
         # ksi1, Extinction of light along u-path from scatter at Q to observation at O, REF 2, Appendix A (A2), p. 656
         ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2))
-        # f4, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f4 = (a_sha**2.0*s_CQ**2.0*cos(Psi)**2.0 + 2.0*a_sha*s_CQ*cos(Psi) + 2.0)*exp(-a_sha*s_CQ*cos(Psi)) - 2.0
 
-        # f3, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        f3 = (c_isa**2.0*s_CQ**2.0*cos(Psi)**2.0 + 2.0*c_isa*s_CQ*cos(Psi) + 2.0)*exp(-c_isa*s_CQ*cos(Psi)) - 2.0
+        if Psi > PsiZ_cond:
+            # Alternative f2, For zen near 90 degrees, REF 3 p. 309
+            f2 = s_CQ - s_CQ**3.0*(8.0/(27.0*pi))*a_sha/R_T
 
-        # f2, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        # f2 = a_sha**-1.0*cos(Psi*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
-        f2 = a_sha**-1.0*cos(Psi)**-1.0*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
+            # Alternative f1, For zen near 90 degrees, REF 3 p. 309
+            f1 = s_CQ - s_CQ ** 3.0 * (8.0 / (27.0 * pi)) * c_isa/R_T
 
-        # f1, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
-        # f1 = c_isa**-1.0*cos(Psi*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
-        f1 = c_isa**-1.0*cos(Psi)**-1.0*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
+        else:
+            # f4, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
+            f4 = (a_sha**2.0*s_CQ**2.0*cos(Psi)**2.0 + 2.0*a_sha*s_CQ*cos(Psi) + 2.0)*exp(-a_sha*s_CQ*cos(Psi)) - 2.0
+
+            # f3, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
+            f3 = (c_isa**2.0*s_CQ**2.0*cos(Psi)**2.0 + 2.0*c_isa*s_CQ*cos(Psi) + 2.0)*exp(-c_isa*s_CQ*cos(Psi)) - 2.0
+
+            # f2, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
+            # f2 = a_sha**-1.0*cos(Psi*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
+            f2 = a_sha**-1.0*cos(Psi)**-1.0*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
+
+            # f1, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
+            # f1 = c_isa**-1.0*cos(Psi*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
+            f1 = c_isa**-1.0*cos(Psi)**-1.0*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
 
         # ksi2, Extinction of light along s-path from emission at C to scatter at Q, REF 2, Appendix A (A2), p. 656
         ksi2 = exp(-N_m0*sig_m*(f1 + 11.778*K_am*f2))
