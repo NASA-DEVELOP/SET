@@ -23,7 +23,7 @@ Each equation in ``fsum_single()`` that is taken from any of the papers that det
 
 .. code-block:: python
 	
-	# s, Distance from source to scattering CQ, REF 2, Appendix A (A1), p. 656
+    # s, Distance from source to scattering CQ, REF 2, Appendix A (A1), p. 656
     # equation is wrong in Ref 2 (Cinzano). Changed Chi to theta according to Ref 3, p. 308, Equation 7 (Garstang)
     s_CQ = sqrt((u_OQ - l_OC)**2 + 4*u_OQ*l_OC*sin(theta/2)**2) # km
 

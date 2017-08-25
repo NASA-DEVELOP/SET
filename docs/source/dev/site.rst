@@ -10,7 +10,7 @@ To build the docs, you'll need a couple of packages:
 .. note::
 
    This site is generated with ``sphinx`` . **do not** attempt to modify the html files of this
-   site, instead refer to the :doc:`Building and Writing Docs </dev/docs>` page
+   site, instead follow these instructions for writing docs in reStructured Markdown and then building the html files using Sphinx! Sphinx makes it easy to write and create documentation websites.
 
 The easiest way to built the site would be keeping two repositories of *SET* active, and keep
 one for developing, the other for docs. For this example the development is done on the *master*
