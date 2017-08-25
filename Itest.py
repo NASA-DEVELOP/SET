@@ -24,8 +24,8 @@ logger = logging.getLogger()
 
 regionlat_arg = 40.8797
 ubr_arg = 10.0
-zen_arg = 0.0
-azimuth_arg = 0.0
+zen_arg = 30.0
+azimuth_arg = 180.0
 PsiZ_cond = 89.5 * pi / 180
 filein = "20140901_20140930_75N180W_C.tif"
 
@@ -33,7 +33,7 @@ print('************************************************************')
 print(sys.version)
 def main():
 
-    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + str(PsiZ_cond) + 'test_new_trig2.tif'
+    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + str(PsiZ_cond) + '_newabetanewtrig.tif'
 
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
