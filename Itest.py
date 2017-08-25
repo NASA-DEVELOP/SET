@@ -25,7 +25,7 @@ logger = logging.getLogger()
 regionlat_arg = 40.8797
 ubr_arg = 10.0
 zen_arg = 30.0
-azimuth_arg = 180.0
+azimuth_arg = 180.0 * pi / 180
 PsiZ_cond = 89.5 * pi / 180
 filein = "20140901_20140930_75N180W_C.tif"
 
@@ -33,26 +33,21 @@ print('************************************************************')
 print(sys.version)
 def main():
 
-    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + str(PsiZ_cond) + '_newabetanewtrig.tif'
+    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + str(PsiZ_cond) + '_newabetaasymmetrytest.tif'
 
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
         # bottom bottom_lat = 40.8797
         # top lat= 46.755666
         propkernel, totaltime = fsum_2d()
-        logger.debug('propagation array: %s', propkernel)
         array_to_geotiff(propkernel, kerneltiffpath)
         logger.info("time for prop function ubreak 10: %s", totaltime)
 
     kerneldata = gdal.Open(kerneltiffpath)
     propkernel = kerneldata.ReadAsArray()
-    logger.debug('Surrounding Indices propkernel post conversion from tif: %s', propkernel[522:525, 470])
-    logger.debug('Problem Index propkernel: %s', propkernel[523, 470])
-    logger.debug('PropSumArray: %s', propkernel)
 
     viirsraster = gdal.Open(filein)
     imagearr = viirsraster.ReadAsArray()
-    logger.debug('VIIRS: %s', imagearr)
 
     ######### Convert to float 32 for Fourier, scale, and round
     # falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
@@ -60,9 +55,6 @@ def main():
     viirs_scaling_factor = 10**9
     imagearr *= viirs_scaling_factor
     propkernel = float32(nan_to_num(propkernel))
-    logger.debug('Surrounding Indices propkernel post data type conv: %s', propkernel[522:525, 470])
-    logger.debug('Problem Index propkernel: %s', propkernel[523, 470])
-    logger.debug('PropSumArray: %s', propkernel)
     # generalized padding of kernel so that fft can run
     pad_left = (imagearr.shape[0] - propkernel.shape[0])//2
     pad_right = (imagearr.shape[0] - propkernel.shape[0])//2 + 1
@@ -84,19 +76,15 @@ def main():
     np_dft_prop_im = fft.fft2(padded_prop)
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
-    compare_arr(padded_prop, imagearr,'Relative Weights of Light Propogation (Convolution Kernel)', 'VIIRS Image', 462.7) #meters 462.7
-    compare_arr(padded_prop, np_magnitude_spectrum,'Kernel', 'Fast Fourier Transformed Kernel',462.7, True, False)
 
     np_dft_viirs_im = fft.fft2(imagearr)
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
-    compare_arr(imagearr, np_magnitude_spectrum_viirs,'VIIRS Image', 'Fast Fourier Transformed VIIRS', 462.7)
-
+    
     kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
     FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
-    compare_arr(imagearr, FFT_product_inverse,'VIIRS Image', 'Product of FFT VIIRS and FFT Kernel: Artificial Light Propogation at Zenith', 462.7)
 
     # Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
     # apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
@@ -178,11 +166,15 @@ def fsum_2d():
     abeta = create_abeta(source_lat, rltv_long, Chi, azimuth_arg)
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
     u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
+    array_to_geotiff(u0, "u0asymmetrytest.tif")
+
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
     # l_OC and D_OC are similar as expected
     l_OC = sqrt(4.0*R_T**2.0*sin(Chi/2.0)**2.0) # km
+
     # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
     q1 = R_T*(sin(Chi)*sin(zen)*cos(abeta) + cos(Chi)*cos(zen) - cos(zen)) # km
+
     # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
     theta = arccos(q1/l_OC) # radians
 
