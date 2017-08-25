@@ -24,8 +24,8 @@ logger = logging.getLogger()
 
 regionlat_arg = 40.8797
 ubr_arg = 10.0
-zen_arg = 30.0
-azimuth_arg = 180.0
+zen_arg = 0.0
+azimuth_arg = 0.0
 PsiZ_cond = 89.5 * pi / 180
 filein = "20140901_20140930_75N180W_C.tif"
 
@@ -33,7 +33,7 @@ print('************************************************************')
 print(sys.version)
 def main():
 
-    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + str(PsiZ_cond) + '.tif'
+    kerneltiffpath = 'kernel' + str(regionlat_arg) + '_' + str(ubr_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg) + str(PsiZ_cond) + 'test_new_trig2.tif'
 
     if os.path.isfile(kerneltiffpath) is False:
         # Estimate the 2d propagation function
@@ -163,7 +163,15 @@ def fsum_2d():
     # beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
     # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
     betaarray = arcsin(sin(pi/2.0-source_lat)*sin(rltv_long)/sin(Chi))
+    betapath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'_beta_array'+'.tif'
+    array_to_geotiff(betaarray, betapath)
+
     abeta = betaarray - azimuth_arg
+    abetapath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'_abeta_array'+'.tif'
+    array_to_geotiff(abeta, abetapath)
+    # TEMP PROGRAM STOP
+    return
+
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
     u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
@@ -380,22 +388,22 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
             p2 = u_OQ - u_OQ**3.0*(8.0/(27.0*pi))*a_sha/R_T
 
             # Alternative p1, For zen near 90 degrees, REF 3 p. 309
-            p1 = u_OQ - u_OQ ** 3.0 * (8.0 / (27.0 * pi)) * c_isa/R_T
+            p1 = u_OQ - u_OQ**3.0*(8.0/(27.0*pi))*c_isa/R_T
 
         else:
             # p4, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-            p4 = (a_sha ** 2.0 * u_OQ ** 2.0 * cos(zen) ** 2.0 + 2.0 * a_sha * u_OQ * cos(zen) + 2.0) * exp(-a_sha * u_OQ * cos(zen)) - 2.0
+            p4 = (a_sha**2.0 * u_OQ ** 2.0 * cos(zen) ** 2.0 + 2.0 * a_sha * u_OQ * cos(zen) + 2.0) * exp(-a_sha * u_OQ * cos(zen)) - 2.0
 
             # p3, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
-            p3 = (c_isa ** 2.0 * u_OQ ** 2.0 * cos(zen) ** 2.0 + 2.0 * c_isa * u_OQ * cos(zen) + 2.0) * exp(-c_isa * u_OQ * cos(zen)) - 2.0
+            p3 = (c_isa**2.0 * u_OQ ** 2.0 * cos(zen) ** 2.0 + 2.0 * c_isa * u_OQ * cos(zen) + 2.0) * exp(-c_isa * u_OQ * cos(zen)) - 2.0
 
             # p2, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
             # p2 = a_sha**-1.0*cos(zen*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
-            p2 = a_sha**-1.0*cos(zen)**-1.0*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
+            p2 = a_sha**(-1.0)*cos(zen)**(-1.0)*(1.0 - exp(-a_sha*u_OQ*cos(zen)) + ((16.0*p4*tan(zen)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
 
             # p1, Intermediate quantity u-path, REF 2, Appendix A (A2), p. 656
             # p1 = c_isa**-1.0*cos(zen*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
-            p1 = c_isa**-1.0*cos(zen)**-1.0*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
+            p1 = c_isa**(-1.0)*cos(zen)**(-1.0)*(1.0 - exp(-c_isa*u_OQ*cos(zen)) + ((16.0*p3*tan(zen)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
 
         # ksi1, Extinction of light along u-path from scatter at Q to observation at O, REF 2, Appendix A (A2), p. 656
         ksi1 = exp(-N_m0*sig_m*(p1 + 11.778*K_am*p2))
@@ -405,7 +413,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
             f2 = s_CQ - s_CQ**3.0*(8.0/(27.0*pi))*a_sha/R_T
 
             # Alternative f1, For zen near 90 degrees, REF 3 p. 309
-            f1 = s_CQ - s_CQ ** 3.0 * (8.0 / (27.0 * pi)) * c_isa/R_T
+            f1 = s_CQ - s_CQ**3.0*(8.0/(27.0*pi))*c_isa/R_T
 
         else:
             # f4, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
@@ -416,11 +424,11 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
             # f2, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
             # f2 = a_sha**-1.0*cos(Psi*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T))))**-1.0
-            f2 = a_sha**-1.0*cos(Psi)**-1.0*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
+            f2 = a_sha**(-1.0)*cos(Psi)**(-1.0)*(1.0 - exp(-a_sha*s_CQ*cos(Psi)) + ((16.0*f4*tan(Psi)**2.0)/(9.0*pi*2.0*a_sha*R_T)))
 
             # f1, Intermediate quantity s-path, REF 2, Appendix A (A2), p. 657
             # f1 = c_isa**-1.0*cos(Psi*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T))))**-1.0
-            f1 = c_isa**-1.0*cos(Psi)**-1.0*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
+            f1 = c_isa**(-1.0)*cos(Psi)**(-1.0)*(1.0 - exp(-c_isa*s_CQ*cos(Psi)) + ((16.0*f3*tan(Psi)**2.0)/(9.0*pi*2.0*c_isa*R_T)))
 
         # ksi2, Extinction of light along s-path from emission at C to scatter at Q, REF 2, Appendix A (A2), p. 656
         ksi2 = exp(-N_m0*sig_m*(f1 + 11.778*K_am*f2))
