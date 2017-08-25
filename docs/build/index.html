@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Skyglow Estimation Toolbox &#8212; SET 0.0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="_static/satellite.png"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Program Overview" href="overview.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">
+          SET</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Index <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html"><strong>Program Overview</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="usr/installation.html"><strong>Installation</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="usr/tutorial.html"><strong>Tutorial</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="method.html"><strong>Methodology</strong></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dev/dev.html"><strong>Developer Guide</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/site.html"><strong>Updating The Site</strong></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="trouble/faq.html"><strong>FAQ</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html"><strong>Contact</strong></a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#"><strong>Skyglow Estimation Toolbox</strong></a><ul>
+<li><a class="reference internal" href="#contents"><strong>Contents</strong></a><ul>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="overview.html" title="Next Chapter: Program Overview"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Program Overview &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/index.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="skyglow-estimation-toolbox">
+<h1><strong>Skyglow Estimation Toolbox</strong><a class="headerlink" href="#skyglow-estimation-toolbox" title="Permalink to this headline">¶</a></h1>
+<p><em>Current Version: v0.0.1</em></p>
+<div class="figure align-right" id="id1" style="width: 500px">
+<a class="reference internal image-reference" href="_images/website_image.png"><img alt="_images/website_image.png" src="_images/website_image.png" style="width: 480.0px; height: 270.0px;" /></a>
+<p class="caption"><span class="caption-text"><em>Summer 2017 Wyoming Cross-Cutting II Team Website Image. Teton Range, WY, displayed below a processed artificial skyglow map around Grand Teton National Park, generated from a nine-month composite image.</em></span></p>
+</div>
+<p>Skyglow is the brightening of the sky caused by various illuminated sources, including anthropogenic lighting, atmospheric factors, and celestial light. With the unprecedented growth of urbanization, artificial lighting has been rapidly increasing the brightness of the night sky around the world. This problem has attracted serious concerns from researchers, scientists, and communities to address the ramifications of what is now known as light pollution.</p>
+<p>Previously the impact of light pollution on sky brightness was measured by handheld Sky Quality Meters and observations from the Defense Meteorological Satellite Program (DMSP) Operational Linescan System. Both have observational flaws: the Sky Quality Meter is limited in range and feasibility, the DMSP sensor in resolution.</p>
+<p>To refine these measurements, the Wyoming Cross-Cutting team at the NASA DEVELOP National Program created the Skyglow Estimation Toolbox (SET) in partnership with the National Park Service and Wyoming Stargazing. The Toolbox is written in Python 2.7 and takes satellite measurements from NASA and NOAA’s Suomi National Polar-orbiting Partnership (NPP) Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor to map images of skyglow using local parameters. Researchers using the Toolbox can identify sources of light pollution with far greater precision by factoring in light scattering at different viewing angles and apply SET’s propagation model to varying locations.</p>
+<p>All the Toolbox’s user and developer documentation can be found on this website. End-users can refer to the navigation bar’s “Index” at the top of the page to find information on installing, running, and generating skyglow maps. Likewise, developers looking to contribute to the documentation or program can find guidelines through the index. Thank you for visiting!</p>
+<div class="figure align-right">
+<a class="reference internal image-reference" href="_images/suominpp.png"><img alt="_images/suominpp.png" src="_images/suominpp.png" style="width: 630.0px; height: 388.84999999999997px;" /></a>
+</div>
+<div class="section" id="contents">
+<h2><strong>Contents</strong><a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html"><strong>Program Overview</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#features"><strong>Features</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#research-parameters"><strong>Research Parameters</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#literature"><strong>Literature</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usr/installation.html"><strong>Installation</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usr/installation.html#windows"><strong>Windows</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/installation.html#required-packages"><strong>Required Packages</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usr/tutorial.html"><strong>Tutorial</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#getting-started"><strong>Getting Started</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#getting-data"><strong>Getting Data</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#importing-files"><strong>Importing Files</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#creating-a-kernel"><strong>Creating a Kernel</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#generating-an-artificial-skyglow-map"><strong>Generating an Artificial Skyglow Map</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="method.html"><strong>Methodology</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="method.html#kernel-creation"><strong>Kernel Creation</strong></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="dev/dev.html"><strong>Developer Guide</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/dev.html#learning-the-basics"><strong>Learning the Basics</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/dev.html#developer-tutorials"><strong>Developer Tutorials</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="dev/site.html"><strong>Updating The Site</strong></a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="trouble/faq.html"><strong>FAQ</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html"><strong>Contact</strong></a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2017, Ryan Avery, Stanley Yu, Kenton Ross, Veronica Warda, Steven Chao.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+Icons made by <a href="http://www.flaticon.com/authors/madebyoliver" title="Madebyoliver">Madebyoliver</a> from <a href="http://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>.<br/>
+    </p>
+  </div>
+</footer>
+
+
+  </body>
+</html>

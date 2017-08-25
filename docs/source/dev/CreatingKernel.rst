@@ -9,19 +9,10 @@ Please reach out to past developers for insight on the program's design and chal
 **Learning the Basics**
 -----------------------
 
-This guide assumes that the developer is familiar with Python. There are numerous free online resources for learning Python, the most popular being `Codecademy`__ and `Coursera`__. For help with specific commands, refer to the `Python 2.7 documentation`__ and each module's documentation. We will reference more learning resources throughout the tutorial that are specific to each part of the program.
+This guide assumes that the developer is familiar with Python. There are numerous free online resources for learning Python, the most popular being `Codecademy`__ and `Coursera`__. For help with specific commands, refer to the `Python 2.7 documentation`__.
 
-**Developer Tutorials**
+**Contents**
 ------------
-
-.. toctree::
-   :maxdepth: 2
-
-   environment
-   PropagationModel
-   CreatingKernel
-   ApplyingKernel
-   UserInterface
 
 
 .. __: https://www.codecademy.com/
