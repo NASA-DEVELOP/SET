@@ -61,6 +61,7 @@ def main():
     pad_up = (imagearr.shape[1] - propkernel.shape[1])//2
     pad_down = (imagearr.shape[1] - propkernel.shape[1])//2
     padded_prop = pad(propkernel,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
+    padded_prop = fliplr(flipud(padded_prop))
     ################# for convolution FFT comparison
     # subset = 50
     # prows = padded_prop.shape[0]
