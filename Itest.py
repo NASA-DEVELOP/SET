@@ -160,18 +160,22 @@ def fsum_2d():
     # Earth angle from source to site, REF 3, p. 308\
     Chi = D_OC/R_T
 
-    # beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
-    # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
-    betaarray = arcsin(sin(pi/2.0-source_lat)*sin(rltv_long)/sin(Chi))
-    betapath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'_beta_array'+'.tif'
-    array_to_geotiff(betaarray, betapath)
+    def create_abeta(s_l, r_l, C, a_a):
+        # beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
+        # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
+        beta_arr_raw = arcsin(sin(pi/2.0-s_l)*sin(r_l)/sin(C))
+        # ll
+        beta_arr_raw[0:heigthcenter, 0:widthcenter] = pi - beta_arr_raw[0:heigthcenter, 0:widthcenter]
+        # ul
+        beta_arr_raw[heigthcenter:, 0:widthcenter] += 2*pi
+        # lr
+        beta_arr_raw[0:heigthcenter, widthcenter:] = pi - beta_arr_raw[0:heigthcenter, widthcenter:]
+        # ur
+        # beta_arr_raw_upperright[heigthcenter:, widthcenter:]
+        return beta_arr_raw - a_a
+        
 
-    abeta = betaarray - azimuth_arg
-    abetapath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'_abeta_array'+'.tif'
-    array_to_geotiff(abeta, abetapath)
-    # TEMP PROGRAM STOP
-    return
-
+    abeta = create_abeta(source_lat, rltv_long, Chi, azimuth_arg)
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
     u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
