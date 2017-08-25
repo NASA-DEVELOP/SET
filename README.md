@@ -1,4 +1,6 @@
-8/25/2017
+Date last updated: 8/25/2017
+
+Date created/concieved: 3/10/2017
 
 Code authors: Ryan Avery, Stanley Yu, Veronica Warda, Dr. Kenton Ross
 
