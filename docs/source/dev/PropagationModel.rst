@@ -14,7 +14,7 @@ These papers are the foundation for the part of our code that calculates how lig
 
 The following adapted diagram from (2) shows the relavant geometry parameters that govern how light scatters from a C to a O:
 
-.. image:: _static/cinzano_diagram
+.. image:: ../_static/cinzano_diagram.png
 
 ``fsum_single()`` Code Organization
 -----------------------------------

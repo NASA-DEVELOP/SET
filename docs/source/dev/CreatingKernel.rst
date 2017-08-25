@@ -14,13 +14,6 @@ This guide assumes that the developer is familiar with Python. There are numerou
 **Contents**
 ------------
 
-.. toctree::
-   :maxdepth: 2
-
-   PropagationModel
-   CreatingKernel
-   ApplyingKernel
-   UserInterface
 
 .. __: https://www.codecademy.com/
 .. __: https://www.coursera.org/
