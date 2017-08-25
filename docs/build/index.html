@@ -4,7 +4,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Welcome to Skyglow’s documentation! &#8212; SET 0.0.1 documentation</title>
+    <title>Skyglow Estimation Toolbox &#8212; SET 0.0.1 documentation</title>
     
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -27,6 +27,7 @@
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="_static/satellite.png"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Program Overview" href="overview.html" />
@@ -64,26 +65,19 @@
      href="#">Index <b class="caret"></b></a>
   <ul class="dropdown-menu globaltoc"
       role="menu"
-      aria-labelledby="dLabelGlobalToc"><p class="caption"><span class="caption-text">User Documentation</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Program Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="gettingdata.html">Getting the Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a></li>
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="overview.html"><strong>Program Overview</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="usr/installation.html"><strong>Installation</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="usr/tutorial.html"><strong>Tutorial</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="method.html"><strong>Methodology</strong></a></li>
 </ul>
-<p class="caption"><span class="caption-text">Developer Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="dev/conventions.html">Coding Conventions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dev/enviroment.html">Development Enviroment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dev/docs.html">Building and Writing Docs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dev/site.html">Updating The Site</a></li>
-<li class="toctree-l1"><a class="reference internal" href="doc/modules.html">Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/dev.html"><strong>Developer Guide</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/site.html"><strong>Updating The Site</strong></a></li>
 </ul>
-<p class="caption"><span class="caption-text">Support</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="trouble/faq.html">Troubleshoot</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trouble/issuetracker.html">Submit Bugs or Issues</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble/faq.html"><strong>FAQ</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html"><strong>Contact</strong></a></li>
 </ul>
 </ul>
 </li>
@@ -97,7 +91,10 @@
   <ul class="dropdown-menu localtoc"
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
-<li><a class="reference internal" href="#">Welcome to Skyglow’s documentation!</a><ul>
+<li><a class="reference internal" href="#"><strong>Skyglow Estimation Toolbox</strong></a><ul>
+<li><a class="reference internal" href="#contents"><strong>Contents</strong></a><ul>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -143,66 +140,65 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="welcome-to-skyglow-s-documentation">
-<h1>Welcome to Skyglow’s documentation!<a class="headerlink" href="#welcome-to-skyglow-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+  <div class="section" id="skyglow-estimation-toolbox">
+<h1><strong>Skyglow Estimation Toolbox</strong><a class="headerlink" href="#skyglow-estimation-toolbox" title="Permalink to this headline">¶</a></h1>
+<p><em>Current Version: v0.0.1</em></p>
+<div class="figure align-right" id="id1" style="width: 500px">
+<a class="reference internal image-reference" href="_images/website_image.png"><img alt="_images/website_image.png" src="_images/website_image.png" style="width: 480.0px; height: 270.0px;" /></a>
+<p class="caption"><span class="caption-text"><em>Summer 2017 Wyoming Cross-Cutting II Team Website Image. Teton Range, WY, displayed below a processed artificial skyglow map around Grand Teton National Park, generated from a nine-month composite image.</em></span></p>
+</div>
+<p>Skyglow is the brightening of the sky caused by various illuminated sources, including anthropogenic lighting, atmospheric factors, and celestial light. With the unprecedented growth of urbanization, artificial lighting has been rapidly increasing the brightness of the night sky around the world. This problem has attracted serious concerns from researchers, scientists, and communities to address the ramifications of what is now known as light pollution.</p>
+<p>Previously the impact of light pollution on sky brightness was measured by handheld Sky Quality Meters and observations from the Defense Meteorological Satellite Program (DMSP) Operational Linescan System. Both have observational flaws: the Sky Quality Meter is limited in range and feasibility, the DMSP sensor in resolution.</p>
+<p>To refine these measurements, the Wyoming Cross-Cutting team at the NASA DEVELOP National Program created the Skyglow Estimation Toolbox (SET) in partnership with the National Park Service and Wyoming Stargazing. The Toolbox is written in Python 2.7 and takes satellite measurements from NASA and NOAA’s Suomi National Polar-orbiting Partnership (NPP) Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor to map images of skyglow using local parameters. Researchers using the Toolbox can identify sources of light pollution with far greater precision by factoring in light scattering at different viewing angles and apply SET’s propagation model to varying locations.</p>
+<p>All the Toolbox’s user and developer documentation can be found on this website. End-users can refer to the navigation bar’s “Index” at the top of the page to find information on installing, running, and generating skyglow maps. Likewise, developers looking to contribute to the documentation or program can find guidelines through the index. Thank you for visiting!</p>
+<div class="figure align-right">
+<a class="reference internal image-reference" href="_images/suominpp.png"><img alt="_images/suominpp.png" src="_images/suominpp.png" style="width: 630.0px; height: 388.84999999999997px;" /></a>
+</div>
+<div class="section" id="contents">
+<h2><strong>Contents</strong><a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">User Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="overview.html">Program Overview</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#features">Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="overview.html#additional-information">Additional Information</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html"><strong>Program Overview</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#features"><strong>Features</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#research-parameters"><strong>Research Parameters</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="overview.html#literature"><strong>Literature</strong></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="packages.html">Required Packages</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#windows">Windows</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#linux">Linux</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#os-x">OS X</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usr/installation.html"><strong>Installation</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usr/installation.html#windows"><strong>Windows</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/installation.html#required-packages"><strong>Required Packages</strong></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="gettingdata.html">Getting the Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Getting Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#interface-layout">Interface Layout</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#starting-up">Starting Up</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#navigating-the-plot">Navigating the Plot</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#viewing-properties-of-shapes">Viewing Properties of Shapes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#drawing-shapes">Drawing Shapes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#hiding-and-sharing-specific-shapes">Hiding and Sharing Specific Shapes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#using-the-database">Using the Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#extracting-column-data-from-the-database">Extracting Column Data from the Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#sharing-your-database">Sharing Your Database</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorial.html#advanced-querying">Advanced Querying</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usr/tutorial.html"><strong>Tutorial</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#getting-started"><strong>Getting Started</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#getting-data"><strong>Getting Data</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#importing-files"><strong>Importing Files</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#creating-a-kernel"><strong>Creating a Kernel</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="usr/tutorial.html#generating-an-artificial-skyglow-map"><strong>Generating an Artificial Skyglow Map</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="method.html"><strong>Methodology</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="method.html#kernel-creation"><strong>Kernel Creation</strong></a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Developer Documentation</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="dev/conventions.html">Coding Conventions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dev/enviroment.html">Development Enviroment</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dev/docs.html">Building and Writing Docs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dev/site.html">Updating The Site</a></li>
-<li class="toctree-l1"><a class="reference internal" href="doc/modules.html">Code Documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="doc/general/general.html">General</a></li>
-<li class="toctree-l2"><a class="reference internal" href="doc/polygon/polygon.html">Polygon</a></li>
-<li class="toctree-l2"><a class="reference internal" href="doc/tools/tools.html">Tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev/dev.html"><strong>Developer Guide</strong></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="dev/dev.html#learning-the-basics"><strong>Learning the Basics</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="dev/dev.html#developer-tutorials"><strong>Developer Tutorials</strong></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="dev/site.html"><strong>Updating The Site</strong></a></li>
 </ul>
 </div>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
-<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
-</ul>
 <div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Support</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="trouble/faq.html">Troubleshoot</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trouble/issuetracker.html">Submit Bugs or Issues</a></li>
-<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html">Contact</a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble/faq.html"><strong>FAQ</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="trouble/contact.html"><strong>Contact</strong></a></li>
 </ul>
+</div>
 </div>
 </div>
 
@@ -211,6 +207,7 @@
       
   </div>
 </div>
+
 <footer class="footer">
   <div class="container">
     <p class="pull-right">
@@ -218,10 +215,13 @@
       
     </p>
     <p>
-        &copy; Copyright 2017, Ryan Avery, Kenton Ross, Veronica Warda, Stanley Yu, Steven Chao.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.2.<br/>
+        &copy; Copyright 2017, Ryan Avery, Stanley Yu, Kenton Ross, Veronica Warda, Steven Chao.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+Icons made by <a href="http://www.flaticon.com/authors/madebyoliver" title="Madebyoliver">Madebyoliver</a> from <a href="http://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>.<br/>
     </p>
   </div>
 </footer>
+
+
   </body>
 </html>
