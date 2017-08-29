@@ -24,7 +24,7 @@ import threading
 import sys
 import time
 import constants
-import Itest
+import darkskypy
 import logging
 logger = logging.getLogger()
 
@@ -253,7 +253,7 @@ class SkyglowEstimationToolbox:
         about.tag_config("abt", font='Times 10 bold', justify=CENTER)
         about.pack()
 
-    # Constructs a progress window to monitor Itest.
+    # Constructs a progress window to monitor darkskypy.
     def progress(self):
         # Instantiates a new Toplevel window and frame for progress bar and loading log.
         prg_window = Toplevel(self.root)
@@ -275,7 +275,7 @@ class SkyglowEstimationToolbox:
         prg_lbl = Label(prg_frame, textvariable=prg_lbl_txt)
         prg_lbl.pack()
 
-        # Displays message log that prints from log file and starts Itest.
+        # Displays message log that prints from log file and starts darkskypy.
         self.prg_log = Text(prg_frame, width=90, padx=5, pady=5, relief="sunken")
         self.prg_log.pack()
         self.prg_log.insert("end", "*****Progress Log*****\n=======================\n")
@@ -308,7 +308,7 @@ class SkyglowEstimationToolbox:
 
         # Create new threads to run light propagation model simultaneously.
         p_thread = threading.Thread(target=self.update_progress())
-        t_thread = threading.Thread(target=Itest.main,
+        t_thread = threading.Thread(target=darkskypy.main,
                                     args=(lat_in, k_in, zen_in, azi_in, file_in, krn_file_in))
         t_thread.setDaemon(True)
         p_thread.start()
