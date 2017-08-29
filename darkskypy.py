@@ -18,7 +18,7 @@ from osgeo import gdal
 import logging
 import sys
 import warnings
-import Skyglow
+import skyglow
 import constants
 warnings.filterwarnings("error")
 logger = logging.getLogger()
@@ -27,7 +27,20 @@ PsiZ_cond = 89.5 * pi / 180
 ubr_arg = 10.0
 
 logger.info(sys.version)
-def main(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
+
+def main()
+	# The purpose of main() in darkskypy is supply variables and whatever 
+	# else might be desirable if darkspypy is called from the console.
+
+	# Default sgmapper() arguments
+	la = 40.8797
+	ka = 1.0
+	ze = 30.0
+	az = 180.0
+	fi = 
+	sgmapper(la, ka, ze, az)
+
+def sgmapper(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
     kerneltiffpath = krn_filein
 
     if os.path.isfile(kerneltiffpath) is False:
