@@ -308,7 +308,7 @@ class SkyglowEstimationToolbox:
 
         # Create new threads to run light propagation model simultaneously.
         p_thread = threading.Thread(target=self.update_progress())
-        t_thread = threading.Thread(target=darkskypy.main,
+        t_thread = threading.Thread(target=darkskypy.sgmapper,
                                     args=(lat_in, k_in, zen_in, azi_in, file_in, krn_file_in))
         t_thread.setDaemon(True)
         p_thread.start()

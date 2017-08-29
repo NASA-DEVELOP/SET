@@ -28,17 +28,18 @@ ubr_arg = 10.0
 
 logger.info(sys.version)
 
-def main()
+def main():
 	# The purpose of main() in darkskypy is supply variables and whatever 
 	# else might be desirable if darkspypy is called from the console.
 
 	# Default sgmapper() arguments
-	la = 40.8797
-	ka = 1.0
-	ze = 30.0
-	az = 180.0
-	fi = 
-	sgmapper(la, ka, ze, az)
+	la = 40.8797 # Default latitude (decimal degrees)
+	ka = 1.0 # Default k_am (unitless)
+	ze = 30.0 # Default zenith angle (degrees)
+	az = 180.0*(pi/180) # Default azimuth angle for site viewing (radians)
+	#ISSUE: UPDATE SGMAPPER TO ACCEPT DEGREES INPUT FOR AZIMUTH
+	fi = "20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+	sgmapper(la, ka, ze, az, fi)
 
 def sgmapper(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
     kerneltiffpath = krn_filein
