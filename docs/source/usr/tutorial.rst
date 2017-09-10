@@ -47,9 +47,13 @@ The first step to creating an artificial skyglow map is to import your VIIRS ref
 **Creating a Kernel**
 ---------------------
 
-Creating a kernel is a matter of defining four arguments: region latitude, atmospheric clarity parameter, zenith angle, and azimuth angle.
+Creating a kernel is a matter of defining four arguments: region latitude, atmospheric clarity parameter, zenith angle, and azimuth angle. More information on these parameters can be found in the *Instructions* found in the *Help* menu.
+
+.. note::
+
+    If you have already created a kernel file and wish to use the same parameters as before, simply check the *Import Kernel* option and browse for the file.
 
 **Generating an Artificial Skyglow Map**
 ----------------------------------------
 
-Once all the necessary parameters are chosen, clicking the "Generate Artificial Skyglow Map" will begin the process of modeling sky brightness. A progress log will appear to help you monitor whether the program is still running and how long it has been performing its calculations.
+Once all the necessary parameters are chosen, clicking the "Generate Artificial Skyglow Map" will begin the process of modeling sky brightness. A progress log will appear to help you monitor the generation process. Once the program is finished, a "Finished!" message will display along with a bell sound.
