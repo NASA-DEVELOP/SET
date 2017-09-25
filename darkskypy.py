@@ -23,7 +23,15 @@ import constants
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
-PsiZ_cond = 89.5 * pi / 180
+##ISSUES
+# check angle fixes ~sgmapper and other
+# check beta array fixes ~line 298
+# continue abstracting prop2d is sgmapper ~line 50
+# still need to get rid of global variables
+# still consider making external variable/function constants file
+# consider whether name "darkskypy" is okay
+
+PsiZ_cond = 89.5*(pi/180)
 ubr_arg = 10.0
 
 logger.info(sys.version)
@@ -32,24 +40,54 @@ def main():
 	# The purpose of main() in darkskypy is supply variables and whatever 
 	# else might be desirable if darkspypy is called from the console.
 
-	# Default sgmapper() arguments
-	la = 40.8797 # Default latitude (decimal degrees)
-	ka = 1.0 # Default k_am (unitless)
-	ze = 30.0 # Default zenith angle (degrees)
-	az = 180.0*(pi/180) # Default azimuth angle for site viewing (radians)
-	#ISSUE: UPDATE SGMAPPER TO ACCEPT DEGREES INPUT FOR AZIMUTH
-	fi = "20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
-	sgmapper(la, ka, ze, az, fi)
+	action = sys.argv[1]
 
-def sgmapper(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
-    kerneltiffpath = krn_filein
+	if action == "sgmap_single":
+
+		# Default sgmapper() arguments
+		la = 40.8797 # Default latitude (decimal degrees)
+		ka = 1.0 # Default k_am (unitless)
+		ze = 30.0 # Default zenith angle (degrees)
+		az = 180.0 # Default azimuth angle for site viewing (degrees)
+		#ISSUE: UPDATE SGMAPPER TO ACCEPT DEGREES INPUT FOR AZIMUTH
+		fi = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		sgmapper(la, ka, ze, az, fi)
+
+	elif action == "kernel_lib":
+
+		centerlat = float(sys.argv[2])
+		lat_rad = centerlat*(pi/180)
+		k_am = float(sys.argv[3])
+		filein = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+
+		angle_list = [[0.0, 0.0], [15.0, 0.0], [15.0, 90.0], [15.0, 180.0], [15.0, 270.0]]
+		for angle_set in angle_list:
+			print(angle_set)
+			zenith = angle_set[0]
+			azimuth = angle_set[1]
+			# first convert angles in degrees to radians
+			azi_rad = azimuth*(pi/180)
+			zen_rad = zenith*(pi/180)
+			print(zenith)
+			print(azimuth)
+			print(lat_rad)
+			propkernel, totaltime = fsum_2d(lat_rad, k_am, zen_rad, azi_rad, filein)
+			kerneltiffpath = 'kernel_' + str(centerlat) + '_' +  str(k_am) + '_' + str(zenith) + '_' + str(azimuth)
+			array_to_geotiff(propkernel, kerneltiffpath, filein)
+
+def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
+    kerneltiffpath = prop2filein
 
     if os.path.isfile(kerneltiffpath) is False:
-        # Estimate the 2d propagation function
-        # bottom bottom_lat = 40.8797
-        # top lat= 46.755666
-        propkernel, totaltime = fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg)
-        kerneltiffpath = 'kernel_' + str(regionlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azimuth_arg)
+        # If there is no 2d propagation function (kernel), ...
+        # then estimate the 2d propagation function
+
+        # first convert angles in degrees to radians
+        azi_rad = azi_arg*(pi/180)
+        zen_rad = zen_arg*(pi/180)
+        lat_rad = centerlat_arg*(pi/180)
+        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad)
+        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
 
         logger.info("time for prop function ubreak 10: %s", totaltime)
@@ -72,6 +110,7 @@ def sgmapper(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
     pad_up = (imagearr.shape[1] - propkernel.shape[1])//2
     pad_down = (imagearr.shape[1] - propkernel.shape[1])//2
     padded_prop = pad(propkernel,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
+    # propagation function applied via fft must be rotated 180 degrees
     padded_prop = fliplr(flipud(padded_prop))
     ################# for convolution FFT comparison
     # subset = 50
@@ -114,44 +153,39 @@ def sgmapper(regionlat_arg, k_am_arg, zen_arg, azimuth_arg, filein, krn_filein):
     
 
 # Function that creates 2d propagation function
-def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
+def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Input Variables
     logger.info('**INPUTS**')
-    # arbitrary radius and lat for testing purposes. Instead of R_teton to determine pixel should we use an array of radius of curvature?
-    # bottom bottom_lat = 40.8797
-    # top lat= 46.755666
-    cent_lat_deg = regionlat_arg
-    cent_lat = cent_lat_deg*pi/180.0
+
+    # 2d propagation function pixel size in degrees and radians
     p_deg = .0041666667
     p_rad = p_deg*pi/180.0
 
+    # central latitude for estimation of the 2d propagation function
+    logger.info('Central latitude (deg): {}'.format(cenlat*(180/pi)))
+
     # z, Zenith angle site, REF 2, Fig. 6, p. 648
-    zen = zen_arg
-    logger.info('z, Site zenith (deg): {}'.format(zen))
+    logger.info('z, Site zenith (deg): {}'.format(zen*(180/pi)))
 
     # ubr, Length of u for relaxing integration increment
     ubr = ubr_arg
     logger.info('ubr, Length of u for relaxing integration increment (km): {}'.format(ubr))
 
-    # Earth radius at latitude 43.7904 (grand teton)
-    R_teton = 6367.941 # km  (c)
-    logger.info('R_teton, Radius of curvature of the Earth at Teton (km): {}'.format(R_teton))
-
     # Gaussian Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
-    R_T = gauss_earth_curvature_radius(cent_lat)
+    R_T = gauss_earth_curvature_radius(cenlat)
     logger.info('R_T, Radius of curvature of the Earth (km): {}'.format(R_T))
 
     # Create latitude/longitude arrays
-    source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cent_lat, p_rad)
+    source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cenlat, p_rad)
 
     # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
     # using haversine formula
-    D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cent_lat)/2.0)**2.0 + cos(cent_lat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
+    D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
 
     # Assignment of NaNs or null values outside of 200 km
     D_OC[D_OC > 201.0] = numpy.NaN
 
-    # Check of D_OC shape after assigning NaNs outside of 200 km
+    # Check of D_OC shape after assigning NaNs outside of 200 km radius
     logger.info('kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0]))
     logger.info('kernel width in pixels, trimmed: {}'.format(D_OC.shape[1]))
     widthcenter = (D_OC.shape[1] + 1)//2
@@ -162,32 +196,18 @@ def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
     # Earth angle from source to site, REF 3, p. 308\
     Chi = D_OC/R_T
 
-    def create_abeta(s_l, r_l, C, a_a):
-        # beta array, Azimuth angle from line of sight to scatter from site, REF 2, Fig. 6, p. 648
-        # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
-        beta_arr_raw = arcsin(sin(pi/2.0-s_l)*sin(r_l)/sin(C))
-        # ll
-        beta_arr_raw[0:heigthcenter, 0:widthcenter] = pi - beta_arr_raw[0:heigthcenter, 0:widthcenter]
-        # ul
-        beta_arr_raw[heigthcenter:, 0:widthcenter] += 2*pi
-        # lr
-        beta_arr_raw[0:heigthcenter, widthcenter:] = pi - beta_arr_raw[0:heigthcenter, widthcenter:]
-        # ur
-        # beta_arr_raw_upperright[heigthcenter:, widthcenter:]
-        return beta_arr_raw - a_a
-        
+    beta = create_beta(source_lat, rltv_long, Chi, azi, cent_row, cent_col)
 
-    abeta = create_abeta(source_lat, rltv_long, Chi, azimuth_arg)
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
-    u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(abeta)*sin(Chi)+cos(zen)*cos(Chi)) #km
-    array_to_geotiff(u0, "u0asymmetrytest.tif")
+    u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
+    #array_to_geotiff(u0, "u0asymmetrytest.tif", fin)
 
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
     # l_OC and D_OC are similar as expected
     l_OC = sqrt(4.0*R_T**2.0*sin(Chi/2.0)**2.0) # km
 
     # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
-    q1 = R_T*(sin(Chi)*sin(zen)*cos(abeta) + cos(Chi)*cos(zen) - cos(zen)) # km
+    q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
 
     # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
     theta = arccos(q1/l_OC) # radians
@@ -212,7 +232,7 @@ def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
         for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am_arg)
+            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am)
         end = time.time()
         time_sec = end-start
         PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
@@ -235,22 +255,23 @@ def fsum_2d(regionlat_arg, k_am_arg, zen_arg, azimuth_arg):
         logger.debug('l_OC: %s', l_OC)
         logger.debug('Problem Index theta: %s', theta[523, 470])
         logger.debug('theta: %s', theta)
-        logger.debug('Surrounding Indices abeta: %s', abeta[522:525, 470])
-        logger.debug('Problem Index abeta: %s', abeta[523, 470])
-        logger.debug('abeta: %s', abeta)
+        logger.debug('Surrounding Indices beta: %s', beta[522:525, 470])
+        logger.debug('Problem Index beta: %s', beta[523, 470])
+        logger.debug('beta: %s', beta)
         PropSumArray = zeros_like(l_OC)
 
         logger.info("Time for iterations, no symmetry")
         start = time.time()
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
-        for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(abeta, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am_arg)
+        for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(beta, op_flags=['readwrite'])):
+            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am)
         end = time.time()
         time_sec = end-start
         logger.debug('Surrounding Indices PropSumArray: %s', PropSumArray[522:525, 470])
         logger.debug('Problem Index PropSumArray: %s', PropSumArray[523, 470])
         logger.debug('PropSumArray: %s', PropSumArray)
+    
     return PropSumArray, time_sec
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
@@ -268,7 +289,6 @@ def gauss_earth_curvature_radius(center_lat):
     # R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
 
     return R_curve
-
 
 # Function does initial array sizing and create latitude/longitude arrays
 def create_latlon_arrays(R_curve, center_lat, pix_rad):
@@ -299,8 +319,29 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad):
     rel_long = tile(rel_long_vec,(kernel_rows,1))
     rel_lat = transpose(tile(rel_lat_vec,(kernel_cols,1)))
     src_lat = rel_lat + center_lat
+
     return src_lat, rel_long, center_row, center_col
 
+# Function that creates array of beta angles based on 
+# source latitude array, relative longitude array, Earth angle, and input viewing azimuth
+def create_beta(src_lat, rel_long, Chi, azi_view, cen_row, cen_col):
+    # beta array, where beta is horizontal angle from direct line (observer to source, OC) 
+    # to scatter line (observer to scatter, OQ), REF 2, Fig. 6, p. 648
+
+    # formula for horizontal angle on sphere from:
+    # http://www.codeguru.com/cpp/cpp/algorithms/article.php/c5115/Geographic-Distance-and-Azimuth-Calculations.htm
+
+    # base trig function
+    beta_arr_raw = arcsin(sin(pi/2.0-src_lat)*sin(rel_long)/sin(Chi))
+
+    # quadrant corrections
+    # lower half (left and right)
+    beta_arr_raw[0:cen_row, :] = pi - beta_arr_raw[0:cen_row, :]
+    # upper left
+    beta_arr_raw[cen_row:, 0:cen_col] += 2*pi
+    # upper right stays the same as original calculation
+
+    return beta_arr_raw - azi_view
 
 # Function that takes elements of the arrays of D_OC, Chi, etc. as arguments.
 def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg, del_u_farg = .2, lhr_viirs = 1.5):
