@@ -1,7 +1,7 @@
-======================
-**The User Interface**
-======================
+==================
+**User Interface**
+==================
 
-SET is currently in its early stages of development, so it needs as many people as possible to help improve it. This developer guide is designed to lead programmers through the basics of SET and allow them to contribute to its functionality. Step through each of the tutorials in order to walk through how SET works.
+SET's user interface is created nearly entirely using Tkinter, which is Python's de facto standard GUI. The menu is created by initializing a class `SkyglowEstimationToolbox`. Following the initialization are plenty of functions that make use of Tkinter's library of features, such as a menu button, canvas, etc. More information, guides, and tutorials on Tkinter can be found online.
 
-Please reach out to past developers for insight on the program's design and challenges. See the :doc:`contact page </trouble/contact>` for more information on how to get in touch!
+The `generate_map` function runs `Itest.py` and makes use of the `threading` library to run the UI window and Itest program simultaneously (preventing one or the other from freezing). The `LogRedirector` and `StderrRedirector` simply redirect logging lines from the terminal to the Tkinter progress window.

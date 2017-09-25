@@ -1,6 +1,6 @@
-===========================================================
-How to calculate how light scatters from a Source to a Site
-===========================================================
+===============================================================
+**How to calculate how light scatters from a Source to a Site**
+===============================================================
 
 **Summary and References**
 ------------------------------------
@@ -16,8 +16,8 @@ The following adapted diagram from (2) shows the relavant geometry parameters th
 
 .. image:: ../_static/cinzano_diagram.png
 
-``fsum_single()`` Code Organization
------------------------------------
+``fsum_single()`` **Code Organization**
+---------------------------------------
 
 Each equation in ``fsum_single()`` that is taken from any of the papers that detail our model for light pollution are referenced as follows:
 

@@ -18,10 +18,8 @@ This guide assumes that the developer is familiar with Python. There are numerou
    :maxdepth: 2
 
    environment
-   PropagationModel
-   CreatingKernel
-   ApplyingKernel
-   UserInterface
+   propagation
+   userinterface
 
 
 .. __: https://www.codecademy.com/
