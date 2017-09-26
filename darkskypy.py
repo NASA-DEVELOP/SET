@@ -7,7 +7,7 @@
 from __future__ import division
 import numpy
 from numpy import *
-import itertools
+#import itertools
 import time
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html #scipy.signal.fftconvolve
 # from scipy import ndimage
@@ -60,7 +60,7 @@ def main():
 		k_am = float(sys.argv[3])
 		filein = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
 
-		angle_list = [[0.0, 0.0], [15.0, 0.0], [15.0, 90.0], [15.0, 180.0], [15.0, 270.0]]
+		angle_list = [[15.0, 0.0], [15.0, 90.0], [15.0, 180.0], [15.0, 270.0], [0.0, 0.0]]
 		for angle_set in angle_list:
 			print(angle_set)
 			zenith = angle_set[0]
@@ -72,7 +72,8 @@ def main():
 			print(azimuth)
 			print(lat_rad)
 			propkernel, totaltime = fsum_2d(lat_rad, k_am, zen_rad, azi_rad, filein)
-			kerneltiffpath = 'kernel_' + str(centerlat) + '_' +  str(k_am) + '_' + str(zenith) + '_' + str(azimuth)
+			kerneltiffpath = ('kernel_' + str(centerlat) + '_' +  str(k_am) + '_' 
+				+ str(zenith) + '_' + str(azimuth) + '.tif')
 			array_to_geotiff(propkernel, kerneltiffpath, filein)
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
@@ -87,7 +88,8 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
         zen_rad = zen_arg*(pi/180)
         lat_rad = centerlat_arg*(pi/180)
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg)
+        kerneltiffpath = ('kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_'
+         + str(zen_arg) + '_' + str(azi_arg) + '.tif')
         array_to_geotiff(propkernel, kerneltiffpath, filein)
 
         logger.info("time for prop function ubreak 10: %s", totaltime)
@@ -146,7 +148,8 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     # plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
     # plt.show()
     ###############################################################################
-    FFTpath = filein[:-4]+ '_'+ str(centerlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azi_arg)+'convolved'+'.tif'
+    FFTpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
+    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved' +' .tif')
     array_to_geotiff(FFT_product_inverse, FFTpath, filein)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
     constants.ding()
@@ -239,19 +242,15 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         			l_OCleft[ii][jj], thetaleft[ii][jj], betaleft[ii][jj], zen, ubr, k_am)
 
         time_kern = time.time() - start
-        logger.info("Time to produce kernel: %d minutes", time_sec/60.0)
+        logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
+
+        # Mirror left side of kernel array to the right
         PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
 
-        # Complete 2d propagation function
+        # Complete 2d propagation function by putting left and right together
         PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
     else:
-        # test array subsets to reduce processing time
-        # Chi = Chi[300:heigthcenter,530:widthcenter]
-        # u0 = u0[300:heigthcenter,530:widthcenter]
-        # l_OC = l_OC[300:heigthcenter,530:widthcenter]
-        # theta = theta[300:heigthcenter,530:widthcenter]
-        # abeta = theta[300:heigthcenter,530:widthcenter]
-        # container for Propagation array
+    	# debug checks for subset arrays
         logger.debug('Problem Index Chi: %s', Chi[523, 470])
         logger.debug('Chi: %s', Chi)
         logger.debug('Problem Index u0: %s', u0[523, 470])
@@ -263,21 +262,35 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         logger.debug('Surrounding Indices beta: %s', beta[522:525, 470])
         logger.debug('Problem Index beta: %s', beta[523, 470])
         logger.debug('beta: %s', beta)
-        PropSumArray = zeros_like(l_OC)
 
-        logger.info("Time for iterations, no symmetry")
+        # initialize for 2d iteration
+        PropSumArray = zeros_like(l_OC)
+        kerdim = l_OC.shape
+        ker10per = kerdim[0]//10
+
+        logger.info("Beginning kernel...")
         start = time.time()
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
-        for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(beta, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am)
-        end = time.time()
-        time_sec = end-start
+        #for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(beta, op_flags=['readwrite'])):
+        #    p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am)
+
+        for ii in range(kerdim[0]):
+        	if mod(ii, ker10per) == 0:
+        		interm = time.time() - start
+        		logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
+        	for jj in range(kerdim[1]):
+        		PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj], 
+        			l_OC[ii][jj], theta[ii][jj], beta[ii][jj], zen, ubr, k_am)
+
+        time_kern = time.time() - start
+        logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
+
         logger.debug('Surrounding Indices PropSumArray: %s', PropSumArray[522:525, 470])
         logger.debug('Problem Index PropSumArray: %s', PropSumArray[523, 470])
         logger.debug('PropSumArray: %s', PropSumArray)
     
-    return PropSumArray, time_sec
+    return PropSumArray, time_kern
 
 # Function to calculate Gaussian Earth radius of curvature as a function of latitude
 def gauss_earth_curvature_radius(center_lat):
