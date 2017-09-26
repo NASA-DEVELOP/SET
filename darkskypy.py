@@ -218,23 +218,28 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         u0left = u0[0:, 0:widthcenter]
         l_OCleft = l_OC[0:, 0:widthcenter]
         thetaleft = theta[0:, 0:widthcenter]
-
-        # test array subsets to reduce processing time
-        # Chileft = Chi[300:432, 530:widthcenter]
-        # u0left = u0[300:432, 530:widthcenter]
-        # l_OCleft = l_OC[300:432, 530:widthcenter]
-        # thetaleft = theta[300:432, 530:widthcenter]
-        # container for Propogation array
+        betaleft = beta[0:, 0:widthcenter]
         PropSumArrayleft = zeros_like(l_OCleft)
+        kerdim = l_OCleft.shape
+        ker10per = kerdim[0]//10
 
-        logger.info("Time for iterations")
+        logger.info("Beginning kernel...")
         start = time.time()
 
         # 2d iteration for integrating from u0 to infinity to create propagation function for each element
-        for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-            p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am)
-        end = time.time()
-        time_sec = end-start
+        #for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
+        #    p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am)
+
+        for ii in range(kerdim[0]):
+        	if mod(ii, ker10per) == 0:
+        		interm = time.time() - start
+        		logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
+        	for jj in range(kerdim[1]):
+        		PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj], u0left[ii][jj], 
+        			l_OCleft[ii][jj], thetaleft[ii][jj], betaleft[ii][jj], zen, ubr, k_am)
+
+        time_kern = time.time() - start
+        logger.info("Time to produce kernel: %d minutes", time_sec/60.0)
         PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
 
         # Complete 2d propagation function
