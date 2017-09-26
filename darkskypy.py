@@ -50,7 +50,7 @@ def main():
 		ze = 30.0 # Default zenith angle (degrees)
 		az = 180.0 # Default azimuth angle for site viewing (degrees)
 		#ISSUE: UPDATE SGMAPPER TO ACCEPT DEGREES INPUT FOR AZIMUTH
-		fi = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		fi = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
 		sgmapper(la, ka, ze, az, fi)
 
 	elif action == "kernel_lib":
@@ -58,7 +58,7 @@ def main():
 		centerlat = float(sys.argv[2])
 		lat_rad = centerlat*(pi/180)
 		k_am = float(sys.argv[3])
-		filein = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		filein = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
 
 		angle_list = [[0.0, 0.0], [15.0, 0.0], [15.0, 90.0], [15.0, 180.0], [15.0, 270.0]]
 		for angle_set in angle_list:
@@ -86,7 +86,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
         azi_rad = azi_arg*(pi/180)
         zen_rad = zen_arg*(pi/180)
         lat_rad = centerlat_arg*(pi/180)
-        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad)
+        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
 
@@ -146,7 +146,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     # plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
     # plt.show()
     ###############################################################################
-    FFTpath = filein[:-4]+ '_'+ str(regionlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azimuth_arg)+'convolved'+'.tif'
+    FFTpath = filein[:-4]+ '_'+ str(centerlat_arg) +'_'+ str(ubr_arg) +'_'+ str(zen_arg) +'_'+str(azi_arg)+'convolved'+'.tif'
     array_to_geotiff(FFT_product_inverse, FFTpath, filein)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
     constants.ding()
