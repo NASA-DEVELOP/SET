@@ -15,6 +15,7 @@ import os.path
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from osgeo import gdal
+import json
 import logging
 import sys
 import warnings
@@ -43,14 +44,20 @@ def main():
 	action = sys.argv[1]
 
 	if action == "sgmap_single":
-
-		# Default sgmapper() arguments
-		la = 40.8797 # Default latitude (decimal degrees)
-		ka = 1.0 # Default k_am (unitless)
-		ze = 30.0 # Default zenith angle (degrees)
-		az = 180.0 # Default azimuth angle for site viewing (degrees)
+		# Default sgmappper() arguments
+		la = float(sys.argv[2])
+		ka = float(sys.argv[3])
+		ze = float(sys.argv[4])
+		az = float(sys.argv[5])
+		filename = sys.argv[6]
+		filepath1 = os.getcwd() + '\\' + str(filename)
+		fi = filepath1.replace("/","\\")
+		#la = 37.032814 # Default latitude (decimal degrees)
+		#ka = 1.0 # Default k_am (unitless)
+		#ze = 45.0 # Default zenith angle (degrees)
+		#az = 0.0 # Default azimuth angle for site viewing (degrees)
 		#ISSUE: UPDATE SGMAPPER TO ACCEPT DEGREES INPUT FOR AZIMUTH
-		fi = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		#fi = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\clip-SVDNB_npp_20160601-20160630_75N180W_vcmslcfg_v10_c201608101833.avg_rade9.tif" # Test VIIRS monthly file
 		sgmapper(la, ka, ze, az, fi)
 
 	elif action == "kernel_lib":
@@ -60,7 +67,7 @@ def main():
 		k_am = float(sys.argv[3])
 		filein = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
 
-		angle_list = [[15.0, 0.0], [15.0, 90.0], [15.0, 180.0], [15.0, 270.0], [0.0, 0.0]]
+		angle_list = [[45.0, 0.0], [45.0, 90.0], [45.0, 180.0], [45.0, 270.0], [0.0, 0.0]]
 		for angle_set in angle_list:
 			print(angle_set)
 			zenith = angle_set[0]
@@ -112,6 +119,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     padded_prop = pad(propkernel,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
     # propagation function applied via fft must be rotated 180 degrees
     padded_prop = fliplr(flipud(padded_prop))
+
     ################# for convolution FFT comparison
     # subset = 50
     # prows = padded_prop.shape[0]
@@ -147,7 +155,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     # plt.show()
     ###############################################################################
     FFTpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
-    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved' +' .tif')
+    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved' +'.tif')
     array_to_geotiff(FFT_product_inverse, FFTpath, filein)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
     constants.ding()
