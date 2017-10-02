@@ -57,7 +57,8 @@ def main():
 		#ze = 45.0 # Default zenith angle (degrees)
 		#az = 0.0 # Default azimuth angle for site viewing (degrees)
 		#ISSUE: UPDATE SGMAPPER TO ACCEPT DEGREES INPUT FOR AZIMUTH
-		#fi = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\clip-SVDNB_npp_20160601-20160630_75N180W_vcmslcfg_v10_c201608101833.avg_rade9.tif" # Test VIIRS monthly file
+		#fi = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		#fi = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
 		sgmapper(la, ka, ze, az, fi)
 
 	elif action == "kernel_lib":
@@ -65,7 +66,8 @@ def main():
 		centerlat = float(sys.argv[2])
 		lat_rad = centerlat*(pi/180)
 		k_am = float(sys.argv[3])
-		filein = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		#filein = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		filein = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
 
 		angle_list = [[45.0, 0.0], [45.0, 90.0], [45.0, 180.0], [45.0, 270.0], [0.0, 0.0]]
 		for angle_set in angle_list:
@@ -98,25 +100,38 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
         array_to_geotiff(propkernel, kerneltiffpath, filein)
 
         logger.info("time for prop function ubreak 10: %s", totaltime)
+    else:
+    	# If there is a 2d propagation function (kernel), ...
+    	# then read it into an array
+    	kerneldata = gdal.Open(kerneltiffpath)
+    	propkernel = kerneldata.ReadAsArray()
 
-    kerneldata = gdal.Open(kerneltiffpath)
-    propkernel = kerneldata.ReadAsArray()
-
+    # read in VIIRS DNB image
     viirsraster = gdal.Open(filein)
     imagearr = viirsraster.ReadAsArray()
 
+    # Produce sky glow raster
+    skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
+    skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
+    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved' +' .tif')
+    array_to_geotiff(skyglowarr, skyglowpath, filein)
+    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
+    constants.ding()
+
+# Function convolves VIIRS DNB with 2d propagation function
+def convolve_viirs_to_skyglow(dnbarr, proparr):
     ######### Convert to float 32 for Fourier, scale, and round
     # falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
     # Not sure if this is correct scaling factor, I assume that this makes the output prop image in units of cd/m^2
     viirs_scaling_factor = 10**9
-    imagearr *= viirs_scaling_factor
-    propkernel = float32(nan_to_num(propkernel))
+    dnbarr *= viirs_scaling_factor
+    proparr = float32(nan_to_num(proparr))
     # generalized padding of kernel so that fft can run
-    pad_left = (imagearr.shape[0] - propkernel.shape[0])//2
-    pad_right = (imagearr.shape[0] - propkernel.shape[0])//2 + 1
-    pad_up = (imagearr.shape[1] - propkernel.shape[1])//2
-    pad_down = (imagearr.shape[1] - propkernel.shape[1])//2
-    padded_prop = pad(propkernel,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
+    pad_left = (dnbarr.shape[0] - proparr.shape[0])//2
+    pad_right = (dnbarr.shape[0] - proparr.shape[0])//2 + 1
+    pad_up = (dnbarr.shape[1] - proparr.shape[1])//2
+    pad_down = (dnbarr.shape[1] - proparr.shape[1])//2
+    padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
     # propagation function applied via fft must be rotated 180 degrees
     padded_prop = fliplr(flipud(padded_prop))
 
@@ -136,7 +151,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
 
-    np_dft_viirs_im = fft.fft2(imagearr)
+    np_dft_viirs_im = fft.fft2(dnbarr)
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
 
@@ -144,6 +159,8 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
     FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
+
+    return FFT_product_inverse
 
     # Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
     # apply kernel: https://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.ndimage.filters.convolve.html
@@ -153,13 +170,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     # plt.subplot(122),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
     # plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
     # plt.show()
-    ###############################################################################
-    FFTpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
-    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved' +'.tif')
-    array_to_geotiff(FFT_product_inverse, FFTpath, filein)
-    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
-    constants.ding()
-    
+    ###############################################################################    
 
 # Function that creates 2d propagation function
 def fsum_2d(cenlat, k_am, zen, azi, fin):
