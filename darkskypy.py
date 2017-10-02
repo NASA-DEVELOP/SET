@@ -162,13 +162,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # plt.subplot(122),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
     # plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
     # plt.show()
-    ###############################################################################
-    FFTpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
-    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved' +' .tif')
-    array_to_geotiff(FFT_product_inverse, FFTpath, filein)
-    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
-    constants.ding()
-    
+    ###############################################################################    
 
 # Function that creates 2d propagation function
 def fsum_2d(cenlat, k_am, zen, azi, fin):
