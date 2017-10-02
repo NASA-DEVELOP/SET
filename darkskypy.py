@@ -74,8 +74,7 @@ def main():
 			print(azimuth)
 			print(lat_rad)
 			propkernel, totaltime = fsum_2d(lat_rad, k_am, zen_rad, azi_rad, filein)
-			kerneltiffpath = ('kernel_' + str(centerlat) + '_' +  str(k_am) + '_' 
-				+ str(zenith) + '_' + str(azimuth) + '.tif')
+			kerneltiffpath = 'kernel_' + str(centerlat) + '_' +  str(k_am) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
 			array_to_geotiff(propkernel, kerneltiffpath, filein)
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
@@ -90,8 +89,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
         zen_rad = zen_arg*(pi/180)
         lat_rad = centerlat_arg*(pi/180)
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-        kerneltiffpath = ('kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_'
-         + str(zen_arg) + '_' + str(azi_arg) + '.tif')
+        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
         array_to_geotiff(propkernel, kerneltiffpath, filein)
 
         logger.info("time for prop function ubreak 10: %s", totaltime)
@@ -186,6 +184,9 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
 
     # z, Zenith angle site, REF 2, Fig. 6, p. 648
     logger.info('z, Site zenith (deg): {}'.format(zen*(180/pi)))
+
+    # Beta, Azimuth angle site, REF 2, Fig 6 p. 648
+    logger.info('Beta, Site azimuth as referenced from North (deg): {}'.format(azi*(180/pi)))
 
     # ubr, Length of u for relaxing integration increment
     ubr = ubr_arg
