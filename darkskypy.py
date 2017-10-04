@@ -45,13 +45,28 @@ def main():
 
 	if action == "sgmap_single":
 		# Default sgmappper() arguments
-		la = float(sys.argv[2])
-		ka = float(sys.argv[3])
-		ze = float(sys.argv[4])
-		az = float(sys.argv[5])
-		filename = sys.argv[6]
-		filepath1 = os.getcwd() + '\\' + str(filename)
-		fi = filepath1.replace("/","\\")
+		default_inputs = {"none","None","na","NA","-"}
+		if sys.argv[2] not in default_inputs:# Default latitude (decimal degrees); if not in the list of values for a default input then user has defined their own value
+			la = float(sys.argv[2])
+		else:
+			la = 40.8797 #for GRTE and 37.032814 for the Colorado Plateau
+		if sys.argv[3] not in default_inputs:# Default k_am (unitless); if not in the list of values for a default input then user has defined their own value
+			ka = float(sys.argv[3])
+		else:
+			ka = 1.0
+		if sys.argv[4] not in default_inputs:# Default zenith angle (degrees); if not in the list of values for a default input then user has defined their own value
+			ze = float(sys.argv[4])
+		else:
+			ze = 0.0
+		if sys.argv[5] not in default_inputs: # Default azimuth angle for site viewing (degrees); if not in the list of values for a default input then user has defined their own value
+			az = float(sys.argv[5])
+		else:
+			az = 0.0
+		if sys.argv[6] not in default_inputs:
+			filename = sys.argv[6].split("/")
+			fi = os.path.join(os.getcwd(), *filename)
+		else:
+			fi = os.path.join(os.getcwd(), "data", "20140901_20140930_75N180W_C.tif")
 		#la = 37.032814 # Default latitude (decimal degrees)
 		#ka = 1.0 # Default k_am (unitless)
 		#ze = 45.0 # Default zenith angle (degrees)
@@ -63,13 +78,30 @@ def main():
 
 	elif action == "kernel_lib":
 
-		centerlat = float(sys.argv[2])
-		lat_rad = centerlat*(pi/180)
-		k_am = float(sys.argv[3])
-		#filein = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
-		filein = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
+		default_inputs = {"none","None","na","NA","-"}
+		if sys.argv[2] not in default_inputs:# Default latitude (decimal degrees); if not in the list of values for a default input then user has defined their own value
+			centerlat = float(sys.argv[2]) 
+		else: #Default Value
+			centerlat = 40.8797 #for GRTE and 37.032814 for the Colorado Plateau
+		if sys.argv[3] not in default_inputs:# Default k_am (unitless); if not in the list of values for a default input then user has defined their own value
+			k_am = float(sys.argv[3])
+		else: #Default Value
+			k_am = 1.0 # typically calculated with a value of 1
+		if sys.argv[4] not in default_inputs:# Default zenith angle (degrees); if not in the list of values for a default input then user has defined their own value
+			csv_in = sys.argv[4].split("/")
+			csv_path = os.path.join(os.getcwd(), *csv_in)
+			angle_list = numpy.loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
+		else: #Default Value
+			csv_path = os.path.join(os.getcwd(), "default.csv") # the default CSV is default.csv which I added in the artifitial-brightness directory the input angles are 45.0,0.0 45.0,90.0 45.0,180.0 45.0,270.0 0.0,0.0
+			angle_list = numpy.loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
+		if sys.argv[5] not in default_inputs: # Test VIIRS monthly file
+			filename = sys.argv[5].split("/")
+			filein = os.path.join(os.getcwd(), *filename)
+		else:
+			filein = os.path.join(os.getcwd(), "data", "20140901_20140930_75N180W_C.tif")
 
-		angle_list = [[45.0, 0.0], [45.0, 90.0], [45.0, 180.0], [45.0, 270.0], [0.0, 0.0]]
+		lat_rad = centerlat*(pi/180)
+
 		for angle_set in angle_list:
 			print(angle_set)
 			zenith = angle_set[0]
@@ -113,9 +145,9 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     # Produce sky glow raster
     skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
     skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
-    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved' +' .tif')
+    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
     array_to_geotiff(skyglowarr, skyglowpath, filein)
-    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + FFTpath)
+    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
     constants.ding()
 
 # Function convolves VIIRS DNB with 2d propagation function
