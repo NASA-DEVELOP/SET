@@ -15,7 +15,7 @@ References:
 """
 from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
     Text, Menubutton, Menu, Checkbutton, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, \
-    StringVar, IntVar
+    StringVar, IntVar, PhotoImage
 import ttk
 from PIL import Image, ImageTk, ImageOps
 import tkFileDialog
@@ -26,6 +26,7 @@ import time
 import constants
 import darkskypy
 import logging
+import os
 logger = logging.getLogger()
 
 
@@ -51,7 +52,8 @@ class SkyglowEstimationToolbox:
         # Sets window title, size, and icon on screen.
         self.root.title("Skyglow Estimation Toolbox (SET)")
         self.root.geometry('%dx%d+%d+%d' % (constants.SW*0.75, constants.SH*0.75, 25, 25))
-        self.root.wm_iconbitmap(constants.ICO)
+        if "nt" == os.name: # See Lee Crocker's answer. wm_iconbitmap won't work on Linux: https://stackoverflow.com/questions/11176638/tkinter-tclerror-error-reading-bitmap-file
+            self.root.wm_iconbitmap(constants.ICO)
         self.root.resizable(False, False)
 
         # Creates three paned windows for the main screen.
@@ -213,7 +215,8 @@ class SkyglowEstimationToolbox:
         instr_window = Toplevel(self.root)
         instr_window.geometry('550x575+25+25')
         instr_window.title('Instructions')
-        instr_window.wm_iconbitmap(constants.ICO)
+        if "nt" == os.name:
+            instr_window.wm_iconbitmap(constants.ICO)
         instr_window.resizable(False, False)
 
         # Creatse Scrollbar and Frame for containing other widgets.
@@ -243,7 +246,8 @@ class SkyglowEstimationToolbox:
         about_window = Toplevel(self.root)
         about_window.geometry('350x335+25+25')
         about_window.title('About')
-        about_window.wm_iconbitmap(constants.ICO)
+        if "nt" == os.name:
+            about_window.wm_iconbitmap(constants.ICO)
         about_window.resizable(False, False)
 
         # Adds text to about window.
@@ -259,7 +263,8 @@ class SkyglowEstimationToolbox:
         prg_window = Toplevel(self.root)
         prg_window.geometry('650x325+250+250')
         prg_window.title('Generating Artificial Skyglow Map...')
-        prg_window.wm_iconbitmap(constants.ICO)
+        if "nt" == os.name:
+            prg_window.wm_iconbitmap(constants.ICO)
         prg_window.resizable(False, False)
         prg_frame = Frame(prg_window)
         prg_frame.pack(fill=BOTH)
