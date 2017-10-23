@@ -33,6 +33,8 @@ default_ze = 0.0
 default_az = 0.0
 default_csv_path = os.path.join(os.getcwd(), "default.csv")
 default_input_path = os.path.join(os.getcwd(), "data", "20140901_20140930_75N180W_C.tif")
+default_kernel_folder = os.path.join(os.getcwd(), "kernel_lib")
+default_output_folder = os.path.join(os.getcwd(), "skyglow_out")
 
 
 
@@ -55,7 +57,10 @@ def main():
 
 	action = sys.argv[1]
 
+	# Estimate a single map of artificial sky brightness with or without
+	# an existing 2d propagation function or "kernel"
 	if action == "sgmap_single":
+
 		# Default sgmappper() arguments
 		default_inputs = {"none","None","na","NA","-"}
 		if sys.argv[2] not in default_inputs:# Default latitude (decimal degrees); if not in the list of values for a default input then user has defined their own value
@@ -88,6 +93,7 @@ def main():
 		#fi = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
 		sgmapper(la, ka, ze, az, fi)
 
+	# Estimate a group or "library" of 2d propagation functions or "kernels"
 	elif action == "kernel_lib":
 
 		default_inputs = {"none","None","na","NA","-"}
@@ -127,6 +133,26 @@ def main():
 			propkernel, totaltime = fsum_2d(lat_rad, k_am, zen_rad, azi_rad, filein)
 			kerneltiffpath = 'kernel_' + str(centerlat) + '_' +  str(k_am) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
 			array_to_geotiff(propkernel, kerneltiffpath, filein)
+
+	# Produce a set of artificial skyglow maps based an existing library of propagation functions
+	elif action == "sgmap_multiple":
+
+		default_inputs = {"none","None","na","NA","-"}
+		if sys.argv[2] not in default_inputs: # Test kernel iput folder
+			inname = sys.argv[2].split("/")
+			infolder = os.path.join(os.getcwd(), *inname)
+		else:
+			infolder = default_kernel_folder
+		print(infolder)
+
+		if sys.argv[3] not in default_inputs: # Test skyglow map output folder
+			outname = sys.argv[3].split("/")
+			outfolder = os.path.join(os.getcwd(), *outname)
+		else:
+			outfolder = default_output_folder
+		print(outfolder)
+
+
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     kerneltiffpath = prop2filein
