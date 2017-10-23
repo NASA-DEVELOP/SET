@@ -18,6 +18,7 @@ from osgeo import gdal
 import json
 import logging
 import sys
+import glob
 import warnings
 import skyglow
 import constants
@@ -45,6 +46,7 @@ default_output_folder = os.path.join(os.getcwd(), "skyglow_out")
 # still need to get rid of global variables
 # still consider making external variable/function constants file
 # consider whether name "darkskypy" is okay
+# darkskypy mixes spaces and tabs for indentation
 
 PsiZ_cond = 89.5*(pi/180)
 ubr_arg = 10.0
@@ -138,55 +140,86 @@ def main():
 	elif action == "sgmap_multiple":
 
 		default_inputs = {"none","None","na","NA","-"}
-		if sys.argv[2] not in default_inputs: # Test kernel iput folder
-			inname = sys.argv[2].split("/")
-			infolder = os.path.join(os.getcwd(), *inname)
+		# Get input VIIRS image path
+		if sys.argv[2] not in default_inputs: # Test VIIRS monthly file
+			filename = sys.argv[2].split("/")
+			filein = os.path.join(os.getcwd(), "data", *filename)
 		else:
-			infolder = default_kernel_folder
-		print(infolder)
-
-		if sys.argv[3] not in default_inputs: # Test skyglow map output folder
-			outname = sys.argv[3].split("/")
+			filein = default_input_path
+		# Get kernel library folder path
+		if sys.argv[3] not in default_inputs: # Test kernel iput folder
+			krnname = sys.argv[3].split("/")
+			krnfolder = os.path.join(os.getcwd(), *krnname)
+		else:
+			krnfolder = default_kernel_folder
+		# Get skyglow output folder path
+		if sys.argv[4] not in default_inputs: # Test skyglow map output folder
+			outname = sys.argv[4].split("/")
 			outfolder = os.path.join(os.getcwd(), *outname)
 		else:
 			outfolder = default_output_folder
-		print(outfolder)
 
+		# read in VIIRS DNB image
+		viirsraster = gdal.Open(filein)
+		imgarr = viirsraster.ReadAsArray()
 
+		# Get kernel library file list
+		krnsrch = os.path.join(krnfolder,'*.tif')
+		krnlist = glob.glob(krnsrch)
+
+		for krn in krnlist:
+			# If there is a 2d propagation function (kernel), ...
+			# then read it into an array
+			kh = gdal.Open(krn)
+			krnarr = kh.ReadAsArray()
+			# Break down kernel filename to get elements for skyglow filename
+			krnbase = os.path.basename(krn)
+			sgtags = krnbase.split("_")
+			# Change "kernel" to "skyglow"
+			sgtags[0] = "skyglow"
+			# Put the skyglow basename together
+			sep = "_"
+			sgbase = sep.join(sgtags)
+			sgfile = os.path.join(outfolder, sgbase)
+			print(sgfile)
+			# Create skyglow array
+			sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
+			# Write skyglow to a geotiff
+			array_to_geotiff(sgarr, sgfile, filein)
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
-    kerneltiffpath = prop2filein
+	kerneltiffpath = prop2filein
 
-    if os.path.isfile(kerneltiffpath) is False:
-        # If there is no 2d propagation function (kernel), ...
-        # then estimate the 2d propagation function
+	if os.path.isfile(kerneltiffpath) is False:
+		# If there is no 2d propagation function (kernel), ...
+		# then estimate the 2d propagation function
 
-        # first convert angles in degrees to radians
-        azi_rad = azi_arg*(pi/180)
-        zen_rad = zen_arg*(pi/180)
-        lat_rad = centerlat_arg*(pi/180)
-        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
-        array_to_geotiff(propkernel, kerneltiffpath, filein)
+		# first convert angles in degrees to radians
+		azi_rad = azi_arg*(pi/180)
+		zen_rad = zen_arg*(pi/180)
+		lat_rad = centerlat_arg*(pi/180)
+		propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+		kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
+		array_to_geotiff(propkernel, kerneltiffpath, filein)
 
-        logger.info("time for prop function ubreak 10: %s", totaltime)
-    else:
-    	# If there is a 2d propagation function (kernel), ...
-    	# then read it into an array
-    	kerneldata = gdal.Open(kerneltiffpath)
-    	propkernel = kerneldata.ReadAsArray()
+		logger.info("time for prop function ubreak 10: %s", totaltime)
+	else:
+		# If there is a 2d propagation function (kernel), ...
+		# then read it into an array
+		kerneldata = gdal.Open(kerneltiffpath)
+		propkernel = kerneldata.ReadAsArray()
 
-    # read in VIIRS DNB image
-    viirsraster = gdal.Open(filein)
-    imagearr = viirsraster.ReadAsArray()
+	# read in VIIRS DNB image
+	viirsraster = gdal.Open(filein)
+	imagearr = viirsraster.ReadAsArray()
 
-    # Produce sky glow raster
-    skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
-    skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
-    	+ str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
-    array_to_geotiff(skyglowarr, skyglowpath, filein)
-    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
-    constants.ding()
+	# Produce sky glow raster
+	skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
+	skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
+		+ str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
+	array_to_geotiff(skyglowarr, skyglowpath, filein)
+	logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
+	constants.ding()
 
 # Function convolves VIIRS DNB with 2d propagation function
 def convolve_viirs_to_skyglow(dnbarr, proparr):
