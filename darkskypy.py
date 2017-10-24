@@ -154,6 +154,15 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     viirsraster = gdal.Open(filein)
     imagearr = viirsraster.ReadAsArray()
 
+    #ADDED DEBUG CODE#
+    logger.debug('imagearr shape : {}'.format(imagearr.shape))
+    logger.debug('imagearr shape rows : {}'.format(imagearr.shape[0]))
+    logger.debug('imagearr shape columns : {}'.format(imagearr.shape[1]))
+    logger.debug('propkernel shape : {}'.format(propkernel.shape))
+    logger.debug('propkernel shape rows : {}'.format(propkernel.shape[0]))
+    logger.debug('propkernel shape columns : {}'.format(propkernel.shape[1]))
+
+
     # Produce sky glow raster
     skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
     skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
@@ -170,12 +179,30 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     viirs_scaling_factor = 10**9
     dnbarr *= viirs_scaling_factor
     proparr = float32(nan_to_num(proparr))
+
+    #ADDED DEBUG CODE#
+    logger.debug('dnbarr.shape[0] : {}'.format(dnbarr.shape[0]))
+    logger.debug('dnbarr.shape[1] : {}'.format(dnbarr.shape[1]))
+    logger.debug('proparr.shape[0] : {}'.format(proparr.shape[0]))
+    logger.debug('proparr.shape[1] : {}'.format(proparr.shape[1]))
+
     # generalized padding of kernel so that fft can run
     pad_left = (dnbarr.shape[0] - proparr.shape[0])//2
     pad_right = (dnbarr.shape[0] - proparr.shape[0])//2 + 1
     pad_up = (dnbarr.shape[1] - proparr.shape[1])//2
     pad_down = (dnbarr.shape[1] - proparr.shape[1])//2
     padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
+
+    #ADDED DEBUG CODE#
+    logger.debug('padded_prop : {}'.format(array(padded_prop).shape))
+    logger.debug('padded_prop[0] : {}'.format(array(padded_prop).shape[0]))
+    logger.debug('padded_prop[1] : {}'.format(array(padded_prop).shape[1]))
+    logger.debug('pad_left : {}'.format(array(pad_left)))
+    logger.debug('pad_right : {}'.format(array(pad_right)))
+    logger.debug('pad_up : {}'.format(array(pad_up)))
+    logger.debug('pad_down : {}'.format(array(pad_down)))
+
+
     # propagation function applied via fft must be rotated 180 degrees
     padded_prop = fliplr(flipud(padded_prop))
 
@@ -195,12 +222,26 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
 
+    #ADDED DEBUG CODE#
+    logger.debug('np_dft_prop_im shape : {}'.format(np_dft_prop_im.shape))
+    logger.debug('np_dft_kernel_shift shape : {}'.format(np_dft_kernel_shift.shape))
+    logger.debug('np_magnitude_spectrum shape : {}'.format(np_magnitude_spectrum.shape))
+
     np_dft_viirs_im = fft.fft2(dnbarr)
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
 
+    #ADDED DEBUG CODE#
+    logger.debug('np_dft_viirs_im shape : {}'.format(np_dft_viirs_im.shape))
+    logger.debug('np_dft_viirs_shift shape : {}'.format(np_dft_viirs_shift.shape))
+    logger.debug('np_magnitude_spectrum_viirs shape : {}'.format(np_magnitude_spectrum_viirs.shape))
+
     kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
+
+    #ADDED DEBUG CODE#
+    logger.debug('kernel_inv_shift shape : {}'.format(kernel_inv_shift.shape))
+    logger.debug('viirs_inv_shift shape : {}'.format(viirs_inv_shift.shape))
 
     FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
 
