@@ -213,13 +213,13 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 	viirsraster = gdal.Open(filein)
 	imagearr = viirsraster.ReadAsArray()
 
-    #ADDED DEBUG CODE#
-    logger.debug('imagearr shape : {}'.format(imagearr.shape))
-    logger.debug('imagearr shape rows : {}'.format(imagearr.shape[0]))
-    logger.debug('imagearr shape columns : {}'.format(imagearr.shape[1]))
-    logger.debug('propkernel shape : {}'.format(propkernel.shape))
-    logger.debug('propkernel shape rows : {}'.format(propkernel.shape[0]))
-    logger.debug('propkernel shape columns : {}'.format(propkernel.shape[1]))
+	#ADDED DEBUG CODE#
+	logger.debug('imagearr shape : {}'.format(imagearr.shape))
+	logger.debug('imagearr shape rows : {}'.format(imagearr.shape[0]))
+	logger.debug('imagearr shape columns : {}'.format(imagearr.shape[1]))
+	logger.debug('propkernel shape : {}'.format(propkernel.shape))
+	logger.debug('propkernel shape rows : {}'.format(propkernel.shape[0]))
+	logger.debug('propkernel shape columns : {}'.format(propkernel.shape[1]))
 
 
 	# Produce sky glow raster
@@ -247,9 +247,9 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
 
     # generalized padding of kernel so that fft can run
     pad_left = (dnbarr.shape[0] - proparr.shape[0])//2
-    pad_right = (dnbarr.shape[0] - proparr.shape[0])//2 + 1
+    pad_right = (dnbarr.shape[0] - proparr.shape[0])//2
     pad_up = (dnbarr.shape[1] - proparr.shape[1])//2
-    pad_down = (dnbarr.shape[1] - proparr.shape[1])//2
+    pad_down = (dnbarr.shape[1] - proparr.shape[1])//2 + 1
     padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
 
     #ADDED DEBUG CODE#
