@@ -102,7 +102,7 @@ def main():
 		if sys.argv[2] not in default_inputs:# Default latitude (decimal degrees); if not in the list of values for a default input then user has defined their own value
 			centerlat = float(sys.argv[2]) 
 		else: #Default Value
-			centerlat = default_la # 40.8797for GRTE and 37.032814 for the Colorado Plateau
+			centerlat = default_la # 40.8797 for GRTE and 37.032814 for the Colorado Plateau
 		if sys.argv[3] not in default_inputs:# Default k_am (unitless); if not in the list of values for a default input then user has defined their own value
 			k_am = float(sys.argv[3])
 		else: #Default Value
@@ -124,6 +124,8 @@ def main():
 
 		for angle_set in angle_list:
 			print(angle_set)
+			logger.info(angle_list)
+			logger.info(angle_set)
 			zenith = angle_set[0]
 			azimuth = angle_set[1]
 			# first convert angles in degrees to radians
@@ -143,7 +145,7 @@ def main():
 		# Get input VIIRS image path
 		if sys.argv[2] not in default_inputs: # Test VIIRS monthly file
 			filename = sys.argv[2].split("/")
-			filein = os.path.join(os.getcwd(), "data", *filename)
+			filein = os.path.join(os.getcwd(), *filename)
 		else:
 			filein = default_input_path
 		# Get kernel library folder path
@@ -186,6 +188,28 @@ def main():
 			sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
 			# Write skyglow to a geotiff
 			array_to_geotiff(sgarr, sgfile, filein)
+			# Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
+			cond_angle = sgtags[4]
+			cond = float(cond_angle[:-4])
+			if (cond < 180.0) and not (cond == 0.0):
+				# Must undo the scaling factor in convolve_viirs_to_skyglow
+				rescale_factor = 10**-9
+				krn_rescale = rescale_factor * krnarr
+				# Flips the current kernel left to right
+				krnarr_flip = fliplr(krn_rescale)
+				# Creates the corresponding flipped angle
+				flip_azi = 360.0 - cond
+				# Returns the proper file extention onto the tag in order to read as a file
+				sgtags[4] = str(flip_azi) + '.tif'
+				sgbase_flip = sep.join(sgtags)
+				sgfile_flip = os.path.join(outfolder, sgbase_flip)
+				print(sgfile_flip)
+				logger.info("working on " + sgbase_flip)
+				sgarr_flip = convolve_viirs_to_skyglow(imgarr, krnarr_flip)
+				array_to_geotiff(sgarr_flip, sgfile_flip, filein)
+
+
+
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 	kerneltiffpath = prop2filein
@@ -379,7 +403,9 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # theta, elevation angle of scatter above source from site (QOC), REF 2, Appendix A (A1), p. 656
     theta = arccos(q1/l_OC) # radians
 
-    if zen == 0.0:
+    # simulates what a 180 degrees azimuth input would look like to the program to make sure that rounding errors dont prevent the if statement
+    azi_of_180 = float(180)*pi/180.0
+    if azi in {0.0, azi_of_180}:
         # Get left arrays to cut processing time in half
         Chileft = Chi[0:, 0:widthcenter]
         u0left = u0[0:, 0:widthcenter]
