@@ -213,8 +213,11 @@ def main():
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 	kerneltiffpath = prop2filein
-
-	if os.path.isfile(kerneltiffpath) is False:
+	#added code to allow for auto opening of kernels based on if they are saved in the current directory or the kernel_lib directory
+	if kerneltiffpath == "":
+		# If there is no input from skyglow.py for in input kernel (such as when the program is run through command line) then the default kernel name is used
+		kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
+	if (os.path.isfile(kerneltiffpath) == False) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == False):
 		# If there is no 2d propagation function (kernel), ...
 		# then estimate the 2d propagation function
 
@@ -228,10 +231,22 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 
 		logger.info("time for prop function ubreak 10: %s", totaltime)
 	else:
-		# If there is a 2d propagation function (kernel), ...
-		# then read it into an array
-		kerneldata = gdal.Open(kerneltiffpath)
-		propkernel = kerneldata.ReadAsArray()
+		if (os.path.isfile(kerneltiffpath) == True) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == False):
+			# If there is a 2d propagation function (kernel) in the current direcotry and not in the kernel_lib subdirectory, ...
+			# then read it into an array
+			kerneldata = gdal.Open(kerneltiffpath)
+			propkernel = kerneldata.ReadAsArray()
+		elif (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == True) and (os.path.isfile(kerneltiffpath) == False):
+			# If there is a 2d propagation function (kernel) in the kernel_lib sub directory but not the current directory, ...
+			# then read it into an array
+			kerneldata = gdal.Open(os.path.join("kernel_lib", kerneltiffpath))
+			propkernel = kerneldata.ReadAsArray()
+		elif (os.path.isfile(kerneltiffpath) == True) and (os.path.isfile(os.path.join("kernel_lib",kerneltiffpath)) == True):
+			# If there is a 2d propagation function (kernel) in the current directory and subdirectory, ...
+			# then read the one in the current directory into an array 
+			kerneldata = gdal.Open(kerneltiffpath)
+			propkernel = kerneldata.ReadAsArray()
+		
 
 	# read in VIIRS DNB image
 	viirsraster = gdal.Open(filein)
