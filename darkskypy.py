@@ -169,7 +169,14 @@ def main():
 		krnsrch = os.path.join(krnfolder,'*.tif')
 		krnlist = glob.glob(krnsrch)
 
+		ln = 0
+
 		for krn in krnlist:
+			# If the loop has already ran once then rescale imgarr back down to prevent multiple scaling factors being applied
+			if ln > 0:
+				imgarr *= 10**-9
+			ln = 1
+
 			# If there is a 2d propagation function (kernel), ...
 			# then read it into an array
 			kh = gdal.Open(krn)
@@ -194,9 +201,9 @@ def main():
 			if (cond < 180.0) and not (cond == 0.0):
 				# Must undo the scaling factor in convolve_viirs_to_skyglow
 				rescale_factor = 10**-9
-				krn_rescale = rescale_factor * krnarr
+				img_rescale = rescale_factor * imgarr
 				# Flips the current kernel left to right
-				krnarr_flip = fliplr(krn_rescale)
+				krnarr_flip = fliplr(krnarr)
 				# Creates the corresponding flipped angle
 				flip_azi = 360.0 - cond
 				# Returns the proper file extention onto the tag in order to read as a file
@@ -205,7 +212,7 @@ def main():
 				sgfile_flip = os.path.join(outfolder, sgbase_flip)
 				print(sgfile_flip)
 				logger.info("working on " + sgbase_flip)
-				sgarr_flip = convolve_viirs_to_skyglow(imgarr, krnarr_flip)
+				sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
 				array_to_geotiff(sgarr_flip, sgfile_flip, filein)
 
 
