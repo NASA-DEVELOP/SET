@@ -57,7 +57,10 @@ def main():
 	# The purpose of main() in darkskypy is supply variables and whatever 
 	# else might be desirable if darkspypy is called from the console.
 
-	action = sys.argv[1]
+	if len(sys.argv) > 1:
+		action = sys.argv[1]
+	else:
+		action = "None"
 
 	# Estimate a single map of artificial sky brightness with or without
 	# an existing 2d propagation function or "kernel"
@@ -214,6 +217,9 @@ def main():
 				logger.info("working on " + sgbase_flip)
 				sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
 				array_to_geotiff(sgarr_flip, sgfile_flip, filein)
+
+	else:
+		print("No action/incorrect action given. Choose ""sgmap_single"", ""sgmap_multiple"" or ""kernel_lib"".")
 
 
 
