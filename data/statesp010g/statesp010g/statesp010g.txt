@@ -1,0 +1,605 @@
+Metadata:
+  Identification_Information:
+    Citation:
+      Citation_Information:
+        Originator: National Atlas of the United States
+        Publication_Date: 201403
+        Title: 1:1,000,000-Scale State Boundaries of the United States
+        Geospatial_Data_Presentation_Form: Vector digital data
+        Publication_Information:
+          Publication_Place: Rolla, MO
+          Publisher: National Atlas of the United States
+        Online_Linkage: http://nationalatlas.gov/atlasftp-1m.html
+    Description:
+      Abstract:
+        This map layer portrays the State boundaries of the United States, Puerto Rico, and the U.S. Virgin 
+        Islands.  The map layer was created by extracting county polygon features from the CENSUS 2006 
+        TIGER/Line files produced by the U.S. Census Bureau.  These files were then merged into a single 
+        file and county boundaries within States were removed.  This is a revised version of the July 2012 
+        map layer.
+      Purpose:
+        These data are intended for geographic display and analysis at the national level, and for large 
+        regional areas.  The data should be displayed and analyzed at scales appropriate 
+        for 1:1,000,000-scale data.  No responsibility is assumed by the National Atlas of the United 
+        States in the use of these data.
+    Time_Period_of_Content:
+      Time_Period_Information:
+        Single_Date/Time:
+          Calendar_Date: 201403
+      Currentness_Reference: Publication date
+    Status:
+      Progress: Complete
+      Maintenance_and_Update_Frequency: Irregular
+    Spatial_Domain:
+      Bounding_Coordinates:
+        West_Bounding_Coordinate: 170
+        East_Bounding_Coordinate: -64
+        North_Bounding_Coordinate: 72
+        South_Bounding_Coordinate: 17
+    Keywords:
+      Theme:
+        Theme_Keyword_Thesaurus: ISO 19115 Topic Category
+        Theme_Keyword: Boundaries
+      Theme:
+        Theme_Keyword_Thesaurus: None
+        Theme_Keyword: State
+        Theme_Keyword: State boundaries
+      Place:
+        Place_Keyword_Thesaurus:
+          Organization for International Standards, 2008, ISO 3166 Country Codes,
+          https://www.iso.org/obp/ui/#search
+        Place_Keyword: United States
+        Place_Keyword: US
+      Place:
+        Place_Keyword_Thesaurus: None
+        Place_Keyword: USA
+      Place:
+        Place_Keyword_Thesaurus:
+          U.S. Department of Commerce; 2013; American National Standards Institute (ANSI) Codes for States, 
+          the District of Columbia, Puerto Rico, and the Insular Areas of the United States; 
+          Washington, DC; U.S. Census Bureau; http://www.census.gov/geo/reference/ansi_statetables.html.
+        Place_Keyword: Alabama
+        Place_Keyword: Alaska
+        Place_Keyword: Arizona
+        Place_Keyword: Arkansas
+        Place_Keyword: California
+        Place_Keyword: Colorado
+        Place_Keyword: Connecticut
+        Place_Keyword: Delaware
+        Place_Keyword: District of Columbia
+        Place_Keyword: Florida
+        Place_Keyword: Georgia
+        Place_Keyword: Hawaii
+        Place_Keyword: Idaho
+        Place_Keyword: Illinois
+        Place_Keyword: Indiana
+        Place_Keyword: Iowa
+        Place_Keyword: Kansas
+        Place_Keyword: Kentucky
+        Place_Keyword: Louisiana
+        Place_Keyword: Maine
+        Place_Keyword: Maryland
+        Place_Keyword: Massachusetts
+        Place_Keyword: Michigan
+        Place_Keyword: Minnesota
+        Place_Keyword: Mississippi
+        Place_Keyword: Missouri
+        Place_Keyword: Montana
+        Place_Keyword: Nebraska
+        Place_Keyword: Nevada
+        Place_Keyword: New Hampshire
+        Place_Keyword: New Jersey
+        Place_Keyword: New Mexico
+        Place_Keyword: New York
+        Place_Keyword: North Carolina
+        Place_Keyword: North Dakota
+        Place_Keyword: Ohio
+        Place_Keyword: Oklahoma
+        Place_Keyword: Oregon
+        Place_Keyword: Pennsylvania
+        Place_Keyword: Rhode Island
+        Place_Keyword: South Carolina
+        Place_Keyword: South Dakota
+        Place_Keyword: Tennessee
+        Place_Keyword: Texas
+        Place_Keyword: Utah
+        Place_Keyword: Vermont
+        Place_Keyword: Virginia
+        Place_Keyword: Washington
+        Place_Keyword: West Virginia
+        Place_Keyword: Wisconsin
+        Place_Keyword: Wyoming
+        Place_Keyword: Puerto Rico
+        Place_Keyword: Virgin Islands
+        Place_Keyword: U.S. Virgin Islands
+    Access_Constraints: None
+    Use_Constraints:
+      None.  Acknowledgment of The National Atlas of the United States of America would be appreciated in 
+      products derived from these data.
+    Point_of_Contact:
+      Contact_Information:
+        Contact_Organization_Primary:
+          Contact_Organization: National Atlas of the United States
+        Contact_Address:
+          Address_Type: Mailing and physical address
+          Address: U.S. Geological Survey
+          Address: 511 National Center
+          Address: 12201 Sunrise Valley Drive 
+          City: Reston
+          State_or_Province: VA
+          Postal_Code: 20192
+        Contact_Voice_Telephone: 1-888-ASK-USGS (1-888-275-8747)
+        Contact_Electronic_Mail_Address: atlasmail@usgs.gov
+        Contact_Instructions:
+          For questions about this map layer or metadata, please contact the National Atlas using the 
+          information above, or through the U.S. Geological Survey contact page at 
+          http://www.usgs.gov/ask/.  For distribution questions, please see the Distribution Information 
+          elsewhere in this metadata. 
+
+  Data_Quality_Information:
+    Logical_Consistency_Report:
+      The map layer was checked for topological consistency using ArcGIS.  No other checks for logical 
+      consistency were performed on this map layer.
+    Completeness_Report:
+      This map layer includes State boundaries for all 50 States, Puerto Rico, and the U.S. Virgin Islands.
+    Lineage:
+      Source_Information:
+        Source_Citation:
+          Citation_Information:
+            Originator: U.S. Census Bureau
+            Publication_Date: 2007
+            Title: 2006 Second Edition TIGER/Line files - Boundaries 
+        Type_of_Source_Media: Online
+        Source_Time_Period_of_Content:
+          Time_Period_Information:
+            Single_Date/Time:
+              Calendar_Date: 200610
+          Source_Currentness_Reference: Publication date
+        Source_Citation_Abbreviation: Bound-Cen06
+        Source_Contribution: Spatial and attribute information
+
+      Source_Information:
+        Source_Citation:
+          Citation_Information:
+            Originator: National Atlas of the United States
+            Publication_Date: Unknown
+            Title: 1:1,000,000-Scale National Atlas map layers and other quality control files
+            Other_Citation_Details:
+              Numerous sources were used to perform quality-control and vertical integration, including all 
+              the 1:1,000,000-scale National Atlas map layers, a variety of online sources, and online USGS 
+              topographic maps.  More information is available from the National Atlas contacts listed 
+              elsewhere in this metadata.
+        Type_of_Source_Media: Variable
+        Source_Time_Period_of_Content: 
+          Time_Period_Information:
+            Single_Date/Time:
+              Calendar_Date: Unknown
+          Source_Currentness_Reference: Variable
+        Source_Citation_Abbreviation: QC
+        Source_Contribution: Spatial information
+
+      Source_Information:
+        Source_Citation:
+          Citation_Information:
+            Originator: National Atlas of the United States
+            Publication_Date: 201207
+            Title: 1:1,000,000-Scale State Boundaries of the United States
+            Publication_Information:
+              Publication_Place: Rolla, MO
+              Publisher: National Atlas of the United States
+        Type_of_Source_Media: Online
+        Source_Time_Period_of_Content:
+          Time_Period_Information:
+            Single_Date/Time:
+              Calendar_Date: 201207
+          Source_Currentness_Reference: Publication date
+        Source_Citation_Abbreviation: National Atlas 1M States 2012
+        Source_Contribution: Spatial and attribute information
+
+      Source_Information:
+        Source_Citation:
+          Citation_Information:
+            Originator: Government of Canada, Natural Resources Canada, Mapping Information Branch
+            Publication_Date: 20131108
+            Title: Atlas of Canada National Scale Data 1:1,000,000 - Boundary Lines
+            Geospatial_Data_Presentation_Form: Vector digital data
+            Publication_Information:
+              Publication_Place: Ottawa, Ontario, Canada
+              Publisher: Government of Canada
+            Online_Linkage: 
+              http://geogratis.gc.ca/api/en/nrcan-rncan/ess-sst/689a20f0-55bd-574a-9917-a0ab89912d56.html
+        Type_of_Source_Media: Online
+        Source_Time_Period_of_Content:
+          Time_Period_Information:
+            Single_Date/Time:
+              Calendar_Date: 20131108
+          Source_Currentness_Reference: Publication date
+        Source_Citation_Abbreviation: Canada Boundary
+        Source_Contribution: Spatial information
+
+      Source_Information: 
+        Source_Citation:
+          Citation_Information:
+            Originator: Government of Canada, Natural Resources Canada, Mapping Information Branch
+            Publication_Date: Unknown
+            Title: National Topographic System Maps (1:250 000)
+            Publication_Information: 
+              Publication_Place: Ottawa, Ontario, Canada 
+              Publisher: Government of Canada 
+        Source_Scale_Denominator: 250000 
+        Type_of_Source_Media: Variable
+        Source_Time_Period_of_Content:
+          Time_Period_Information: 
+            Range_of_Dates/Times: 
+              Beginning_Date: 1945 
+              Ending_Date: Present 
+          Source_Currentness_Reference: Ground condition
+        Source_Citation_Abbreviation: Canada 250K Topo
+        Source_Contribution:  Positional reference 
+
+      Source_Information: 
+        Source_Citation:
+          Citation_Information:
+            Originator: 
+              Government of Canada, Natural Resources Canada, Geomatics Canada, Surveyor General's Branch, 
+              International Boundary Commission
+            Publication_Date: Unknown
+            Title: Legal Boundary Points
+            Geospatial_Data_Presentation_Form: Point digital data
+            Other_Citation_Details: 
+              Updated and converted from NAD27 to NAD83 boundary monument coordinates.
+        Type_of_Source_Media: Electronic mail 
+        Source_Time_Period_of_Content:
+          Time_Period_Information: 
+            Single_Date/Time:
+              Calendar_Date: 200910
+          Source_Currentness_Reference: Date of data acquisition
+        Source_Citation_Abbreviation: Can_US_Boundary 2009
+        Source_Contribution: Spatial data
+
+      Source_Information:
+        Source_Citation:
+          Citation_Information:
+            Originator: United States Census Bureau
+            Publication_Date: 2012
+            Title: American Factfinder, Total Population, Table DEC_10_SF1_P1
+            Publication_Information:
+              Publication_Place: Suitland, MD
+              Publisher: United States Census Bureau
+            Online_Linkage: 
+              http://factfinder2.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=DEC_10_SF1_P1&prodType=table
+        Type_of_Source_Media: Online
+        Source_Time_Period_of_Content:
+          Time_Period_Information:
+            Single_Date/Time:
+              Calendar_Date: 20130123
+          Source_Currentness_Reference: Date of data download
+        Source_Citation_Abbreviation: Census 2010 Population
+        Source_Contribution: Attribute information
+
+      Source_Information:
+        Source_Citation:
+          Citation_Information:
+            Originator: United States Census Bureau
+            Publication_Date: 20110824
+            Title: U.S. Census Bureau Releases 2010 Census Population Counts for the U.S. Virgin Islands
+            Publication_Information:
+              Publication_Place: Suitland, MD
+              Publisher: United States Census Bureau
+            Online_Linkage: http://www.census.gov/2010census/news/releases/operations/cb11-cn180.html
+        Type_of_Source_Media: Online
+        Source_Time_Period_of_Content:
+          Time_Period_Information:
+            Single_Date/Time:
+              Calendar_Date: 2010
+          Source_Currentness_Reference: Ground condition
+        Source_Citation_Abbreviation: Census 2010 USVI Population
+        Source_Contribution: Attribute information
+
+      Process_Step:
+        Process_Description: 
+          The 1:1,000,000-scale county and State boundaries were derived from U.S. Census TIGER 
+          (Topologically Integrated Geographic Encoding and Reference system) data.  The TIGER files were 
+          merged and generalized.  County boundaries within States were removed using the ESRI dissolve 
+          tool.
+        Source_Used_Citation_Abbreviation: Bound_Cen06
+        Process_Date: 2007
+
+      Process_Step:
+        Process_Description:
+          All the 1:1,000,000-scale map layers were checked for vertical integration.  Line positions were 
+          adjusted as necessary to remove overlaps.  Wherever possible, linear features were separated 
+          by 300 meters, but were kept within 500 meters of their true location.
+        Source_Used_Citation_Abbreviation: QC
+        Process_Date: 2012
+        Source_Produced_Citation_Abbreviation: National Atlas 1M States 2012
+
+      Process_Step:
+        Process_Description:
+          Data along the Canadian border were adjusted so that the Canadian and U.S. 1:1,000,000-scale data 
+          sets can be used together as seamlessly as possible.  Problem areas were identified by Natural 
+          Resources Canada (NRCan) and edits to the U.S. data were performed by the USGS.
+
+          To identify problems, the National Atlas 1M States 2012 data set was projected to the NRCan 
+          working coordinate system, which is a Lambert Conformal Conic projection with standard parallels 
+          of 49 and 77 degrees, datum of NAD83, an XY tolerance of 0.001 meters, and an XY resolution 
+          of 0.0001 meters.  
+ 
+          The Canadian and U.S. data sets were displayed together and features were compared across the 
+          border.  An initial set of comments and suggestions for edits were sent to the USGS by NRCan.  
+          NRCan used satellite imagery for reference during the editing process by converting the 
+          appropriate National Atlas 1:1,000,000-scale map layers and the 250K Canadian topographic data to 
+          KML and loading the KMLs into GoogleEarth.   Using the cursor coordinates in the ArcMap status 
+          bar, NRCan visually navigated and correlated the ArcMap and GoogleEarth vectors.
+
+          NRCan exported their findings and sent them to the USGS for correction and (or) further comment.  
+          USGS reviewed the Canadian findings and returned the data to NRCan with comments.  The U.S. data 
+          were either edited, not edited and further explanation was requested, or not edited and changes 
+          were suggested for the Canadian data.  This process was repeated until both NRCan and USGS felt 
+          that the data were satisfactorily harmonized.
+        Source_Used_Citation_Abbreviation: National Atlas 1M States 2012
+        Source_Used_Citation_Abbreviation: QC
+        Source_Used_Citation_Abbreviation: Canada Boundary
+        Source_Used_Citation_Abbreviation: Canada 250K Topo
+        Source_Used_Citation_Abbreviation: Can_US_Boundary 2009
+        Source_Used_Citation_Abbreviation: Can_US_Boundary 2011
+        Process_Date: 201301
+
+      Process_Step:
+        Process_Description:
+          The areas in the file were combined into large polygons, one for each State including associated 
+          islands, and for States that border the Great Lakes, one for the water area of each State. 
+
+          Population values were added from the 2010 Census information.  The data were projected by region 
+          to the National Atlas Albers Equal Area Conic projection, fields were added for the perimeter 
+          measurement and square miles, the values were calculated using ArcMap, and the data were 
+          converted back to geographic coordinates.  The Albers Equal Area Conic parameters used are 
+          available on request.
+        Source_Used_Citation_Abbreviation: Census 2010 Population
+        Source_Used_Citation_Abbreviation: Census 2010 USVI Population
+        Process_Date: 2013
+
+      Process_Step:
+        Process_Description: The map layer was saved in shapefile and in file geodatabase formats.
+        Process_Date: 2013
+
+  Spatial_Data_Organization_Information:
+    Indirect_Spatial_Reference:
+      U.S. Department of Commerce; 2013; American National Standards Institute (ANSI) Codes for States, the 
+      District of Columbia, Puerto Rico, and the Insular Areas of the United States; U.S. Census Bureau.
+
+    Direct_Spatial_Reference_Method: Vector
+    Point_and_Vector_Object_Information:
+      SDTS_Terms_Description:
+        SDTS_Point_and_Vector_Object_Type: G-polygon 
+        Point_and_Vector_Object_Count: 61
+
+  Spatial_Reference_Information:
+    Horizontal_Coordinate_System_Definition:
+      Geographic:
+        Latitude_Resolution: 0.000278
+        Longitude_Resolution: 0.000278
+        Geographic_Coordinate_Units: Decimal degrees
+      Geodetic_Model:
+        Horizontal_Datum_Name: North American Datum of 1983
+        Ellipsoid_Name: GRS1980
+        Semi-major_Axis: 6378137
+        Denominator_of_Flattening_Ratio: 298.257222
+
+  Entity_and_Attribute_Information:
+    Detailed_Description:
+      Entity_Type:
+        Entity_Type_Label: State
+        Entity_Type_Definition: 
+          A first order division of the nation, including States and State equivalents.
+        Entity_Type_Definition_Source: National Atlas of the United States
+      Attribute: 
+        Attribute_Label: Shape 
+        Attribute_Definition: The representation of the entity in the data.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values: 
+          Enumerated_Domain: 
+            Enumerated_Domain_Value: Polygon 
+            Enumerated_Domain_Value_Definition: 2-dimensional element
+            Enumerated_Domain_Value_Definition_Source: ESRI GIS software 
+      Attribute:
+        Attribute_Label: Name
+        Attribute_Definition: The name of the State or State equivalent.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Codeset_Domain:
+            Codeset_Name:
+              American National Standards Institute (ANSI) Codes for States, the District of Columbia, 
+              Puerto Rico, and the Insular Areas of the United States
+            Codeset_Source: U.S. Census Bureau
+      Attribute:
+        Attribute_Label: State_abbr
+        Attribute_Definition: The 2-character abbreviation for the State or State equivalent.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Codeset_Domain:
+            Codeset_Name:
+              American National Standards Institute (ANSI) Codes for States, the District of Columbia, 
+              Puerto Rico, and the Insular Areas of the United States
+            Codeset_Source: U.S. Census Bureau
+      Attribute:
+        Attribute_Label: State_fips
+        Attribute_Definition: The 2-digit FIPS code of the State or State equivalent.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Codeset_Domain:
+            Codeset_Name:
+              American National Standards Institute (ANSI) Codes for States, the District of Columbia, 
+              Puerto Rico, and the Insular Areas of the United States
+            Codeset_Source: U.S. Census Bureau
+      Attribute:
+        Attribute_Label: Order_adm
+        Attribute_Definition: 
+          A ranking indicating the order in which States were admitted to the United States.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Range_Domain:
+            Range_Domain_Minimum: 1
+            Range_Domain_Maximum: 50
+        Attribute_Domain_Values:
+          Enumerated_Domain:
+            Enumerated_Domain_Value: 0
+            Enumerated_Domain_Value_Definition:
+              The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in 
+              association with the United States, and the U.S. Virgin Islands is a territory of the United 
+              States.
+            Enumerated_Domain_Value_Definition_Source: National Atlas of the United States
+      Attribute:
+        Attribute_Label: Month_adm
+        Attribute_Definition: The month when the State was admitted to the United States.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Range_Domain:
+            Range_Domain_Minimum: January
+            Range_Domain_Maximum: December
+        Attribute_Domain_Values:
+          Enumerated_Domain:
+            Enumerated_Domain_Value: <blank>
+            Enumerated_Domain_Value_Definition:
+              The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in 
+              association with the United States, and the U.S. Virgin Islands is a territory of the United 
+              States.
+            Enumerated_Domain_Value_Definition_Source: National Atlas of the United States
+      Attribute:
+        Attribute_Label: Day_Adm
+        Attribute_Definition: The day of the month when the State was admitted to the United States.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Range_Domain:
+            Range_Domain_Minimum: 1
+            Range_Domain_Maximum: 31
+        Attribute_Domain_Values:
+          Enumerated_Domain:
+            Enumerated_Domain_Value: 0
+            Enumerated_Domain_Value_Definition:
+              The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in 
+              association with the United States, and the U.S. Virgin Islands is a territory of the United 
+              States.
+            Enumerated_Domain_Value_Definition_Source: 
+              National Atlas of the United States
+      Attribute:
+        Attribute_Label: Year_Adm
+        Attribute_Definition: The year when the State was admitted  to the United States.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Range_Domain:
+            Range_Domain_Minimum: 1787
+            Range_Domain_Maximum: 1959
+        Attribute_Domain_Values:
+          Enumerated_Domain:
+            Enumerated_Domain_Value: 0
+            Enumerated_Domain_Value_Definition:
+              The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in 
+              association with the United States, and the U.S. Virgin Islands is a territory of the United 
+              States.
+            Enumerated_Domain_Value_Definition_Source: National Atlas of the United States
+      Attribute:
+        Attribute_Label: Type
+        Attribute_Definition: An indication of whether the area is land or water.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Enumerated_Domain: 
+            Enumerated_Domain_Value: Land
+            Enumerated_Domain_Value_Definition: The area is land.
+            Enumerated_Domain_Value_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Enumerated_Domain: 
+            Enumerated_Domain_Value: Water
+            Enumerated_Domain_Value_Definition: The area is water (the Great Lakes.)
+            Enumerated_Domain_Value_Definition_Source: National Atlas of the United States
+      Attribute:
+        Attribute_Label: Pop
+        Attribute_Definition: The population of the State or State equivalent, as found in the 2010 Census.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Enumerated_Domain: 
+            Enumerated_Domain_Value: 0
+            Enumerated_Domain_Value_Definition: The area is water (the Great Lakes.)
+            Enumerated_Domain_Value_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Range_Domain:
+            Range_Domain_Minimum: 106405
+            Range_Domain_Maximum: 37253956
+      Attribute:
+        Attribute_Label: Sq_miles
+        Attribute_Definition: The size of the area in square miles.  This is a calculated field.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Range_Domain:
+            Range_Domain_Minimum: 62.1
+            Range_Domain_Maximum: 582037.1
+      Attribute:
+        Attribute_Label: Prim_miles
+        Attribute_Definition: The perimeter of the area in miles.  This is a calculated field.
+        Attribute_Definition_Source: National Atlas of the United States
+        Attribute_Domain_Values:
+          Range_Domain:
+            Range_Domain_Minimum: 52.7
+            Range_Domain_Maximum: 36642.5
+
+  Distribution_Information:
+    Distributor:
+      Contact_Information:
+        Contact_Organization_Primary:
+          Contact_Organization: Earth Explorer, U.S. Geological Survey
+        Contact_Address:
+          Address_Type: Mailing address
+          Address: U.S. Geological Survey
+          Address: 47914 252nd Street
+          City: Sioux Falls
+          State_or_Province: SD
+          Postal_Code: 57198-0001
+        Contact_Voice_Telephone: 605-594-6116
+        Contact_Voice_Telephone: 866-573-3222
+        Contact_Electronic_Mail_Address: custserv@usgs.gov
+    Distribution_Liability:
+      Although these data have been processed successfully on a computer system at the U.S. Geological 
+      Survey, no warranty expressed or implied is made by the U.S. Geological Survey regarding the utility 
+      of the data on any other system, nor shall the act of distribution constitute any such warranty.  
+      No responsibility is assumed by the U.S. Geological Survey in the use of these data.
+    Standard_Order_Process:
+      Digital_Form:
+        Digital_Transfer_Information:
+          Format_Name: ESRI Shapefile
+        Digital_Transfer_Option:
+          Online_Option:
+            Computer_Contact_Information:
+              Network_Address:
+                Network_Resource_Name: http://nationalatlas.gov/atlasftp-1m.html
+      Digital_Form:
+        Digital_Transfer_Information:
+          Format_Name: ESRI File Geodatabase 10.0
+        Digital_Transfer_Option:
+          Online_Option:
+            Computer_Contact_Information:
+              Network_Address:
+                Network_Resource_Name: http://nationalatlas.gov/atlasftp-1m.html
+      Fees: None
+
+  Metadata_Reference_Information:
+    Metadata_Date: 20140408
+    Metadata_Contact:
+      Contact_Information:
+        Contact_Organization_Primary:
+          Contact_Organization: National Atlas of the United States
+        Contact_Address:
+          Address_Type: Mailing address
+          Address: U.S. Geological Survey
+          Address: 511 National Center
+          Address: 12201 Sunrise Valley Drive 
+          City: Reston
+          State_or_Province: VA
+          Postal_Code: 20192
+        Contact_Voice_Telephone: 1-888-ASK-USGS (1-888-275-8747)
+        Contact_Electronic_Mail_Address: atlasmail@usgs.gov
+    Metadata_Standard_Name: FGDC Content Standard for Digital Geospatial Metadata
+    Metadata_Standard_Version: FGDC-STD-001-1998
+    Metadata_Security_Information:
+      Metadata_Security_Classification_System: None
+      Metadata_Security_Classification: Unclassified
+      Metadata_Security_Handling_Description: None

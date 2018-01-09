@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tutorial &#8212; SET 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="shortcut icon" href="../_static/satellite.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Methodology" href="../method.html" />
+    <link rel="prev" title="Installation" href="installation.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body>
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html">
+          SET</a>
+        <span class="navbar-text navbar-version pull-left"><b>0.0.1</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Index <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../overview.html"><strong>Program Overview</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html"><strong>Installation</strong></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#"><strong>Tutorial</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../method.html"><strong>Methodology</strong></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../dev/dev.html"><strong>Developer Guide</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../dev/site.html"><strong>Updating The Site</strong></a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../trouble/faq.html"><strong>FAQ</strong></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../trouble/contact.html"><strong>Contact</strong></a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#"><strong>Tutorial</strong></a><ul>
+<li><a class="reference internal" href="#getting-started"><strong>Getting Started</strong></a></li>
+<li><a class="reference internal" href="#getting-data"><strong>Getting Data</strong></a></li>
+<li><a class="reference internal" href="#importing-files"><strong>Importing Files</strong></a></li>
+<li><a class="reference internal" href="#creating-a-kernel"><strong>Creating a Kernel</strong></a></li>
+<li><a class="reference internal" href="#generating-an-artificial-skyglow-map"><strong>Generating an Artificial Skyglow Map</strong></a></li>
+</ul>
+</li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="installation.html" title="Previous Chapter: Installation"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; Installation</span>
+    </a>
+  </li>
+  <li>
+    <a href="../method.html" title="Next Chapter: Methodology"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Methodology &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="../_sources/usr/tutorial.rst.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="tutorial">
+<h1><strong>Tutorial</strong><a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>The following tutorial will help guide you on how to use the Skyglow Estimation Toolbox to produce your own artificial skyglow maps. SET’s interface is designed to be as easy and simple to use as possible. Don’t hesitate to contact us about an issue or suggestion you might have!</p>
+<div class="section" id="getting-started">
+<h2><strong>Getting Started</strong><a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h2>
+<a class="reference internal image-reference" href="../_images/ui_empty.PNG"><img alt="../_images/ui_empty.PNG" class="align-left" src="../_images/ui_empty.PNG" style="width: 569.7px; height: 366.75px;" /></a>
+<p>Starting the program is a simple two-step process. Making sure that you are in the “skyglow” directory in Git Bash, activate the geospatial environment and then run the program:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span>$ source activate geospatial
+$ python Skyglow.py
+</pre></div>
+</div>
+<p>The image on the left displays the interface that should pop-up when you run the Toolbox. Look at the FAQ or contact us if an issue is preventing you from starting the software.</p>
+<p>In the top left corner of the SET interface are the input options that allow you to choose your VIIRS image and create a kernel using local parameters. The top right corner includes a “Help” button that contains the documentation link, instructions, and “about” window.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><br /></div>
+</div>
+</div>
+<div class="section" id="getting-data">
+<h2><strong>Getting Data</strong><a class="headerlink" href="#getting-data" title="Permalink to this headline">¶</a></h2>
+<p>Suomi NPP VIIRS data is distributed to various sources and processed into environmental data records. The National Centers for Environmental Information (NCEI) Earth Observation Group produces monthly average radiance composite images from VIIRS. You can download VIIRS Nighttime Light Data for your region from their website <a class="reference external" href="https://www.ngdc.noaa.gov/eog/viirs/download_dnb_composites.html">here</a>.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Downloading the data may take a while because the files are so large (up to 1.9GB). Keep this in mind before you hit download!</p>
+</div>
+</div>
+<div class="section" id="importing-files">
+<h2><strong>Importing Files</strong><a class="headerlink" href="#importing-files" title="Permalink to this headline">¶</a></h2>
+<p>The first step to creating an artificial skyglow map is to import your VIIRS reference image. SET requires TIFF files in order to perform the proper array calculations.</p>
+<div class="figure align-right" id="id2">
+<img alt="../_images/ui_073117.PNG" src="../_images/ui_073117.PNG" />
+<p class="caption"><span class="caption-text"><em>Image of the SET interface displaying a VIIRS median composite of summer months from 2014-16. The program will use the inputs to generate a kernel and create a map of aritficial sky brightness.</em></span></p>
+</div>
+</div>
+<div class="section" id="creating-a-kernel">
+<h2><strong>Creating a Kernel</strong><a class="headerlink" href="#creating-a-kernel" title="Permalink to this headline">¶</a></h2>
+<p>Creating a kernel is a matter of defining four arguments: region latitude, atmospheric clarity parameter, zenith angle, and azimuth angle. More information on these parameters can be found in the <em>Instructions</em> found in the <em>Help</em> menu.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you have already created a kernel file and wish to use the same parameters as before, simply check the <em>Import Kernel</em> option and browse for the file.</p>
+</div>
+</div>
+<div class="section" id="generating-an-artificial-skyglow-map">
+<h2><strong>Generating an Artificial Skyglow Map</strong><a class="headerlink" href="#generating-an-artificial-skyglow-map" title="Permalink to this headline">¶</a></h2>
+<p>Once all the necessary parameters are chosen, clicking the “Generate Artificial Skyglow Map” will begin the process of modeling sky brightness. A progress log will appear to help you monitor the generation process. Once the program is finished, a “Finished!” message will display along with a bell sound.</p>
+</div>
+</div>
+
+
+    </div>
+      
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2017, Ryan Avery, Stanley Yu, Kenton Ross, Veronica Warda, Steven Chao.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.<br/>
+Icons made by <a href="http://www.flaticon.com/authors/madebyoliver" title="Madebyoliver">Madebyoliver</a> from <a href="http://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>.<br/>
+    </p>
+  </div>
+</footer>
+
+
+  </body>
+</html>

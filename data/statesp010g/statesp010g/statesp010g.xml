@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<metadata>
+<idinfo>
+<citation>
+<citeinfo>
+<origin>National Atlas of the United States</origin>
+<pubdate>201403</pubdate>
+<title>1:1,000,000-Scale State Boundaries of the United States</title>
+<geoform>Vector digital data</geoform>
+<pubinfo>
+<pubplace>Rolla, MO</pubplace>
+<publish>National Atlas of the United States</publish>
+</pubinfo>
+<onlink>http://nationalatlas.gov/atlasftp-1m.html</onlink>
+</citeinfo>
+</citation>
+<descript>
+<abstract>
+This map layer portrays the State boundaries of the United States, Puerto Rico, and the U.S. Virgin
+Islands.  The map layer was created by extracting county polygon features from the CENSUS 2006
+TIGER/Line files produced by the U.S. Census Bureau.  These files were then merged into a single
+file and county boundaries within States were removed.  This is a revised version of the July 2012
+map layer.
+</abstract>
+<purpose>
+These data are intended for geographic display and analysis at the national level, and for large
+regional areas.  The data should be displayed and analyzed at scales appropriate
+for 1:1,000,000-scale data.  No responsibility is assumed by the National Atlas of the United
+States in the use of these data.
+</purpose>
+</descript>
+<timeperd>
+<timeinfo>
+<sngdate>
+<caldate>201403</caldate>
+</sngdate>
+</timeinfo>
+<current>Publication date</current>
+</timeperd>
+<status>
+<progress>Complete</progress>
+<update>Irregular</update>
+</status>
+<spdom>
+<bounding>
+<westbc>170</westbc>
+<eastbc>-64</eastbc>
+<northbc>72</northbc>
+<southbc>17</southbc>
+</bounding>
+</spdom>
+<keywords>
+<theme>
+<themekt>ISO 19115 Topic Category</themekt>
+<themekey>Boundaries</themekey>
+</theme>
+<theme>
+<themekt>None</themekt>
+<themekey>State</themekey>
+<themekey>State boundaries</themekey>
+</theme>
+<place>
+<placekt>
+Organization for International Standards, 2008, ISO 3166 Country Codes,
+https://www.iso.org/obp/ui/#search
+</placekt>
+<placekey>United States</placekey>
+<placekey>US</placekey>
+</place>
+<place>
+<placekt>None</placekt>
+<placekey>USA</placekey>
+</place>
+<place>
+<placekt>
+U.S. Department of Commerce; 2013; American National Standards Institute (ANSI) Codes for States,
+the District of Columbia, Puerto Rico, and the Insular Areas of the United States;
+Washington, DC; U.S. Census Bureau; http://www.census.gov/geo/reference/ansi_statetables.html.
+</placekt>
+<placekey>Alabama</placekey>
+<placekey>Alaska</placekey>
+<placekey>Arizona</placekey>
+<placekey>Arkansas</placekey>
+<placekey>California</placekey>
+<placekey>Colorado</placekey>
+<placekey>Connecticut</placekey>
+<placekey>Delaware</placekey>
+<placekey>District of Columbia</placekey>
+<placekey>Florida</placekey>
+<placekey>Georgia</placekey>
+<placekey>Hawaii</placekey>
+<placekey>Idaho</placekey>
+<placekey>Illinois</placekey>
+<placekey>Indiana</placekey>
+<placekey>Iowa</placekey>
+<placekey>Kansas</placekey>
+<placekey>Kentucky</placekey>
+<placekey>Louisiana</placekey>
+<placekey>Maine</placekey>
+<placekey>Maryland</placekey>
+<placekey>Massachusetts</placekey>
+<placekey>Michigan</placekey>
+<placekey>Minnesota</placekey>
+<placekey>Mississippi</placekey>
+<placekey>Missouri</placekey>
+<placekey>Montana</placekey>
+<placekey>Nebraska</placekey>
+<placekey>Nevada</placekey>
+<placekey>New Hampshire</placekey>
+<placekey>New Jersey</placekey>
+<placekey>New Mexico</placekey>
+<placekey>New York</placekey>
+<placekey>North Carolina</placekey>
+<placekey>North Dakota</placekey>
+<placekey>Ohio</placekey>
+<placekey>Oklahoma</placekey>
+<placekey>Oregon</placekey>
+<placekey>Pennsylvania</placekey>
+<placekey>Rhode Island</placekey>
+<placekey>South Carolina</placekey>
+<placekey>South Dakota</placekey>
+<placekey>Tennessee</placekey>
+<placekey>Texas</placekey>
+<placekey>Utah</placekey>
+<placekey>Vermont</placekey>
+<placekey>Virginia</placekey>
+<placekey>Washington</placekey>
+<placekey>West Virginia</placekey>
+<placekey>Wisconsin</placekey>
+<placekey>Wyoming</placekey>
+<placekey>Puerto Rico</placekey>
+<placekey>Virgin Islands</placekey>
+<placekey>U.S. Virgin Islands</placekey>
+</place>
+</keywords>
+<accconst>None</accconst>
+<useconst>
+None.  Acknowledgment of The National Atlas of the United States of America would be appreciated in
+products derived from these data.
+</useconst>
+<ptcontac>
+<cntinfo>
+<cntorgp>
+<cntorg>National Atlas of the United States</cntorg>
+</cntorgp>
+<cntaddr>
+<addrtype>Mailing and physical address</addrtype>
+<address>U.S. Geological Survey</address>
+<address>511 National Center</address>
+<address>12201 Sunrise Valley Drive</address>
+<city>Reston</city>
+<state>VA</state>
+<postal>20192</postal>
+</cntaddr>
+<cntvoice>1-888-ASK-USGS (1-888-275-8747)</cntvoice>
+<cntemail>atlasmail@usgs.gov</cntemail>
+<cntinst>
+For questions about this map layer or metadata, please contact the National Atlas using the
+information above, or through the U.S. Geological Survey contact page at
+http://www.usgs.gov/ask/.  For distribution questions, please see the Distribution Information
+elsewhere in this metadata.
+</cntinst>
+</cntinfo>
+</ptcontac>
+</idinfo>
+<dataqual>
+<logic>
+The map layer was checked for topological consistency using ArcGIS.  No other checks for logical
+consistency were performed on this map layer.
+</logic>
+<complete>This map layer includes State boundaries for all 50 States, Puerto Rico, and the U.S. Virgin Islands.</complete>
+<lineage>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>U.S. Census Bureau</origin>
+<pubdate>2007</pubdate>
+<title>2006 Second Edition TIGER/Line files - Boundaries</title>
+</citeinfo>
+</srccite>
+<typesrc>Online</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>200610</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Publication date</srccurr>
+</srctime>
+<srccitea>Bound-Cen06</srccitea>
+<srccontr>Spatial and attribute information</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>National Atlas of the United States</origin>
+<pubdate>Unknown</pubdate>
+<title>1:1,000,000-Scale National Atlas map layers and other quality control files</title>
+<othercit>
+Numerous sources were used to perform quality-control and vertical integration, including all
+the 1:1,000,000-scale National Atlas map layers, a variety of online sources, and online USGS
+topographic maps.  More information is available from the National Atlas contacts listed
+elsewhere in this metadata.
+</othercit>
+</citeinfo>
+</srccite>
+<typesrc>Variable</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>Unknown</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Variable</srccurr>
+</srctime>
+<srccitea>QC</srccitea>
+<srccontr>Spatial information</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>National Atlas of the United States</origin>
+<pubdate>201207</pubdate>
+<title>1:1,000,000-Scale State Boundaries of the United States</title>
+<pubinfo>
+<pubplace>Rolla, MO</pubplace>
+<publish>National Atlas of the United States</publish>
+</pubinfo>
+</citeinfo>
+</srccite>
+<typesrc>Online</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>201207</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Publication date</srccurr>
+</srctime>
+<srccitea>National Atlas 1M States 2012</srccitea>
+<srccontr>Spatial and attribute information</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>Government of Canada, Natural Resources Canada, Mapping Information Branch</origin>
+<pubdate>20131108</pubdate>
+<title>Atlas of Canada National Scale Data 1:1,000,000 - Boundary Lines</title>
+<geoform>Vector digital data</geoform>
+<pubinfo>
+<pubplace>Ottawa, Ontario, Canada</pubplace>
+<publish>Government of Canada</publish>
+</pubinfo>
+<onlink>http://geogratis.gc.ca/api/en/nrcan-rncan/ess-sst/689a20f0-55bd-574a-9917-a0ab89912d56.html</onlink>
+</citeinfo>
+</srccite>
+<typesrc>Online</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>20131108</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Publication date</srccurr>
+</srctime>
+<srccitea>Canada Boundary</srccitea>
+<srccontr>Spatial information</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>Government of Canada, Natural Resources Canada, Mapping Information Branch</origin>
+<pubdate>Unknown</pubdate>
+<title>National Topographic System Maps (1:250 000)</title>
+<pubinfo>
+<pubplace>Ottawa, Ontario, Canada</pubplace>
+<publish>Government of Canada</publish>
+</pubinfo>
+</citeinfo>
+</srccite>
+<srcscale>250000</srcscale>
+<typesrc>Variable</typesrc>
+<srctime>
+<timeinfo>
+<rngdates>
+<begdate>1945</begdate>
+<enddate>Present</enddate>
+</rngdates>
+</timeinfo>
+<srccurr>Ground condition</srccurr>
+</srctime>
+<srccitea>Canada 250K Topo</srccitea>
+<srccontr>  Positional reference </srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>
+Government of Canada, Natural Resources Canada, Geomatics Canada, Surveyor General's Branch,
+International Boundary Commission
+</origin>
+<pubdate>Unknown</pubdate>
+<title>Legal Boundary Points</title>
+<geoform>Point digital data</geoform>
+<othercit>Updated and converted from NAD27 to NAD83 boundary monument coordinates.</othercit>
+</citeinfo>
+</srccite>
+<typesrc>Electronic mail</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>200910</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Date of data acquisition</srccurr>
+</srctime>
+<srccitea>Can_US_Boundary 2009</srccitea>
+<srccontr>Spatial data</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>United States Census Bureau</origin>
+<pubdate>2012</pubdate>
+<title>American Factfinder, Total Population, Table DEC_10_SF1_P1</title>
+<pubinfo>
+<pubplace>Suitland, MD</pubplace>
+<publish>United States Census Bureau</publish>
+</pubinfo>
+<onlink>http://factfinder2.census.gov/faces/tableservices/jsf/pages/productview.xhtml?pid=DEC_10_SF1_P1&amp;prodType=table</onlink>
+</citeinfo>
+</srccite>
+<typesrc>Online</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>20130123</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Date of data download</srccurr>
+</srctime>
+<srccitea>Census 2010 Population</srccitea>
+<srccontr>Attribute information</srccontr>
+</srcinfo>
+<srcinfo>
+<srccite>
+<citeinfo>
+<origin>United States Census Bureau</origin>
+<pubdate>20110824</pubdate>
+<title>U.S. Census Bureau Releases 2010 Census Population Counts for the U.S. Virgin Islands</title>
+<pubinfo>
+<pubplace>Suitland, MD</pubplace>
+<publish>United States Census Bureau</publish>
+</pubinfo>
+<onlink>http://www.census.gov/2010census/news/releases/operations/cb11-cn180.html</onlink>
+</citeinfo>
+</srccite>
+<typesrc>Online</typesrc>
+<srctime>
+<timeinfo>
+<sngdate>
+<caldate>2010</caldate>
+</sngdate>
+</timeinfo>
+<srccurr>Ground condition</srccurr>
+</srctime>
+<srccitea>Census 2010 USVI Population</srccitea>
+<srccontr>Attribute information</srccontr>
+</srcinfo>
+<procstep>
+<procdesc>
+The 1:1,000,000-scale county and State boundaries were derived from U.S. Census TIGER
+(Topologically Integrated Geographic Encoding and Reference system) data.  The TIGER files were
+merged and generalized.  County boundaries within States were removed using the ESRI dissolve
+tool.
+</procdesc>
+<srcused>Bound_Cen06</srcused>
+<procdate>2007</procdate>
+</procstep>
+<procstep>
+<procdesc>
+All the 1:1,000,000-scale map layers were checked for vertical integration.  Line positions were
+adjusted as necessary to remove overlaps.  Wherever possible, linear features were separated
+by 300 meters, but were kept within 500 meters of their true location.
+</procdesc>
+<srcused>QC</srcused>
+<procdate>2012</procdate>
+<srcprod>National Atlas 1M States 2012</srcprod>
+</procstep>
+<procstep>
+<procdesc>
+Data along the Canadian border were adjusted so that the Canadian and U.S. 1:1,000,000-scale data
+sets can be used together as seamlessly as possible.  Problem areas were identified by Natural
+Resources Canada (NRCan) and edits to the U.S. data were performed by the USGS.
+
+To identify problems, the National Atlas 1M States 2012 data set was projected to the NRCan
+working coordinate system, which is a Lambert Conformal Conic projection with standard parallels
+of 49 and 77 degrees, datum of NAD83, an XY tolerance of 0.001 meters, and an XY resolution
+of 0.0001 meters.
+
+The Canadian and U.S. data sets were displayed together and features were compared across the
+border.  An initial set of comments and suggestions for edits were sent to the USGS by NRCan.
+NRCan used satellite imagery for reference during the editing process by converting the
+appropriate National Atlas 1:1,000,000-scale map layers and the 250K Canadian topographic data to
+KML and loading the KMLs into GoogleEarth.   Using the cursor coordinates in the ArcMap status
+bar, NRCan visually navigated and correlated the ArcMap and GoogleEarth vectors.
+
+NRCan exported their findings and sent them to the USGS for correction and (or) further comment.
+USGS reviewed the Canadian findings and returned the data to NRCan with comments.  The U.S. data
+were either edited, not edited and further explanation was requested, or not edited and changes
+were suggested for the Canadian data.  This process was repeated until both NRCan and USGS felt
+that the data were satisfactorily harmonized.
+</procdesc>
+<srcused>National Atlas 1M States 2012</srcused>
+<srcused>QC</srcused>
+<srcused>Canada Boundary</srcused>
+<srcused>Canada 250K Topo</srcused>
+<srcused>Can_US_Boundary 2009</srcused>
+<srcused>Can_US_Boundary 2011</srcused>
+<procdate>201301</procdate>
+</procstep>
+<procstep>
+<procdesc>
+The areas in the file were combined into large polygons, one for each State including associated
+islands, and for States that border the Great Lakes, one for the water area of each State.
+
+Population values were added from the 2010 Census information.  The data were projected by region
+to the National Atlas Albers Equal Area Conic projection, fields were added for the perimeter
+measurement and square miles, the values were calculated using ArcMap, and the data were
+converted back to geographic coordinates.  The Albers Equal Area Conic parameters used are
+available on request.
+</procdesc>
+<srcused>Census 2010 Population</srcused>
+<srcused>Census 2010 USVI Population</srcused>
+<procdate>2013</procdate>
+</procstep>
+<procstep>
+<procdesc>The map layer was saved in shapefile and in file geodatabase formats.</procdesc>
+<procdate>2013</procdate>
+</procstep>
+</lineage>
+</dataqual>
+<spdoinfo>
+<indspref>
+U.S. Department of Commerce; 2013; American National Standards Institute (ANSI) Codes for States, the
+District of Columbia, Puerto Rico, and the Insular Areas of the United States; U.S. Census Bureau.
+</indspref>
+<direct>Vector</direct>
+<ptvctinf>
+<sdtsterm>
+<sdtstype>G-polygon</sdtstype>
+<ptvctcnt>61</ptvctcnt>
+</sdtsterm>
+</ptvctinf>
+</spdoinfo>
+<spref>
+<horizsys>
+<geograph>
+<latres>0.000278</latres>
+<longres>0.000278</longres>
+<geogunit>Decimal degrees</geogunit>
+</geograph>
+<geodetic>
+<horizdn>North American Datum of 1983</horizdn>
+<ellips>GRS1980</ellips>
+<semiaxis>6378137</semiaxis>
+<denflat>298.257222</denflat>
+</geodetic>
+</horizsys>
+</spref>
+<eainfo>
+<detailed>
+<enttyp>
+<enttypl>State</enttypl>
+<enttypd>A first order division of the nation, including States and State equivalents.</enttypd>
+<enttypds>National Atlas of the United States</enttypds>
+</enttyp>
+<attr>
+<attrlabl>Shape</attrlabl>
+<attrdef>The representation of the entity in the data.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<edom>
+<edomv>Polygon</edomv>
+<edomvd>2-dimensional element</edomvd>
+<edomvds>ESRI GIS software</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Name</attrlabl>
+<attrdef>The name of the State or State equivalent.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<codesetd>
+<codesetn>
+American National Standards Institute (ANSI) Codes for States, the District of Columbia,
+Puerto Rico, and the Insular Areas of the United States
+</codesetn>
+<codesets>U.S. Census Bureau</codesets>
+</codesetd>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>State_abbr</attrlabl>
+<attrdef>The 2-character abbreviation for the State or State equivalent.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<codesetd>
+<codesetn>
+American National Standards Institute (ANSI) Codes for States, the District of Columbia,
+Puerto Rico, and the Insular Areas of the United States
+</codesetn>
+<codesets>U.S. Census Bureau</codesets>
+</codesetd>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>State_fips</attrlabl>
+<attrdef>The 2-digit FIPS code of the State or State equivalent.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<codesetd>
+<codesetn>
+American National Standards Institute (ANSI) Codes for States, the District of Columbia,
+Puerto Rico, and the Insular Areas of the United States
+</codesetn>
+<codesets>U.S. Census Bureau</codesets>
+</codesetd>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Order_adm</attrlabl>
+<attrdef>A ranking indicating the order in which States were admitted to the United States.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>50</rdommax>
+</rdom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>0</edomv>
+<edomvd>
+The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in
+association with the United States, and the U.S. Virgin Islands is a territory of the United
+States.
+</edomvd>
+<edomvds>National Atlas of the United States</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Month_adm</attrlabl>
+<attrdef>The month when the State was admitted to the United States.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>January</rdommin>
+<rdommax>December</rdommax>
+</rdom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>&lt;blank&gt;</edomv>
+<edomvd>
+The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in
+association with the United States, and the U.S. Virgin Islands is a territory of the United
+States.
+</edomvd>
+<edomvds>National Atlas of the United States</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Day_Adm</attrlabl>
+<attrdef>The day of the month when the State was admitted to the United States.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1</rdommin>
+<rdommax>31</rdommax>
+</rdom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>0</edomv>
+<edomvd>
+The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in
+association with the United States, and the U.S. Virgin Islands is a territory of the United
+States.
+</edomvd>
+<edomvds>National Atlas of the United States</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Year_Adm</attrlabl>
+<attrdef>The year when the State was admitted  to the United States.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>1787</rdommin>
+<rdommax>1959</rdommax>
+</rdom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>0</edomv>
+<edomvd>
+The area is a not a State.  Washington, DC is a district, Puerto Rico is a commonwealth in
+association with the United States, and the U.S. Virgin Islands is a territory of the United
+States.
+</edomvd>
+<edomvds>National Atlas of the United States</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Type</attrlabl>
+<attrdef>An indication of whether the area is land or water.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<edom>
+<edomv>Land</edomv>
+<edomvd>The area is land.</edomvd>
+<edomvds>National Atlas of the United States</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<edom>
+<edomv>Water</edomv>
+<edomvd>The area is water (the Great Lakes.)</edomvd>
+<edomvds>National Atlas of the United States</edomvds>
+</edom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Pop</attrlabl>
+<attrdef>The population of the State or State equivalent, as found in the 2010 Census.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<edom>
+<edomv>0</edomv>
+<edomvd>The area is water (the Great Lakes.)</edomvd>
+<edomvds>National Atlas of the United States</edomvds>
+</edom>
+</attrdomv>
+<attrdomv>
+<rdom>
+<rdommin>106405</rdommin>
+<rdommax>37253956</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Sq_miles</attrlabl>
+<attrdef>The size of the area in square miles.  This is a calculated field.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>62.1</rdommin>
+<rdommax>582037.1</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+<attr>
+<attrlabl>Prim_miles</attrlabl>
+<attrdef>The perimeter of the area in miles.  This is a calculated field.</attrdef>
+<attrdefs>National Atlas of the United States</attrdefs>
+<attrdomv>
+<rdom>
+<rdommin>52.7</rdommin>
+<rdommax>36642.5</rdommax>
+</rdom>
+</attrdomv>
+</attr>
+</detailed>
+</eainfo>
+<distinfo>
+<distrib>
+<cntinfo>
+<cntorgp>
+<cntorg>Earth Explorer, U.S. Geological Survey</cntorg>
+</cntorgp>
+<cntaddr>
+<addrtype>Mailing address</addrtype>
+<address>U.S. Geological Survey</address>
+<address>47914 252nd Street</address>
+<city>Sioux Falls</city>
+<state>SD</state>
+<postal>57198-0001</postal>
+</cntaddr>
+<cntvoice>605-594-6116</cntvoice>
+<cntvoice>866-573-3222</cntvoice>
+<cntemail>custserv@usgs.gov</cntemail>
+</cntinfo>
+</distrib>
+<distliab>
+Although these data have been processed successfully on a computer system at the U.S. Geological
+Survey, no warranty expressed or implied is made by the U.S. Geological Survey regarding the utility
+of the data on any other system, nor shall the act of distribution constitute any such warranty.
+No responsibility is assumed by the U.S. Geological Survey in the use of these data.
+</distliab>
+<stdorder>
+<digform>
+<digtinfo>
+<formname>ESRI Shapefile</formname>
+</digtinfo>
+<digtopt>
+<onlinopt>
+<computer>
+<networka>
+<networkr>http://nationalatlas.gov/atlasftp-1m.html</networkr>
+</networka>
+</computer>
+</onlinopt>
+</digtopt>
+</digform>
+<digform>
+<digtinfo>
+<formname>ESRI File Geodatabase 10.0</formname>
+</digtinfo>
+<digtopt>
+<onlinopt>
+<computer>
+<networka>
+<networkr>http://nationalatlas.gov/atlasftp-1m.html</networkr>
+</networka>
+</computer>
+</onlinopt>
+</digtopt>
+</digform>
+<fees>None</fees>
+</stdorder>
+</distinfo>
+<metainfo>
+<metd>20140408</metd>
+<metc>
+<cntinfo>
+<cntorgp>
+<cntorg>National Atlas of the United States</cntorg>
+</cntorgp>
+<cntaddr>
+<addrtype>Mailing address</addrtype>
+<address>U.S. Geological Survey</address>
+<address>511 National Center</address>
+<address>12201 Sunrise Valley Drive</address>
+<city>Reston</city>
+<state>VA</state>
+<postal>20192</postal>
+</cntaddr>
+<cntvoice>1-888-ASK-USGS (1-888-275-8747)</cntvoice>
+<cntemail>atlasmail@usgs.gov</cntemail>
+</cntinfo>
+</metc>
+<metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+<metstdv>FGDC-STD-001-1998</metstdv>
+<metsi>
+<metscs>None</metscs>
+<metsc>Unclassified</metsc>
+<metshd>None</metshd>
+</metsi>
+</metainfo>
+</metadata>
