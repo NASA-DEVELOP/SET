@@ -5,6 +5,7 @@ from darkskypy import gauss_earth_curvature_radius, sgmapper
 
 
 class TestGaussianEarthCurvatureRadius(unittest.TestCase):
+"""Test gauss_earth_curvature_radius functionality on different inputs"""
     def test_0(self):
         self.assertEqual(gauss_earth_curvature_radius(0), 6356.7523142)
 
