@@ -301,7 +301,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     pad_left = (dnbarr.shape[0] - proparr.shape[0])//2
     pad_right = (dnbarr.shape[0] - proparr.shape[0])//2
     pad_up = (dnbarr.shape[1] - proparr.shape[1])//2
-    pad_down = (dnbarr.shape[1] - proparr.shape[1])//2 + 1
+    pad_down = (dnbarr.shape[1] - proparr.shape[1])//2
     padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
 
     #ADDED DEBUG CODE#
