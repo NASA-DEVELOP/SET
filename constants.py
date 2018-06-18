@@ -9,7 +9,7 @@ from playsound import playsound
 SW = 1680
 SH = 1050
 
-ICO = './static/satellite.ico'
+ICO = 'static/satellite.ico'
 
 def ding():
      playsound('./static/ting.mp3')

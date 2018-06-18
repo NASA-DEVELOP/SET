@@ -13,15 +13,27 @@ References:
 (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc.
 	  Pac. 101.
 """
-from Tkinter import Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button, Canvas, Scrollbar, \
-    Text, Menubutton, Menu, Checkbutton, BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, \
-    StringVar, IntVar
-import ttk
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+try:
+    from Tkinter import (Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button,
+                         Canvas, Scrollbar, Text, Menubutton, Menu, Checkbutton,
+                         BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y,
+                         StringVar, IntVar)
+    import ttk
+    import tkFileDialog as filedialog
+except:
+    from tkinter import (Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button,
+                         Canvas, Scrollbar, Text, Menubutton, Menu, Checkbutton,
+                         BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y,
+                         StringVar, IntVar, ttk, filedialog)
+import matplotlib
+matplotlib.use('TkAgg')
 from PIL import Image, ImageTk, ImageOps
-import tkFileDialog
 import webbrowser
 import threading
-import sys
+import sys, os
 import time
 import constants
 import darkskypy
@@ -51,7 +63,7 @@ class SkyglowEstimationToolbox:
         # Sets window title, size, and icon on screen.
         self.root.title("Skyglow Estimation Toolbox (SET)")
         self.root.geometry('%dx%d+%d+%d' % (constants.SW*0.75, constants.SH*0.75, 25, 25))
-        self.root.wm_iconbitmap(constants.ICO)
+        self.root.iconbitmap(os.path.join(os.getcwd(), constants.ICO))
         self.root.resizable(False, False)
 
         # Creates three paned windows for the main screen.
@@ -73,6 +85,7 @@ class SkyglowEstimationToolbox:
         # Creates canvas for displaying images.
         self.img_canvas = Canvas(self.img_frame, bd=2, relief="groove",
                                  width=constants.SW*0.6, height=constants.SH*0.6)
+        print(constants.SW, constants.SH)
         self.img_canvas.place(relx=.5, rely=.5, anchor=CENTER)
 
         # Creates help button for link to documentation, instructions, and about.
@@ -104,13 +117,13 @@ class SkyglowEstimationToolbox:
         krn_chk = Checkbutton(self.input_frame, anchor=W, variable=self.krn_var,
                               command=self.checkbtn_val)
         krn_chk.place(relx=.1, rely=.31, anchor=CENTER)
-        
+
         # Region Latitude (deg), Grand Teton National park = 43.7904 degrees N
         self.lat_lbl = Label(self.input_frame, text="Latitude (deg):", width=15, anchor=E)
         self.lat_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
 
         # Atmospheric Clarity Parameter, REF 2, Eq. 12, p. 645
-        self.k_lbl = Label(self.input_frame, text="Atmospheric Clarity Parameter:", 
+        self.k_lbl = Label(self.input_frame, text="Atmospheric Clarity Parameter:",
         				   width=25, anchor=E)
         self.k_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
 
@@ -128,7 +141,7 @@ class SkyglowEstimationToolbox:
         self.krn_btn = Button(self.input_frame, text="Browse", command=self.import_krn)
 
         # Generate Artificial Skyglow Map Button
-        self.map_btn = Button(self.input_frame, text="Generate Artificial Skyglow Map", 
+        self.map_btn = Button(self.input_frame, text="Generate Artificial Skyglow Map",
                                  width=79, command=self.generate_map)
 
         # Places widgets.
@@ -147,13 +160,15 @@ class SkyglowEstimationToolbox:
     def import_viirs(self):
         # Allows user to search through his directory for VIIRS Image file.
         file_types = [('TIFF Files', '*.tif'), ('All files', '*')]
-        file_name = tkFileDialog.Open(initialdir='/', title="Select file", filetypes=file_types)
+        file_name = filedialog.Open(initialdir='/', title="Select file", filetypes=file_types)
         file_name = file_name.show()
         self.file_log_var.set(file_name)
 
         # Checks to see if file is empty. If not, displays image on canvas.
         if file_name != '':
             pilimg = Image.open(file_name)
+            pilimg_width, pilimg_height = pilimg.size
+            pilimg.tile = [t for t in pilimg.tile if t[1][2] < pilimg_width and t[1][3] < pilimg_height]
             canvas_size = (self.img_canvas.winfo_width(), self.img_canvas.winfo_height())
             pilimg_r = pilimg.resize(canvas_size, Image.ANTIALIAS)
             pilimg_col = ImageOps.colorize(ImageOps.grayscale(pilimg_r), (0,0,0), (255,255,255))
@@ -259,7 +274,7 @@ class SkyglowEstimationToolbox:
         prg_window = Toplevel(self.root)
         prg_window.geometry('650x325+250+250')
         prg_window.title('Generating Artificial Skyglow Map...')
-        prg_window.wm_iconbitmap(constants.ICO)
+        prg_window.iconbitmap(constants.ICO)
         prg_window.resizable(False, False)
         prg_frame = Frame(prg_window)
         prg_frame.pack(fill=BOTH)

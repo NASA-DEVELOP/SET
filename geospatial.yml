@@ -1,42 +1,11 @@
 name: geospatial
-channels:
-- defaults
 dependencies:
-- bzip2=1.0.6=vc9_3
-- curl=7.52.1=vc9_0
-- freetype=2.5.5=vc9_2
-- gdal=2.1.0=py27_0
-- geos=3.5.0=vc9_0
-- hdf4=4.2.12=vc9_1
-- hdf5=1.8.15.1=vc9_4
-- jpeg=9b=vc9_0
-- kealib=1.4.6=vc9_0
-- libgdal=2.1.0=vc9_0
-- libnetcdf=4.3.3.1=vc9_4
-- libpng=1.6.27=vc9_0
-- libtiff=4.0.6=vc9_3
-- mkl=2017.0.3=0
-- numpy=1.13.1=py27_0
-- olefile=0.44=py27_0
-- pillow=4.2.1=py27_0
-- pip=9.0.1=py27_1
-- proj4=4.9.2=vc9_0
-- python=2.7.13=1
-- setuptools=27.2.0=py27_1
-- vs2008_runtime=9.00.30729.5054=0
-- wheel=0.29.0=py27_0
-- xerces-c=3.1.4=vc9_0
-- zlib=1.2.11=vc9_0
+- python>=2.7
+- pip
+- numpy
+- gdal
+- matplotlib
+- pillow
 - pip:
-  - cycler==0.10.0
-  - django==1.11.4
-  - functools32==3.2.3.post2
-  - image==1.5.11
-  - matplotlib==2.0.2
-  - matplotlib-scalebar==0.4.0
-  - playsound==1.2.2
-  - pyparsing==2.2.0
-  - python-dateutil==2.6.1
-  - pytz==2017.2
-  - six==1.10.0
-prefix: C:\Users\ThinkPad\Anaconda3\envs\geospatial
+  - matplotlib-scalebar
+  - playsound
