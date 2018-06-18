@@ -1,0 +1,11 @@
+name: geospatial-dev
+dependencies:
+- python=2.7
+- pip
+- numpy
+- gdal
+- matplotlib
+- pillow
+- pip:
+  - matplotlib-scalebar
+  - playsound
