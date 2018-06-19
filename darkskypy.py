@@ -237,6 +237,8 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
                 # first convert angles in degrees to radians
                 azi_rad = azi_arg*(pi/180)
                 zen_rad = zen_arg*(pi/180)
+                if abs(centerlat_arg) > 90:
+                    raise ValueError("Latitude must be between 0 and 90 degrees")
                 lat_rad = centerlat_arg*(pi/180)
                 propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
                 kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
@@ -300,8 +302,12 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # generalized padding of kernel so that fft can run
     pad_left = (dnbarr.shape[0] - proparr.shape[0])//2
     pad_right = (dnbarr.shape[0] - proparr.shape[0])//2
+    if dnbarr.shape[0] % 2 == 1:
+        pad_right += 1
     pad_up = (dnbarr.shape[1] - proparr.shape[1])//2
-    pad_down = (dnbarr.shape[1] - proparr.shape[1])//2 + 1
+    pad_down = (dnbarr.shape[1] - proparr.shape[1])//2
+    if dnbarr.shape[1] % 2 == 1:
+        pad_down += 1
     padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
 
     #ADDED DEBUG CODE#
