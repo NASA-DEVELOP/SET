@@ -2,8 +2,8 @@ import unittest
 from math import pi
 from numpy import array, tile, transpose, array_equal, arcsin, sin, cos, sqrt
 
-from darkskypy import (gauss_earth_curvature_radius, sgmapper, create_latlon_arrays,
-		       create_beta)
+from darkskypy import (gauss_earth_curvature_radius, sgmapper,
+                       create_latlon_arrays, create_beta)
 
 
 class TestGaussianEarthCurvatureRadius(unittest.TestCase):
@@ -37,11 +37,11 @@ class TestBeta(unittest.TestCase):
         d[2,2] = 0.01
         chi = d/400
         correct = array([[2.74724455, 2.77399189, 3.14159265, 3.50919342, 3.53594076],
-       			 [3.67005487, 3.63695994, 3.14159265, 2.64622536, 2.61313044],
-       			 [4.71238898, 4.71238898, 0, 1.57079633, 1.57079633],
-       			 [5.75472309, 5.78781802, 0, 0.49536729, 0.52846221],
-       			 [6.67753341, 6.65078607, -0., -0.36760077, -0.39434811]])
-	result = create_beta(lat,lon,chi,0,center_lat, center_lon).round(8)
+                         [3.67005487, 3.63695994, 3.14159265, 2.64622536, 2.61313044],
+                         [4.71238898, 4.71238898, 0, 1.57079633, 1.57079633],
+                         [5.75472309, 5.78781802, 0, 0.49536729, 0.52846221],
+                         [6.67753341, 6.65078607, -0., -0.36760077, -0.39434811]])
+        result = create_beta(lat,lon,chi,0,center_lat, center_lon).round(8)
         self.assertTrue(array_equal(result, correct))
 
 
