@@ -1,45 +1,42 @@
 # REFERENCES
-# (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A. Rybnikova
-#       and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness. Sci. Adv. 2.
-# (2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial night sky brightness mapped
-#       from DMSP satellite Operational Linescan System measurements. Mon. Not. R. Astron. Soc. 318.
-# (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc. Pac. 101.
+# (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh,
+#   B.A. Portnov, N.A. Rybnikova and R. Furgoni, 2016. The new workd atlas of
+#   artificial night sky brightness. Sci. Adv. 2.
+# (2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The
+#   artificial night sky brightness mapped from DMSP satellite Operational
+#   Linescan System measurements. Mon. Not. R. Astron. Soc. 318.
+# (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites.
+#   Pub. Astron. Soc. Pac. 101.
+
 from __future__ import division
 from __future__ import print_function
-import numpy
+
 from numpy import *
-#import itertools
-import time
-# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html #scipy.signal.fftconvolve
+# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html
+# scipy.signal.fftconvolve
 # from scipy import ndimage
-import os.path
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from osgeo import gdal
+
+import constants
+
+import os.path
+import time
 import json
 import logging
 import sys
 import glob
 import warnings
-import constants
+from builtins import range
 warnings.filterwarnings("error")
 logger = logging.getLogger()
 
 
-
-#These are the default inputs if you change them here then they will change throughout the document
-default_la = 40.8797
-default_ka = 1.0
-default_ze = 0.0
-default_az = 0.0
-default_csv_path = os.path.join(os.getcwd(), "default.csv")
-default_input_path = os.path.join(os.getcwd(), "data", "20140901_20140930_75N180W_C.tif")
 default_kernel_folder = os.path.join(os.getcwd(), "kernel_lib")
 default_output_folder = os.path.join(os.getcwd(), "skyglow_out")
 
-
-
-##ISSUES
+# ISSUES
 # check angle fixes ~sgmapper and other
 # check beta array fixes ~line 298
 # continue abstracting prop2d is sgmapper ~line 50
@@ -54,246 +51,209 @@ ubr_arg = 10.0
 logger.info(sys.version)
 
 def main():
-        # The purpose of main() in darkskypy is supply variables and whatever
-        # else might be desirable if darkspypy is called from the console.
+    """Main entry point if darksky is run from the command line. Calls
+       appropriate action."""
 
-        if len(sys.argv) > 1:
-                action = sys.argv[1]
+    if len(sys.argv) < 2:
+        raise ValueError("Usage: python {} <action>. Action can be 'sgmap_single', 'kernel_lib', 'sgmap_multiple'".format(sys.argv[0]))
+
+    action = sys.argv[1]
+
+    # Estimate a single map of artificial sky brightness with or without
+    # an existing 2d propagation function or "kernel"
+    if action == "sgmap_single":
+        try:
+            la = float(sys.argv[2])
+        except:
+            raise ValueError("Latitude argument must be a number")
+        try:
+            ka = float(sys.argv[3])
+        except:
+            raise ValueError("Atmospheric clarity argument must be a number")
+        try:
+            ze = float(sys.argv[4])
+        except:
+            raise ValueError("Zenith argument must be a number")
+        try:
+            az = float(sys.argv[5])
+        except:
+            raise ValueError("Azimuth argument must be a number")
+        filename = sys.argv[6].split("/")
+        fi = os.path.join(os.getcwd(), *filename)
+        sgmapper(la, ka, ze, az, fi)
+
+    # Estimate a group or "library" of 2d propagation functions or "kernels"
+    elif action == "kernel_lib":
+        try:
+            la = float(sys.argv[2])
+        except:
+            raise ValueError("Latitude argument must be a number")
+        try:
+            ka = float(sys.argv[3])
+        except:
+            raise ValueError("Atmospheric clarity argument must be a number")
+
+        project_root = os.path.join(os.getcwd(), '/'.join(sys.argv[0].split("/")[:-1]))
+        # zenith angle list from csv file
+        if sys.argv[4] is not None:
+            csv_in = sys.argv[4].split("/")
+            csv_path = os.path.join(os.getcwd(), *csv_in)
+            angle_list = loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
+        # default list of zenith angles from defeault.csv in project root
         else:
-                action = "None"
+            csv_path = project_root + '/default.csv'
+            angle_list = loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
+            filename = sys.argv[5].split("/")
+            filein = os.path.join(os.getcwd(), *filename)
 
-        # Estimate a single map of artificial sky brightness with or without
-        # an existing 2d propagation function or "kernel"
-        if action == "sgmap_single":
+        lat_rad = la*(pi/180)
 
-                # Default sgmappper() arguments
-                default_inputs = {"none","None","na","NA","-"}
-                if sys.argv[2] not in default_inputs:# Default latitude (decimal degrees); if not in the list of values for a default input then user has defined their own value
-                        la = float(sys.argv[2])
-                else:
-                        la = default_la # 40.8797 for GRTE and 37.032814 for the Colorado Plateau
-                if sys.argv[3] not in default_inputs:# Default k_am (unitless); if not in the list of values for a default input then user has defined their own value
-                        ka = float(sys.argv[3])
-                else:
-                        ka = default_ka
-                if sys.argv[4] not in default_inputs:# Default zenith angle (degrees); if not in the list of values for a default input then user has defined their own value
-                        ze = float(sys.argv[4])
-                else:
-                        ze = default_ze
-                if sys.argv[5] not in default_inputs: # Default azimuth angle for site viewing (degrees); if not in the list of values for a default input then user has defined their own value
-                        az = float(sys.argv[5])
-                else:
-                        az = default_az
-                if sys.argv[6] not in default_inputs:
-                        filename = sys.argv[6].split("/")
-                        fi = os.path.join(os.getcwd(), *filename)
-                else:
-                        fi = default_input_path
-                #la = 37.032814 # Default latitude (decimal degrees)
-                #ka = 1.0 # Default k_am (unitless)
-                #ze = 45.0 # Default zenith angle (degrees)
-                #az = 0.0 # Default azimuth angle for site viewing (degrees)
-                #ISSUE: UPDATE SGMAPPER TO ACCEPT DEGREES INPUT FOR AZIMUTH
-                #fi = "C:\\Users\\DEVELOP_5\\ian\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
-                #fi = "C:\\Users\\kwross\\artificial-brightness\\data\\20140901_20140930_75N180W_C.tif" # Test VIIRS monthly file
-                sgmapper(la, ka, ze, az, fi)
+        for angle_set in angle_list:
+            zenith = angle_set[0]
+            azimuth = angle_set[1]
+            # first convert angles in degrees to radians
+            azi_rad = azimuth*(pi/180)
+            zen_rad = zenith*(pi/180)
+            propkernel, totaltime = fsum_2d(lat_rad, k_am, zen_rad, azi_rad, filein)
+            kerneltiffpath = 'kernel_' + str(la) + '_' +  str(k_am) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
+            array_to_geotiff(propkernel, kerneltiffpath, filein)
 
-        # Estimate a group or "library" of 2d propagation functions or "kernels"
-        elif action == "kernel_lib":
-
-                default_inputs = {"none","None","na","NA","-"}
-                if sys.argv[2] not in default_inputs:# Default latitude (decimal degrees); if not in the list of values for a default input then user has defined their own value
-                        centerlat = float(sys.argv[2])
-                else: #Default Value
-                        centerlat = default_la # 40.8797 for GRTE and 37.032814 for the Colorado Plateau
-                if sys.argv[3] not in default_inputs:# Default k_am (unitless); if not in the list of values for a default input then user has defined their own value
-                        k_am = float(sys.argv[3])
-                else: #Default Value
-                        k_am = default_ka # typically calculated with a value of 1
-                if sys.argv[4] not in default_inputs:# Default zenith angle (degrees); if not in the list of values for a default input then user has defined their own value
-                        csv_in = sys.argv[4].split("/")
-                        csv_path = os.path.join(os.getcwd(), *csv_in)
-                        angle_list = numpy.loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
-                else: #Default Value
-                        csv_path = default_csv_path # the default CSV is default.csv which I added in the artifitial-brightness directory the input angles are 45.0,0.0 45.0,90.0 45.0,180.0 45.0,270.0 0.0,0.0
-                        angle_list = numpy.loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
-                if sys.argv[5] not in default_inputs: # Test VIIRS monthly file
-                        filename = sys.argv[5].split("/")
-                        filein = os.path.join(os.getcwd(), *filename)
-                else:
-                        filein = default_input_path
-
-                lat_rad = centerlat*(pi/180)
-
-                for angle_set in angle_list:
-                        print(angle_set)
-                        logger.info(angle_list)
-                        logger.info(angle_set)
-                        zenith = angle_set[0]
-                        azimuth = angle_set[1]
-                        # first convert angles in degrees to radians
-                        azi_rad = azimuth*(pi/180)
-                        zen_rad = zenith*(pi/180)
-                        print(zenith)
-                        print(azimuth)
-                        print(lat_rad)
-                        propkernel, totaltime = fsum_2d(lat_rad, k_am, zen_rad, azi_rad, filein)
-                        kerneltiffpath = 'kernel_' + str(centerlat) + '_' +  str(k_am) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
-                        array_to_geotiff(propkernel, kerneltiffpath, filein)
-
-        # Produce a set of artificial skyglow maps based an existing library of propagation functions
-        elif action == "sgmap_multiple":
-
-                default_inputs = {"none","None","na","NA","-"}
-                # Get input VIIRS image path
-                if sys.argv[2] not in default_inputs: # Test VIIRS monthly file
-                        filename = sys.argv[2].split("/")
-                        filein = os.path.join(os.getcwd(), *filename)
-                else:
-                        filein = default_input_path
-                # Get kernel library folder path
-                if sys.argv[3] not in default_inputs: # Test kernel iput folder
-                        krnname = sys.argv[3].split("/")
-                        krnfolder = os.path.join(os.getcwd(), *krnname)
-                else:
-                        krnfolder = default_kernel_folder
-                # Get skyglow output folder path
-                if sys.argv[4] not in default_inputs: # Test skyglow map output folder
-                        outname = sys.argv[4].split("/")
-                        outfolder = os.path.join(os.getcwd(), *outname)
-                else:
-                        outfolder = default_output_folder
-
-                # read in VIIRS DNB image
-                viirsraster = gdal.Open(filein)
-                imgarr = viirsraster.ReadAsArray()
-
-                # Get kernel library file list
-                krnsrch = os.path.join(krnfolder,'*.tif')
-                krnlist = glob.glob(krnsrch)
-
-                ln = 0
-
-                for krn in krnlist:
-                        # If the loop has already ran once then rescale imgarr back down to prevent multiple scaling factors being applied
-                        if ln > 0:
-                                imgarr *= 10**-9
-                        ln = 1
-
-                        # If there is a 2d propagation function (kernel), ...
-                        # then read it into an array
-                        kh = gdal.Open(krn)
-                        krnarr = kh.ReadAsArray()
-                        # Break down kernel filename to get elements for skyglow filename
-                        krnbase = os.path.basename(krn)
-                        sgtags = krnbase.split("_")
-                        # Change "kernel" to "skyglow"
-                        sgtags[0] = "skyglow"
-                        # Put the skyglow basename together
-                        sep = "_"
-                        sgbase = sep.join(sgtags)
-                        sgfile = os.path.join(outfolder, sgbase)
-                        print(sgfile)
-                        # Create skyglow array
-                        sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
-                        # Write skyglow to a geotiff
-                        array_to_geotiff(sgarr, sgfile, filein)
-                        # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
-                        cond_angle = sgtags[4]
-                        cond = float(cond_angle[:-4])
-                        if (cond < 180.0) and not (cond == 0.0):
-                                # Must undo the scaling factor in convolve_viirs_to_skyglow
-                                rescale_factor = 10**-9
-                                img_rescale = rescale_factor * imgarr
-                                # Flips the current kernel left to right
-                                krnarr_flip = fliplr(krnarr)
-                                # Creates the corresponding flipped angle
-                                flip_azi = 360.0 - cond
-                                # Returns the proper file extention onto the tag in order to read as a file
-                                sgtags[4] = str(flip_azi) + '.tif'
-                                sgbase_flip = sep.join(sgtags)
-                                sgfile_flip = os.path.join(outfolder, sgbase_flip)
-                                print(sgfile_flip)
-                                logger.info("working on " + sgbase_flip)
-                                sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
-                                array_to_geotiff(sgarr_flip, sgfile_flip, filein)
-
+    # Produce a set of artificial skyglow maps based an existing library of propagation functions
+    elif action == "sgmap_multiple":
+        filename = sys.argv[2].split("/")
+        filein = os.path.join(os.getcwd(), *filename)
+        # Get kernel library folder path
+        krnname = sys.argv[3].split("/")
+        krnfolder = os.path.join(os.getcwd(), *krnname)
+        # Get skyglow output folder path
+        if sys.argv[4] is not None:
+            outname = sys.argv[4].split("/")
+            outfolder = os.path.join(os.getcwd(), *outname)
         else:
-                print("No action/incorrect action given. Choose ""sgmap_single"", ""sgmap_multiple"" or ""kernel_lib"".")
-
-
-
-
-def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
-        kerneltiffpath = prop2filein
-        #added code to allow for auto opening of kernels based on if they are saved in the current directory or the kernel_lib directory
-        if kerneltiffpath == "":
-                # If there is no input from skyglow.py for in input kernel (such as when the program is run through command line) then the default kernel name is used
-                kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
-        if (os.path.isfile(kerneltiffpath) == False) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == False):
-                # If there is no 2d propagation function (kernel), ...
-                # then estimate the 2d propagation function
-
-                # first convert angles in degrees to radians
-                azi_rad = azi_arg*(pi/180)
-                zen_rad = zen_arg*(pi/180)
-                if abs(centerlat_arg) > 90:
-                    raise ValueError("Latitude must be between 0 and 90 degrees")
-                lat_rad = centerlat_arg*(pi/180)
-                propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-                kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
-                array_to_geotiff(propkernel, kerneltiffpath, filein)
-
-                logger.info("time for prop function ubreak 10: %s", totaltime)
-        else:
-                if (os.path.isfile(kerneltiffpath) == True) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == False):
-                        # If there is a 2d propagation function (kernel) in the current direcotry and not in the kernel_lib subdirectory, ...
-                        # then read it into an array
-                        kerneldata = gdal.Open(kerneltiffpath)
-                        propkernel = kerneldata.ReadAsArray()
-                elif (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == True) and (os.path.isfile(kerneltiffpath) == False):
-                        # If there is a 2d propagation function (kernel) in the kernel_lib sub directory but not the current directory, ...
-                        # then read it into an array
-                        kerneldata = gdal.Open(os.path.join("kernel_lib", kerneltiffpath))
-                        propkernel = kerneldata.ReadAsArray()
-                elif (os.path.isfile(kerneltiffpath) == True) and (os.path.isfile(os.path.join("kernel_lib",kerneltiffpath)) == True):
-                        # If there is a 2d propagation function (kernel) in the current directory and subdirectory, ...
-                        # then read the one in the current directory into an array
-                        kerneldata = gdal.Open(kerneltiffpath)
-                        propkernel = kerneldata.ReadAsArray()
-
+            outfolder = default_output_folder
 
         # read in VIIRS DNB image
         viirsraster = gdal.Open(filein)
-        imagearr = viirsraster.ReadAsArray()
+        imgarr = viirsraster.ReadAsArray()
 
-        #ADDED DEBUG CODE#
-        logger.debug('imagearr shape : {}'.format(imagearr.shape))
-        logger.debug('imagearr shape rows : {}'.format(imagearr.shape[0]))
-        logger.debug('imagearr shape columns : {}'.format(imagearr.shape[1]))
-        logger.debug('propkernel shape : {}'.format(propkernel.shape))
-        logger.debug('propkernel shape rows : {}'.format(propkernel.shape[0]))
-        logger.debug('propkernel shape columns : {}'.format(propkernel.shape[1]))
+        # Get kernel library file list
+        krnsrch = os.path.join(krnfolder,'*.tif')
+        krnlist = glob.glob(krnsrch)
 
+        ln = 0
 
-        # Produce sky glow raster
-        skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
-        skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
-                + str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
-        array_to_geotiff(skyglowarr, skyglowpath, filein)
-        logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
-        constants.ding()
+        for krn in krnlist:
+            # If the loop has already ran once then rescale imgarr back down to prevent multiple scaling factors being applied
+            if ln > 0:
+                imgarr *= 10**-9
+            ln = 1
+
+            # If there is a 2d propagation function (kernel), ...
+            # then read it into an array
+            kh = gdal.Open(krn)
+            krnarr = kh.ReadAsArray()
+            # Break down kernel filename to get elements for skyglow filename
+            krnbase = os.path.basename(krn)
+            sgtags = krnbase.split("_")
+            # Change "kernel" to "skyglow"
+            sgtags[0] = "skyglow"
+            # Put the skyglow basename together
+            sep = "_"
+            sgbase = sep.join(sgtags)
+            sgfile = os.path.join(outfolder, sgbase)
+            print(sgfile)
+            # Create skyglow array
+            sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
+            # Write skyglow to a geotiff
+            array_to_geotiff(sgarr, sgfile, filein)
+            # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
+            cond_angle = sgtags[4]
+            cond = float(cond_angle[:-4])
+            if (cond < 180.0) and not (cond == 0.0):
+                # Must undo the scaling factor in convolve_viirs_to_skyglow
+                rescale_factor = 10**-9
+                img_rescale = rescale_factor * imgarr
+                # Flips the current kernel left to right
+                krnarr_flip = fliplr(krnarr)
+                # Creates the corresponding flipped angle
+                flip_azi = 360.0 - cond
+                # Returns the proper file extention onto the tag in order to read as a file
+                sgtags[4] = str(flip_azi) + '.tif'
+                sgbase_flip = sep.join(sgtags)
+                sgfile_flip = os.path.join(outfolder, sgbase_flip)
+                print(sgfile_flip)
+                logger.info("working on " + sgbase_flip)
+                sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
+                array_to_geotiff(sgarr_flip, sgfile_flip, filein)
+
+def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
+    kerneltiffpath = prop2filein
+    # added code to allow for auto opening of kernels based on if they are saved in the current directory or the kernel_lib directory
+    if kerneltiffpath == "":
+        # If there is no input from skyglow.py for in input kernel (such as when the program is run through command line) then the default kernel name is used
+        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
+    if (os.path.isfile(kerneltiffpath) is False) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) is False):
+        # If there is no 2d propagation function (kernel), ...
+        # then estimate the 2d propagation function
+
+        # first convert angles in degrees to radians
+        azi_rad = azi_arg*(pi/180)
+        zen_rad = zen_arg*(pi/180)
+        if abs(centerlat_arg) > 90:
+            raise ValueError("Latitude must be between 0 and 90 degrees")
+        lat_rad = centerlat_arg*(pi/180)
+        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
+        array_to_geotiff(propkernel, kerneltiffpath, filein)
+
+        logger.info("time for prop function ubreak 10: %s", totaltime)
+    else:
+        # If there is a 2d propagation function (kernel) in the current direcotry and not in the kernel_lib subdirectory, ...
+        # then read it into an array
+        if (os.path.isfile(kerneltiffpath) is True) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) is False):
+            kerneldata = gdal.Open(kerneltiffpath)
+            propkernel = kerneldata.ReadAsArray()
+        # If there is a 2d propagation function (kernel) in the kernel_lib sub directory but not the current directory, ...
+        # then read it into an array
+        elif (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == True) and (os.path.isfile(kerneltiffpath) == False):
+            kerneldata = gdal.Open(os.path.join("kernel_lib", kerneltiffpath))
+            propkernel = kerneldata.ReadAsArray()
+        # If there is a 2d propagation function (kernel) in the current directory and subdirectory, ...
+        # then read the one in the current directory into an array
+        elif (os.path.isfile(kerneltiffpath) == True) and (os.path.isfile(os.path.join("kernel_lib",kerneltiffpath)) == True):
+            kerneldata = gdal.Open(kerneltiffpath)
+            propkernel = kerneldata.ReadAsArray()
+
+    # read in VIIRS DNB image
+    viirsraster = gdal.Open(filein)
+    imagearr = viirsraster.ReadAsArray()
+
+    # ADDED DEBUG CODE #
+    logger.debug('imagearr shape : {}'.format(imagearr.shape))
+    logger.debug('imagearr shape rows : {}'.format(imagearr.shape[0]))
+    logger.debug('imagearr shape columns : {}'.format(imagearr.shape[1]))
+    logger.debug('propkernel shape : {}'.format(propkernel.shape))
+    logger.debug('propkernel shape rows : {}'.format(propkernel.shape[0]))
+    logger.debug('propkernel shape columns : {}'.format(propkernel.shape[1]))
+
+    # Produce sky glow raster
+    skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
+    skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
+                   + str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
+    array_to_geotiff(skyglowarr, skyglowpath, filein)
+    logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
+    constants.ding()
 
 # Function convolves VIIRS DNB with 2d propagation function
 def convolve_viirs_to_skyglow(dnbarr, proparr):
-    ######### Convert to float 32 for Fourier, scale, and round
+    # Convert to float 32 for Fourier, scale, and round
     # falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
     # Not sure if this is correct scaling factor, I assume that this makes the output prop image in units of cd/m^2
     viirs_scaling_factor = 10**9
     dnbarr *= viirs_scaling_factor
     proparr = float32(nan_to_num(proparr))
 
-    #ADDED DEBUG CODE#
+    # ADDED DEBUG CODE
     logger.debug('dnbarr.shape[0] : {}'.format(dnbarr.shape[0]))
     logger.debug('dnbarr.shape[1] : {}'.format(dnbarr.shape[1]))
     logger.debug('proparr.shape[0] : {}'.format(proparr.shape[0]))
@@ -310,7 +270,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
         pad_down += 1
     padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
 
-    #ADDED DEBUG CODE#
+    # ADDED DEBUG CODE
     logger.debug('padded_prop : {}'.format(array(padded_prop).shape))
     logger.debug('padded_prop[0] : {}'.format(array(padded_prop).shape[0]))
     logger.debug('padded_prop[1] : {}'.format(array(padded_prop).shape[1]))
@@ -323,7 +283,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # propagation function applied via fft must be rotated 180 degrees
     padded_prop = fliplr(flipud(padded_prop))
 
-    ################# for convolution FFT comparison
+    # for convolution FFT comparison
     # subset = 50
     # prows = padded_prop.shape[0]
     # pcols = padded_prop.shape[1]
@@ -333,13 +293,13 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # padded_prop = padded_prop[(prows//2)-subset:(prows//2)+subset, (pcols//2)-subset:(pcols//2)+subset]
     # imagearr = imagearr[(irows//2)-subset:(irows//2)+subset, (icols//2)-subset:(icols//2)+subset]
 
-    ######################## Fourier Transform Method ################################
+    # Fourier Transform Method #
 
     np_dft_prop_im = fft.fft2(padded_prop)
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
 
-    #ADDED DEBUG CODE#
+    # ADDED DEBUG CODE
     logger.debug('np_dft_prop_im shape : {}'.format(np_dft_prop_im.shape))
     logger.debug('np_dft_kernel_shift shape : {}'.format(np_dft_kernel_shift.shape))
     logger.debug('np_magnitude_spectrum shape : {}'.format(np_magnitude_spectrum.shape))
@@ -348,7 +308,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
 
-    #ADDED DEBUG CODE#
+    # ADDED DEBUG CODE
     logger.debug('np_dft_viirs_im shape : {}'.format(np_dft_viirs_im.shape))
     logger.debug('np_dft_viirs_shift shape : {}'.format(np_dft_viirs_shift.shape))
     logger.debug('np_magnitude_spectrum_viirs shape : {}'.format(np_magnitude_spectrum_viirs.shape))
@@ -356,7 +316,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
-    #ADDED DEBUG CODE#
+    # ADDED DEBUG CODE
     logger.debug('kernel_inv_shift shape : {}'.format(kernel_inv_shift.shape))
     logger.debug('viirs_inv_shift shape : {}'.format(viirs_inv_shift.shape))
 
@@ -372,7 +332,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # plt.subplot(122),plt.imshow(FFT_product_inverse, norm = colors.LogNorm(), cmap = 'gray')
     # plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
     # plt.show()
-    ###############################################################################
+    # ##############################################################################
 
 # Function that creates 2d propagation function
 def fsum_2d(cenlat, k_am, zen, azi, fin):
@@ -408,7 +368,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
 
     # Assignment of NaNs or null values outside of 200 km
-    D_OC[D_OC > 201.0] = numpy.NaN
+    D_OC[D_OC > 201.0] = NaN
 
     # Check of D_OC shape after assigning NaNs outside of 200 km radius
     # WHAT IS THE POINT OF CHECKING THE SHAPE IF WE DIDN'T CHANGE IT!
@@ -460,12 +420,16 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         #    p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am)
 
         for ii in range(kerdim[0]):
-                if mod(ii, ker10per) == 0:
-                        interm = time.time() - start
-                        logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
+            if mod(ii, ker10per) == 0:
+                interm = time.time() - start
+                logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
                 for jj in range(kerdim[1]):
-                        PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj], u0left[ii][jj],
-                                l_OCleft[ii][jj], thetaleft[ii][jj], betaleft[ii][jj], zen, ubr, k_am)
+                    PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj],
+                                                           u0left[ii][jj],
+                                                           l_OCleft[ii][jj],
+                                                           thetaleft[ii][jj],
+                                                           betaleft[ii][jj],
+                                                           zen, ubr, k_am)
 
         time_kern = time.time() - start
         logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -502,12 +466,13 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         #    p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am)
 
         for ii in range(kerdim[0]):
-                if mod(ii, ker10per) == 0:
-                        interm = time.time() - start
-                        logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
+            if mod(ii, ker10per) == 0:
+                interm = time.time() - start
+                logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
                 for jj in range(kerdim[1]):
-                        PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
-                                l_OC[ii][jj], theta[ii][jj], beta[ii][jj], zen, ubr, k_am)
+                    PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
+                                                       l_OC[ii][jj], theta[ii][jj],
+                                                       beta[ii][jj], zen, ubr, k_am)
 
         time_kern = time.time() - start
         logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -768,7 +733,6 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     if total_sum > 1:
         print('break!')
     return total_sum
-
 
 def array_to_geotiff(array, outfilename, referenceVIIRS):
     imdata = gdal.Open(referenceVIIRS)
