@@ -36,7 +36,7 @@ import threading
 import sys, os
 import time
 import constants
-import darkskypy
+import darksky
 import logging
 logger = logging.getLogger()
 

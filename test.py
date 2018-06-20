@@ -2,7 +2,7 @@ import unittest
 from math import pi
 from numpy import array, tile, transpose, array_equal, arcsin, sin, cos, sqrt
 
-from darkskypy import (gauss_earth_curvature_radius, sgmapper,
+from darksky import (gauss_earth_curvature_radius, sgmapper,
                        create_latlon_arrays, create_beta)
 
 

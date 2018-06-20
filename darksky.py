@@ -21,7 +21,7 @@ from osgeo import gdal
 
 import constants
 
-import os.path
+import os.path, ntpath
 import time
 import json
 import logging
@@ -57,6 +57,9 @@ def main():
     if len(sys.argv) < 2:
         raise ValueError("Usage: python {} <action>. Action can be 'sgmap_single', 'kernel_lib', 'sgmap_multiple'".format(sys.argv[0]))
 
+    project_root = os.path.join(os.getcwd(), '/'.join(sys.argv[0].split("/")[:-1]))
+    print(project_root)
+
     action = sys.argv[1]
 
     # Estimate a single map of artificial sky brightness with or without
@@ -78,8 +81,11 @@ def main():
             az = float(sys.argv[5])
         except:
             raise ValueError("Azimuth argument must be a number")
-        filename = sys.argv[6].split("/")
-        fi = os.path.join(os.getcwd(), *filename)
+        try:
+            fi = os.path.abspath(sys.argv[6])
+        except:
+            raise ValueError("Specify input VIIRS image")
+        print(fi)
         sgmapper(la, ka, ze, az, fi)
 
     # Estimate a group or "library" of 2d propagation functions or "kernels"
@@ -93,15 +99,14 @@ def main():
         except:
             raise ValueError("Atmospheric clarity argument must be a number")
 
-        project_root = os.path.join(os.getcwd(), '/'.join(sys.argv[0].split("/")[:-1]))
         # zenith angle list from csv file
-        if sys.argv[4] is not None:
+        try:
             csv_in = sys.argv[4].split("/")
             csv_path = os.path.join(os.getcwd(), *csv_in)
             angle_list = loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
         # default list of zenith angles from defeault.csv in project root
-        else:
-            csv_path = project_root + '/default.csv'
+        except:
+            csv_path = project_root + 'default.csv'
             angle_list = loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
             filename = sys.argv[5].split("/")
             filein = os.path.join(os.getcwd(), *filename)
@@ -126,10 +131,10 @@ def main():
         krnname = sys.argv[3].split("/")
         krnfolder = os.path.join(os.getcwd(), *krnname)
         # Get skyglow output folder path
-        if sys.argv[4] is not None:
+        try:
             outname = sys.argv[4].split("/")
             outfolder = os.path.join(os.getcwd(), *outname)
-        else:
+        except:
             outfolder = default_output_folder
 
         # read in VIIRS DNB image
@@ -185,6 +190,8 @@ def main():
                 logger.info("working on " + sgbase_flip)
                 sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
                 array_to_geotiff(sgarr_flip, sgfile_flip, filein)
+    else:
+        raise ValueError("No action/incorrect action given. Choose ""sgmap_single"", ""kernel_lib"", or ""sgmap_multiple""")
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     kerneltiffpath = prop2filein
@@ -238,7 +245,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 
     # Produce sky glow raster
     skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
-    skyglowpath = (filein[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
+    skyglowpath = (ntpath.basename(filein)[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
                    + str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
     array_to_geotiff(skyglowarr, skyglowpath, filein)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
