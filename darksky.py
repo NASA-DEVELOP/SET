@@ -382,7 +382,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     logger.info('kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0]))
     logger.info('kernel width in pixels, trimmed: {}'.format(D_OC.shape[1]))
     widthcenter = (D_OC.shape[1] + 1)//2
-    heigthcenter = (D_OC.shape[0] +1)//2
+    heigthcenter = (D_OC.shape[0] + 1)//2
     # reassignment of center value, need to use better method
     D_OC[cent_row,cent_col] = .01
 
@@ -430,13 +430,13 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
                 logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
-                for jj in range(kerdim[1]):
-                    PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj],
-                                                           u0left[ii][jj],
-                                                           l_OCleft[ii][jj],
-                                                           thetaleft[ii][jj],
-                                                           betaleft[ii][jj],
-                                                           zen, ubr, k_am)
+            for jj in range(kerdim[1]):
+                PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj],
+                                                       u0left[ii][jj],
+                                                       l_OCleft[ii][jj],
+                                                       thetaleft[ii][jj],
+                                                       betaleft[ii][jj],
+                                                       zen, ubr, k_am)
 
         time_kern = time.time() - start
         logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -476,10 +476,10 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
                 logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
-                for jj in range(kerdim[1]):
-                    PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
-                                                       l_OC[ii][jj], theta[ii][jj],
-                                                       beta[ii][jj], zen, ubr, k_am)
+            for jj in range(kerdim[1]):
+                PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
+                                                   l_OC[ii][jj], theta[ii][jj],
+                                                   beta[ii][jj], zen, ubr, k_am)
 
         time_kern = time.time() - start
         logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
