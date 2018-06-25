@@ -19,15 +19,15 @@ from __future__ import print_function
 try:
     from Tkinter import (Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button,
                          Canvas, Scrollbar, Text, Menubutton, Menu, Checkbutton,
-                         BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y,
-                         StringVar, IntVar)
+                         BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, N, S,
+                         StringVar, IntVar, Radiobutton, IntVar)
     import ttk
     import tkFileDialog as filedialog
 except:
     from tkinter import (Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button,
                          Canvas, Scrollbar, Text, Menubutton, Menu, Checkbutton,
-                         BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y,
-                         StringVar, IntVar, ttk, filedialog)
+                         BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, N, S,
+                         StringVar, IntVar, ttk, filedialog, Radiobutton, IntVar)
 import matplotlib
 matplotlib.use('TkAgg')
 from PIL import Image, ImageTk, ImageOps
@@ -48,17 +48,26 @@ class SkyglowEstimationToolbox:
     # Initialization
     def __init__(self, root):
         self.root = root
+
+        # Radio action buttonz
+        self.action = None
+        self.sgmap_single_btn, self.krn_lib_btn, self.multi_map_btn = None, None, None
+
         self.file_log_var = StringVar()
+        self.csv_file_var = StringVar()
+        self.krn_folder_var = StringVar()
+        self.output_folder_var = StringVar()
+
         self.krn_ent_var = StringVar()
         self.krn_var = IntVar()
         self.img, self.cdiag = None, None
         self.lat_lbl, self.lat_entry = None, None
         self.k_lbl, self.k_entry = None, None
         self.zen_lbl, self.zen_entry = None, None
-        self. azi_lbl, self.azi_entry = None, None
-        self. krn_lvl, self.krn_entry, self.krn_btn = None, None, None
+        self.azi_lbl, self.azi_entry = None, None
+        self.krn_lvl, self.krn_entry, self.krn_btn = None, None, None
         self.txt_redir, self.prg_log = None, None
-        self.map_btn = None
+        self.map_btn, self.gen_krn_btn = None, None
 
         # Sets window title, size, and icon on screen.
         self.root.title("Skyglow Estimation Toolbox (SET)")
@@ -69,9 +78,9 @@ class SkyglowEstimationToolbox:
         # Creates three paned windows for the main screen.
         base = PanedWindow()
         base.pack(fill=BOTH, expand=1)
-        sub1 = PanedWindow(base, orient=VERTICAL)
+        sub1 = PanedWindow(base, orient=VERTICAL, height=self.root.winfo_height()*3/4)
         base.add(sub1)
-        sub2 = PanedWindow(sub1, orient=HORIZONTAL)
+        sub2 = PanedWindow(sub1, orient=HORIZONTAL, height=self.root.winfo_height()/5)
         sub1.add(sub2)
 
         # Creates frame for holding inputs.
@@ -84,8 +93,7 @@ class SkyglowEstimationToolbox:
 
         # Creates canvas for displaying images.
         self.img_canvas = Canvas(self.img_frame, bd=2, relief="groove",
-                                 width=constants.SW*0.6, height=constants.SH*0.6)
-        print(constants.SW, constants.SH)
+                                 width=constants.SW*0.6, height=self.root.winfo_height()*3/4*0.9)
         self.img_canvas.place(relx=.5, rely=.5, anchor=CENTER)
 
         # Creates help button for link to documentation, instructions, and about.
@@ -102,21 +110,51 @@ class SkyglowEstimationToolbox:
 
     # Sets up input GUI and image display screen.
     def main_screen(self):
+        self.action = IntVar()
+
+        self.sgmap_single_btn = Radiobutton(self.input_frame, text="Generate Artificial Skyglow Map",
+                                            width=40, variable=self.action, value='sng',
+                                            command=self.sng_popup)
+        self.krn_lib_btn = Radiobutton(self.input_frame, text="Generate Kernel Library",
+                                       width=40, variable=self.action, value='krn',
+                                       command=self.krn_popup)
+        self.multi_map_btn = Radiobutton(self.input_frame, text="Generate Map from Multiple Kernels",
+                                         width=40, variable=self.action, value='mul',
+                                         command=self.mul_popup)
+        #Place widget
+        self.sgmap_single_btn.grid(column=1,columnspan=1, row=0)
+        self.krn_lib_btn.grid(column=2, columnspan=1, row=0)
+        self.multi_map_btn.grid(column=3, columnspan=1, row=0)
+
         # VIIRS Image Reference File
-        file_lbl = Label(self.input_frame, text="Image File:", width=15, anchor=E)
-        file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+        self.file_lbl = Label(self.input_frame, text="Image File:", width=15, anchor=E)
+        self.file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
                          textvariable=self.file_log_var)
-        browse_btn = Button(self.input_frame, text="Browse", command=self.import_viirs)
-        file_lbl.grid(column=0, row=0)
-        file_log.grid(column=1, columnspan=3, row=0)
-        browse_btn.grid(column=4, row=0, sticky=W, padx=3)
+        self.browse_btn = Button(self.input_frame, text="Browse", command=self.import_viirs)
+
+        # Angles CSV File
+        self.csv_file_lbl = Label(self.input_frame, text="Angles CSV File:", width=15, anchor=E)
+        self.csv_file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+                         textvariable=self.csv_file_var)
+        self.csv_browse_btn = Button(self.input_frame, text="Browse", command=self.import_csv)
+
+        # Multiple Map form Kernel library
+        self.mul_file_lbl = Label(self.input_frame, text="Kernel Folder:", width=15, anchor=E)
+        self.mul_file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+                         textvariable=self.krn_folder_var)
+        self.mul_browse_btn = Button(self.input_frame, text="Browse", command=self.import_krn_folder)
+
+        # MultiKrn Map Output Location
+        self.output_lbl = Label(self.input_frame, text="Output Location:", width=15, anchor=E)
+        self.output_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+                 textvariable=self.output_folder_var)
+        self.output_btn = Button(self.input_frame, text="Browse", command=self.import_out_folder)
 
         # Import Kernel Checkbutton
-        check_lbl = Label(self.input_frame, text="Import Kernel:", width=15, anchor=E)
-        check_lbl.grid(column=0, row=1)
-        krn_chk = Checkbutton(self.input_frame, anchor=W, variable=self.krn_var,
+        self.check_lbl = Label(self.input_frame, text="Import Kernel:", width=15, anchor=E)
+
+        self.krn_chk = Checkbutton(self.input_frame, anchor=W, variable=self.krn_var,
                               command=self.checkbtn_val)
-        krn_chk.place(relx=.1, rely=.31, anchor=CENTER)
 
         # Region Latitude (deg), Grand Teton National park = 43.7904 degrees N
         self.lat_lbl = Label(self.input_frame, text="Latitude (deg):", width=15, anchor=E)
@@ -142,26 +180,19 @@ class SkyglowEstimationToolbox:
 
         # Generate Artificial Skyglow Map Button
         self.map_btn = Button(self.input_frame, text="Generate Artificial Skyglow Map",
-                                 width=79, command=self.generate_map)
-
-        # Places widgets.
-        self.lat_lbl.grid(column=0, row=2)
-        self.lat_entry.grid(column=1, row=2)
-        self.k_lbl.grid(column=2, row=2)
-        self.k_entry.grid(column=3, row=2)
-        self.zen_lbl.grid(column=0, row=3)
-        self.zen_entry.grid(column=1, row=3)
-        self.azi_lbl.grid(column=2, row=3)
-        self.azi_entry.grid(column=3, row=3)
-        self.map_btn.grid(column=1, columnspan=3, row=4)
-    ##################################################
+                                 width=40, command=self.generate_map)
+        # Generate Kernal library button for SET
+        self.gen_krn_btn = Button(self.input_frame, text="Generate Kernel Library",
+                                    width=40, command=self.generate_krn)
+        # Generate Map of Multiple Kernals(word better later on)
+        self.mul_map_btn = Button(self.input_frame, text="Generate Map from Multiple Kernels",
+                                    width=40, command=self.generate_mmap)
 
     # Imports a TIFF file for referencing sky brightness in the region of interest.
     def import_viirs(self):
         # Allows user to search through his directory for VIIRS Image file.
         file_types = [('TIFF Files', '*.tif'), ('All files', '*')]
-        file_name = filedialog.Open(initialdir='/', title="Select file", filetypes=file_types)
-        file_name = file_name.show()
+        file_name = filedialog.askopenfilename(initialdir='/', title="Select file", filetypes=file_types)
         self.file_log_var.set(file_name)
 
         # Checks to see if file is empty. If not, displays image on canvas.
@@ -178,13 +209,136 @@ class SkyglowEstimationToolbox:
         else:
             print('File is empty.')
 
+    def import_csv(self):
+        # Allows user to search through his directory for VIIRS Image file.
+        file_types = [('CSV Files', '*.csv'), ('All files', '*')]
+        file_name = filedialog.askopenfilename(initialdir='/', title="Select file", filetypes=file_types)
+        self.csv_file_var.set(file_name)
+
+        if file_name is '':
+            print('File is empty.')
+
+    def import_krn_folder(self):
+        # Allows user to search through his directory for VIIRS Image file.
+        krn_dir = filedialog.askdirectory(initialdir='/', title="Select kernel folder")
+        self.krn_folder_var.set(krn_dir)
+
+        if krn_dir is '':
+            print('Directory is empty.')
+
+    def import_out_folder(self):
+        # Allows user to search through his directory for VIIRS Image file.
+        output_dir = filedialog.askdirectory(initialdir='/', title="Select output folder")
+        self.output_folder_var.set(output_dir)
+
+        if output_dir is '':
+            print('Directory is empty.')
+
     # Imports a TIFF file containing the kernel data from previous input parameters.
     def import_krn(self):
         # Allows user to search through his directory for kernel file.
         file_types = [('TIFF Files', '*.tif'), ('All files', '*')]
-        file_name = tkFileDialog.Open(initialdir='/', title="Select file", filetypes=file_types)
-        file_name = file_name.show()
+        file_name = filedialog.askopenfilename(initialdir='/', title="Select file", filetypes=file_types)
         self.krn_ent_var.set(file_name)
+
+    def sng_popup(self):
+        self.remove_all()
+
+        self.check_lbl.grid(column=0, row=2)
+        self.krn_chk.place(relx=.2, rely=.41, anchor=CENTER)
+
+        self.file_lbl.grid(column=0, row=1)
+        self.file_log.grid(column=1, columnspan=3, row=1)
+        self.browse_btn.grid(column=4, row=1, sticky=W, padx=3)
+
+        self.lat_lbl.grid(column=0, row=3)
+        self.lat_entry.grid(column=1, row=3)
+
+        self.k_lbl.grid(column=2, row=3)
+        self.k_entry.grid(column=3, row=3)
+
+        self.zen_lbl.grid(column=0, row=4)
+        self.zen_entry.grid(column=1, row=4)
+
+        self.azi_lbl.grid(column=2, row=4)
+        self.azi_entry.grid(column=3, row=4)
+
+        self.map_btn.grid(column=1, columnspan=3, row=5, sticky=N+S+E+W)
+
+    def krn_popup(self):
+        self.remove_all()
+
+        # latitude
+        self.lat_lbl.grid(column=0, row=3)
+        self.lat_entry.grid(column=1, row=3)
+
+        # atmospheric clarity
+        self.k_lbl.grid(column=2, row=3)
+        self.k_entry.grid(column=3, row=3)
+
+        # angles file
+        self.csv_file_lbl.grid(column=0, row=1)
+        self.csv_file_log.grid(column=1, columnspan=3, row=1)
+        self.csv_browse_btn.grid(column=4, row=1,sticky=W, padx=3)
+
+        # input VIIRS image
+        self.file_lbl.grid(column=0, row=2)
+        self.file_log.grid(column=1, columnspan=3, row=2)
+        self.browse_btn.grid(column=4, row=2, sticky=W, padx=3)
+
+        self.gen_krn_btn.grid(column=1, columnspan=3, row=5, sticky=N+S+E+W)
+
+    def mul_popup(self):
+        self.remove_all()
+
+        #
+        self.mul_file_lbl.grid(column=0, row=1)
+        self.mul_file_log.grid(column=1, columnspan=3, row=1)
+        self.mul_browse_btn.grid(column=4, row=1, sticky=W, padx=3)
+
+        # input VIIRS image
+        self.file_lbl.grid(column=0, row=2)
+        self.file_log.grid(column=1, columnspan=3, row=2)
+        self.browse_btn.grid(column=4, row=2, sticky=W, padx=3)
+
+        # Choose output location
+        self.output_lbl.grid(column=0, row=3)
+        self.output_log.grid(column=1, columnspan=3, row=3)
+        self.output_btn.grid(column=4, row=3, sticky=W, padx=3)
+
+        # Generate map from kernel folder
+        self.mul_map_btn.grid(column=1, columnspan=3, row=4, sticky=N+S+E+W)
+
+
+    def remove_all(self):
+        self.check_lbl.grid_remove()
+        self.krn_chk.place_forget()
+        self.file_lbl.grid_remove()
+        self.file_log.grid_remove()
+        self.browse_btn.grid_remove()
+        self.krn_lbl.grid_remove()
+        self.krn_ent.grid_remove()
+        self.krn_btn.grid_remove()
+        self.lat_lbl.grid_remove()
+        self.lat_entry.grid_remove()
+        self.k_lbl.grid_remove()
+        self.k_entry.grid_remove()
+        self.zen_lbl.grid_remove()
+        self.zen_entry.grid_remove()
+        self.azi_lbl.grid_remove()
+        self.azi_entry.grid_remove()
+        self.map_btn.grid_remove()
+        self.gen_krn_btn.grid_remove()
+        self.mul_map_btn.grid_remove()
+        self.csv_file_lbl.grid_remove()
+        self.csv_file_log.grid_remove()
+        self.csv_browse_btn.grid_remove()
+        self.mul_file_lbl.grid_remove()
+        self.mul_file_log.grid_remove()
+        self.mul_browse_btn.grid_remove()
+        self.output_lbl.grid_remove()
+        self.output_log.grid_remove()
+        self.output_btn.grid_remove()
 
     # Changes interface based on whether Kernel Checkbutton is selected.
     def checkbtn_val(self):
@@ -201,22 +355,19 @@ class SkyglowEstimationToolbox:
             self.krn_lbl.grid(column=0, row=2)
             self.krn_ent.grid(column=1, columnspan=3, row=2)
             self.krn_btn.grid(column=4, row=2, sticky=W, padx=3)
-            self.map_btn.grid(column=1, columnspan=3, row=3)
         # Input parameter widgets when Kernel Checkbuttton is unmarked
         else:
             self.krn_lbl.grid_remove()
             self.krn_ent.grid_remove()
             self.krn_btn.grid_remove()
-            self.lat_lbl.grid(column=0, row=2)
-            self.lat_entry.grid(column=1, row=2)
-            self.k_lbl.grid(column=2, row=2)
-            self.k_entry.grid(column=3, row=2)
-            self.zen_lbl.grid(column=0, row=3)
-            self.zen_entry.grid(column=1, row=3)
-            self.azi_lbl.grid(column=2, row=3)
-            self.azi_entry.grid(column=3, row=3)
-            self.map_btn.grid(column=1, columnspan=3, row=4)
-
+            self.lat_lbl.grid(column=0, row=3)
+            self.lat_entry.grid(column=1, row=3)
+            self.k_lbl.grid(column=2, row=3)
+            self.k_entry.grid(column=3, row=3)
+            self.zen_lbl.grid(column=0, row=4)
+            self.zen_entry.grid(column=1, row=4)
+            self.azi_lbl.grid(column=2, row=4)
+            self.azi_entry.grid(column=3, row=4)
     # Simple function for opening URLs.
     @staticmethod
     def open_url(url):
@@ -304,6 +455,10 @@ class SkyglowEstimationToolbox:
     # Updates progress window to prevent it from freezing.
     def update_progress(self):
         self.prg_log.update()
+        if len(threading.enumerate()) == 1:
+            self.prg_bar.stop()
+        else:
+            self.prg_bar.start()
         self.root.after(1000, self.update_progress)
 
     # Generates artificial skyglow map based on VIIRS reference and local parameters.
@@ -323,8 +478,45 @@ class SkyglowEstimationToolbox:
 
         # Create new threads to run light propagation model simultaneously.
         p_thread = threading.Thread(target=self.update_progress())
-        t_thread = threading.Thread(target=darkskypy.sgmapper,
+        t_thread = threading.Thread(target=darksky.sgmapper,
                                     args=(lat_in, k_in, zen_in, azi_in, file_in, krn_file_in))
+        t_thread.setDaemon(True)
+        p_thread.start()
+        t_thread.start()
+
+    # Generate Kernels
+    def generate_krn(self):
+        # Acquires input arguments
+        csv_in, file_in, lat_in, k_in = '', '', 0, 0
+        csv_in = self.csv_file_var.get()
+        file_in = self.file_log_var.get()
+        lat_in = float(self.lat_entry.get())
+        k_in = float(self.k_entry.get())
+
+        self.progress()
+
+        # Create new threads to run light propagation model simultaneously.
+        p_thread = threading.Thread(target=self.update_progress())
+        t_thread = threading.Thread(target=darksky.krnlibber,
+                                    args=(lat_in, k_in, csv_in, file_in))
+        t_thread.setDaemon(True)
+        p_thread.start()
+        t_thread.start()
+
+    # Generate Multi Map from Kernel Library
+    def generate_mmap(self):
+        # Acquires input arguments
+        krn_folder_in, file_in, output_in, = '', '', ''
+        krn_folder_in = self.krn_folder_var.get()
+        file_in = self.file_log_var.get()
+        output_in = self.output_folder_var.get()
+
+        self.progress()
+
+        # Create new threads to run light propagation model simultaneously.
+        p_thread = threading.Thread(target=self.update_progress())
+        t_thread = threading.Thread(target=darksky.multisgmapper,
+                                    args=(file_in, krn_folder_in, output_in))
         t_thread.setDaemon(True)
         p_thread.start()
         t_thread.start()
