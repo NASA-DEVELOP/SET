@@ -58,7 +58,6 @@ def main():
         raise ValueError("Usage: python {} <action>. Action can be 'sgmap_single', 'kernel_lib', 'sgmap_multiple'".format(sys.argv[0]))
 
     project_root = os.path.join(os.getcwd(), '/'.join(sys.argv[0].split("/")[:-1]))
-    print(project_root)
 
     action = sys.argv[1]
 
@@ -85,7 +84,6 @@ def main():
             fi = os.path.abspath(sys.argv[6])
         except:
             raise ValueError("Specify input VIIRS image")
-        print(fi)
         sgmapper(la, ka, ze, az, fi)
 
     # Estimate a group or "library" of 2d propagation functions or "kernels"
@@ -103,93 +101,35 @@ def main():
         try:
             csv_in = sys.argv[4].split("/")
             csv_path = os.path.join(os.getcwd(), *csv_in)
-            angle_list = loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
         # default list of zenith angles from defeault.csv in project root
         except:
             csv_path = project_root + 'default.csv'
-            angle_list = loadtxt(open(csv_path, "rb"), delimiter=",",skiprows=1)
-            filename = sys.argv[5].split("/")
-            filein = os.path.join(os.getcwd(), *filename)
+        try:
+            fi = os.path.abspath(sys.argv[5])
+        except:
+            raise ValueError("Specify input VIIRS image")
 
-        lat_rad = la*(pi/180)
-
-        for angle_set in angle_list:
-            zenith = angle_set[0]
-            azimuth = angle_set[1]
-            # first convert angles in degrees to radians
-            azi_rad = azimuth*(pi/180)
-            zen_rad = zenith*(pi/180)
-            propkernel, totaltime = fsum_2d(lat_rad, k_am, zen_rad, azi_rad, filein)
-            kerneltiffpath = 'kernel_' + str(la) + '_' +  str(k_am) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
-            array_to_geotiff(propkernel, kerneltiffpath, filein)
+        krnlibber(la, ka, csv_path, fi)
 
     # Produce a set of artificial skyglow maps based an existing library of propagation functions
     elif action == "sgmap_multiple":
-        filename = sys.argv[2].split("/")
-        filein = os.path.join(os.getcwd(), *filename)
+        try:
+            fi = os.path.abspath(sys.argv[2])
+        except:
+            raise ValueError("Specify input VIIRS image")
         # Get kernel library folder path
-        krnname = sys.argv[3].split("/")
-        krnfolder = os.path.join(os.getcwd(), *krnname)
+        try:
+            krnfolder = os.abspath(sys.argv[3])
+        except:
+            krnfolder = default_kernel_folder
         # Get skyglow output folder path
         try:
-            outname = sys.argv[4].split("/")
-            outfolder = os.path.join(os.getcwd(), *outname)
+            outfolder = os.path.abspath(sys.argv[4])
         except:
             outfolder = default_output_folder
 
-        # read in VIIRS DNB image
-        viirsraster = gdal.Open(filein)
-        imgarr = viirsraster.ReadAsArray()
+        multisgmapper(fi, krnfolder, outfolder)
 
-        # Get kernel library file list
-        krnsrch = os.path.join(krnfolder,'*.tif')
-        krnlist = glob.glob(krnsrch)
-
-        ln = 0
-
-        for krn in krnlist:
-            # If the loop has already ran once then rescale imgarr back down to prevent multiple scaling factors being applied
-            if ln > 0:
-                imgarr *= 10**-9
-            ln = 1
-
-            # If there is a 2d propagation function (kernel), ...
-            # then read it into an array
-            kh = gdal.Open(krn)
-            krnarr = kh.ReadAsArray()
-            # Break down kernel filename to get elements for skyglow filename
-            krnbase = os.path.basename(krn)
-            sgtags = krnbase.split("_")
-            # Change "kernel" to "skyglow"
-            sgtags[0] = "skyglow"
-            # Put the skyglow basename together
-            sep = "_"
-            sgbase = sep.join(sgtags)
-            sgfile = os.path.join(outfolder, sgbase)
-            print(sgfile)
-            # Create skyglow array
-            sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
-            # Write skyglow to a geotiff
-            array_to_geotiff(sgarr, sgfile, filein)
-            # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
-            cond_angle = sgtags[4]
-            cond = float(cond_angle[:-4])
-            if (cond < 180.0) and not (cond == 0.0):
-                # Must undo the scaling factor in convolve_viirs_to_skyglow
-                rescale_factor = 10**-9
-                img_rescale = rescale_factor * imgarr
-                # Flips the current kernel left to right
-                krnarr_flip = fliplr(krnarr)
-                # Creates the corresponding flipped angle
-                flip_azi = 360.0 - cond
-                # Returns the proper file extention onto the tag in order to read as a file
-                sgtags[4] = str(flip_azi) + '.tif'
-                sgbase_flip = sep.join(sgtags)
-                sgfile_flip = os.path.join(outfolder, sgbase_flip)
-                print(sgfile_flip)
-                logger.info("working on " + sgbase_flip)
-                sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
-                array_to_geotiff(sgarr_flip, sgfile_flip, filein)
     else:
         raise ValueError("No action/incorrect action given. Choose ""sgmap_single"", ""kernel_lib"", or ""sgmap_multiple""")
 
@@ -250,6 +190,77 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     array_to_geotiff(skyglowarr, skyglowpath, filein)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
     constants.ding()
+
+def krnlibber(centerlat_arg, k_am_arg, angles_file, filein):
+    lat_rad = centerlat_arg*(pi/180)
+    angle_list = loadtxt(open(angles_file, "rb"), delimiter=",",skiprows=1)
+
+    for angle_set in angle_list:
+        zenith = angle_set[0]
+        azimuth = angle_set[1]
+        # first convert angles in degrees to radians
+        azi_rad = azimuth*(pi/180)
+        zen_rad = zenith*(pi/180)
+        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
+        array_to_geotiff(propkernel, kerneltiffpath, filein)
+
+        logger.info("time for prop function \{{}, {}\} ubreak 10: %s".format(zenith, azimuth), totaltime)
+
+def multisgmapper(filein, krnfolder, outfolder):
+    # read in VIIRS DNB image
+    viirsraster = gdal.Open(filein)
+    imgarr = viirsraster.ReadAsArray()
+
+    # Get kernel library file list
+    krnsrch = os.path.join(krnfolder,'*.tif')
+    krnlist = glob.glob(krnsrch)
+
+    ln = 0
+
+    for krn in krnlist:
+        # If the loop has already ran once then rescale imgarr back down to prevent multiple scaling factors being applied
+        if ln > 0:
+            imgarr *= 10**-9
+        ln = 1
+
+        # If there is a 2d propagation function (kernel), ...
+        # then read it into an array
+        kh = gdal.Open(krn)
+        krnarr = kh.ReadAsArray()
+        # Break down kernel filename to get elements for skyglow filename
+        krnbase = os.path.basename(krn)
+        sgtags = krnbase.split("_")
+        # Change "kernel" to "skyglow"
+        sgtags[0] = "skyglow"
+        # Put the skyglow basename together
+        sep = "_"
+        sgbase = sep.join(sgtags)
+        sgfile = os.path.join(outfolder, sgbase)
+        print(sgfile)
+        # Create skyglow array
+        sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
+        # Write skyglow to a geotiff
+        array_to_geotiff(sgarr, sgfile, filein)
+        # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
+        cond_angle = sgtags[4]
+        cond = float(cond_angle[:-4])
+        if (cond < 180.0) and not (cond == 0.0):
+            # Must undo the scaling factor in convolve_viirs_to_skyglow
+            rescale_factor = 10**-9
+            img_rescale = rescale_factor * imgarr
+            # Flips the current kernel left to right
+            krnarr_flip = fliplr(krnarr)
+            # Creates the corresponding flipped angle
+            flip_azi = 360.0 - cond
+            # Returns the proper file extention onto the tag in order to read as a file
+            sgtags[4] = str(flip_azi) + '.tif'
+            sgbase_flip = sep.join(sgtags)
+            sgfile_flip = os.path.join(outfolder, sgbase_flip)
+            print(sgfile_flip)
+            logger.info("working on " + sgbase_flip)
+            sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
+            array_to_geotiff(sgarr_flip, sgfile_flip, filein)
 
 # Function convolves VIIRS DNB with 2d propagation function
 def convolve_viirs_to_skyglow(dnbarr, proparr):
@@ -752,6 +763,7 @@ def array_to_geotiff(array, outfilename, referenceVIIRS):
     proj = imdata.GetProjection()
     nodatav = 0
     outfile = outfilename
+    logger.info('Saving geotiff {}'.format(outfile))
 
     # Create the georeffed file, using the information from the VIIRS image
     outdriver = gdal.GetDriverByName("GTiff")
