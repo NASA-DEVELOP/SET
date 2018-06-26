@@ -74,6 +74,7 @@ class SkyglowEstimationToolbox:
         self.root.geometry('%dx%d+%d+%d' % (constants.SW*0.75, constants.SH*0.75, 25, 25))
         self.root.iconbitmap(os.path.join(os.getcwd(), constants.ICO))
         self.root.resizable(False, False)
+        self.root.update_idletasks()
 
         # Creates three paned windows for the main screen.
         base = PanedWindow()
@@ -112,81 +113,86 @@ class SkyglowEstimationToolbox:
     def main_screen(self):
         self.action = IntVar()
 
+        btn_width = int(constants.SW/60)
+        file_width = int(constants.SW/18)
+        lbl_width = int(constants.SW/120)
+        gen_width = int(constants.SW/42)
+        print(btn_width, file_width, lbl_width)
         self.sgmap_single_btn = Radiobutton(self.input_frame, text="Generate Artificial Skyglow Map",
-                                            width=40, variable=self.action, value='sng',
+                                            width=btn_width, variable=self.action, value='sng',
                                             command=self.sng_popup)
         self.krn_lib_btn = Radiobutton(self.input_frame, text="Generate Kernel Library",
-                                       width=40, variable=self.action, value='krn',
+                                       width=btn_width, variable=self.action, value='krn',
                                        command=self.krn_popup)
         self.multi_map_btn = Radiobutton(self.input_frame, text="Generate Map from Multiple Kernels",
-                                         width=40, variable=self.action, value='mul',
+                                         width=btn_width, variable=self.action, value='mul',
                                          command=self.mul_popup)
         #Place widget
-        self.sgmap_single_btn.grid(column=1,columnspan=1, row=0)
-        self.krn_lib_btn.grid(column=2, columnspan=1, row=0)
-        self.multi_map_btn.grid(column=3, columnspan=1, row=0)
+        self.sgmap_single_btn.grid(column=0,columnspan=1, row=0)
+        self.krn_lib_btn.grid(column=1, columnspan=1, row=0)
+        self.multi_map_btn.grid(column=2, columnspan=1, row=0)
 
         # VIIRS Image Reference File
         self.file_lbl = Label(self.input_frame, text="Image File:", width=15, anchor=E)
-        self.file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+        self.file_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
                          textvariable=self.file_log_var)
         self.browse_btn = Button(self.input_frame, text="Browse", command=self.import_viirs)
 
         # Angles CSV File
-        self.csv_file_lbl = Label(self.input_frame, text="Angles CSV File:", width=15, anchor=E)
-        self.csv_file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+        self.csv_file_lbl = Label(self.input_frame, text="Angles CSV File:", width=lbl_width, anchor=E)
+        self.csv_file_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
                          textvariable=self.csv_file_var)
         self.csv_browse_btn = Button(self.input_frame, text="Browse", command=self.import_csv)
 
         # Multiple Map form Kernel library
-        self.mul_file_lbl = Label(self.input_frame, text="Kernel Folder:", width=15, anchor=E)
-        self.mul_file_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+        self.mul_file_lbl = Label(self.input_frame, text="Kernel Folder:", width=lbl_width, anchor=E)
+        self.mul_file_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
                          textvariable=self.krn_folder_var)
         self.mul_browse_btn = Button(self.input_frame, text="Browse", command=self.import_krn_folder)
 
         # MultiKrn Map Output Location
-        self.output_lbl = Label(self.input_frame, text="Output Location:", width=15, anchor=E)
-        self.output_log = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+        self.output_lbl = Label(self.input_frame, text="Output Location:", width=lbl_width, anchor=E)
+        self.output_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
                  textvariable=self.output_folder_var)
         self.output_btn = Button(self.input_frame, text="Browse", command=self.import_out_folder)
 
         # Import Kernel Checkbutton
-        self.check_lbl = Label(self.input_frame, text="Import Kernel:", width=15, anchor=E)
+        self.check_lbl = Label(self.input_frame, text="Import Kernel:", width=lbl_width, anchor=E)
 
         self.krn_chk = Checkbutton(self.input_frame, anchor=W, variable=self.krn_var,
                               command=self.checkbtn_val)
 
         # Region Latitude (deg), Grand Teton National park = 43.7904 degrees N
-        self.lat_lbl = Label(self.input_frame, text="Latitude (deg):", width=15, anchor=E)
-        self.lat_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
+        self.lat_lbl = Label(self.input_frame, text="Latitude (deg):", width=lbl_width, anchor=E)
+        self.lat_entry = Entry(self.input_frame, width=btn_width, bd=2, relief="sunken")
 
         # Atmospheric Clarity Parameter, REF 2, Eq. 12, p. 645
         self.k_lbl = Label(self.input_frame, text="Atmospheric Clarity Parameter:",
-        				   width=25, anchor=E)
-        self.k_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
+        				   width=btn_width, anchor=E)
+        self.k_entry = Entry(self.input_frame, width=btn_width, bd=2, relief="sunken")
 
         # Zenith angle (deg), z, REF 2, Fig. 6, p.648
-        self.zen_lbl = Label(self.input_frame, text="Zenith Angle (deg):", width=15, anchor=E)
-        self.zen_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
+        self.zen_lbl = Label(self.input_frame, text="Zenith Angle (deg):", width=lbl_width, anchor=E)
+        self.zen_entry = Entry(self.input_frame, width=btn_width, bd=2, relief="sunken")
 
         # Azimuth angle (deg)
-        self.azi_lbl = Label(self.input_frame, text="Azimuth Angle (deg):", width=25, anchor=E)
-        self.azi_entry = Entry(self.input_frame, width=30, bd=2, relief="sunken")
+        self.azi_lbl = Label(self.input_frame, text="Azimuth Angle (deg):", width=lbl_width, anchor=E)
+        self.azi_entry = Entry(self.input_frame, width=btn_width, bd=2, relief="sunken")
 
-        self.krn_lbl = Label(self.input_frame, text="Kernel File:", width=15, anchor=E)
-        self.krn_ent = Entry(self.input_frame, width=93, bd=2, relief="sunken",
+        self.krn_lbl = Label(self.input_frame, text="Kernel File:", width=lbl_width, anchor=E)
+        self.krn_ent = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
                              textvariable=self.krn_ent_var)
         self.krn_btn = Button(self.input_frame, text="Browse", command=self.import_krn)
 
         # Generate Artificial Skyglow Map Button
         self.map_btn = Button(self.input_frame, text="Generate Artificial Skyglow Map",
-                                 width=40, command=self.generate_map)
+                                 width=gen_width, command=self.generate_map)
         # Generate Kernal library button for SET
         self.gen_krn_btn = Button(self.input_frame, text="Generate Kernel Library",
-                                    width=40, command=self.generate_krn)
+                                    width=gen_width, command=self.generate_krn)
         # Generate Map of Multiple Kernals(word better later on)
         self.mul_map_btn = Button(self.input_frame, text="Generate Map from Multiple Kernels",
-                                    width=40, command=self.generate_mmap)
+                                    width=gen_width, command=self.generate_mmap)
 
     # Imports a TIFF file for referencing sky brightness in the region of interest.
     def import_viirs(self):
@@ -291,7 +297,7 @@ class SkyglowEstimationToolbox:
     def mul_popup(self):
         self.remove_all()
 
-        #
+        # Kernel folder location
         self.mul_file_lbl.grid(column=0, row=1)
         self.mul_file_log.grid(column=1, columnspan=3, row=1)
         self.mul_browse_btn.grid(column=4, row=1, sticky=W, padx=3)
