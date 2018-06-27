@@ -108,6 +108,12 @@ def main():
             fi = os.path.abspath(sys.argv[5])
         except:
             raise ValueError("Specify input VIIRS image")
+        if len(sys.argv) < 7:
+            logger.info("Not generating hemispherical kernels")
+        else:
+            hem = sys.argv[6]
+            if hem != 'hemisphere':
+                raise ValueError("Last argument must be 'hemisphere' or blank")
 
         krnlibber(la, ka, csv_path, fi)
 
