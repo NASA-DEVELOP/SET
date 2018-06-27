@@ -119,7 +119,7 @@ def main():
             raise ValueError("Specify input VIIRS image")
         # Get kernel library folder path
         try:
-            krnfolder = os.abspath(sys.argv[3])
+            krnfolder = os.path.abspath(sys.argv[3])
         except:
             krnfolder = default_kernel_folder
         # Get skyglow output folder path
@@ -205,7 +205,7 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein):
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
         array_to_geotiff(propkernel, kerneltiffpath, filein)
 
-        logger.info("time for prop function \{{}, {}\} ubreak 10: %s".format(zenith, azimuth), totaltime)
+        logger.info("time for prop function ({}, {}) ubreak 10: {}".format(zenith, azimuth, totaltime))
 
 def multisgmapper(filein, krnfolder, outfolder):
     # read in VIIRS DNB image
