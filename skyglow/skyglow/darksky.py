@@ -28,6 +28,7 @@ import logging
 import sys
 import glob
 import warnings
+from multiprocessing import Pool
 from builtins import range
 warnings.filterwarnings("error")
 logger = logging.getLogger()
@@ -108,8 +109,24 @@ def main():
         except:
             logger.info('CSV file not specified, using default.csv')
             csv_path = project_root + 'default.csv'
+        try:
+            sync = bool(sys.argv[5])
+        except:
+            sync = False
 
-        krnlibber(la, ka, csv_path, fi)
+        if not sync:
+            static_args = [(la, ka, fi)]
+            with open(csv_path, "rb") as f:
+                angle_list = loadtxt(f, delimiter=",",skiprows=1)
+            # cartesian product of arguments
+            args_product = [(x[0], x[1], x[2], y[0], y[1]) for x in static_args for y in angle_list]
+            p = Pool()
+            try:
+                p.map_async(krn_unpack, args_product).get(9999999)
+            except KeyboardInterrupt:
+                p.close()
+        else:
+            krnlibber(la, ka, csv_path, fi)
 
     # Produce a set of artificial skyglow maps based an existing library of propagation functions
     elif action == "sgmap_multiple":
@@ -193,21 +210,33 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
     constants.ding()
 
+def krn_unpack(args):
+    print(args)
+    return generate_krn(*args)
+
+def generate_krn(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein):
+    lat_rad = centerlat_arg*(pi/180)
+    zen_rad = zen_arg*(pi/180)
+    azi_rad = azi_arg*(pi/180)
+    propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+    kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
+    array_to_geotiff(propkernel, kerneltiffpath, filein)
+    logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zen_arg, azi_arg), totaltime)
+
 def krnlibber(centerlat_arg, k_am_arg, angles_file, filein):
     lat_rad = centerlat_arg*(pi/180)
-    angle_list = loadtxt(open(angles_file, "rb"), delimiter=",",skiprows=1)
-
+    with open(angles_file, "rb") as f:
+        angle_list = loadtxt(f, delimiter=",",skiprows=1)
     for angle_set in angle_list:
         zenith = angle_set[0]
         azimuth = angle_set[1]
-        # first convert angles in degrees to radians
-        azi_rad = azimuth*(pi/180)
         zen_rad = zenith*(pi/180)
+        azi_rad = azimuth*(pi/180)
+
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
         array_to_geotiff(propkernel, kerneltiffpath, filein)
-
-        logger.info("time for prop function \{{}, {}\} ubreak 10: %s".format(zenith, azimuth), totaltime)
+        logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zenith, azimuth), totaltime)
 
 def multisgmapper(filein, krnfolder, outfolder):
     # read in VIIRS DNB image
@@ -366,7 +395,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # central latitude for estimation of the 2d propagation function
     logger.info('Central latitude (deg): {}'.format(cenlat*(180/pi)))
 
-    # Atmospheric clarity indicator
+    # central latitude for estimation of the 2d propagation function
     logger.info('Atmospheric clarity indicator: {}'.format(k_am))
 
     # z, Zenith angle site, REF 2, Fig. 6, p. 648
@@ -445,7 +474,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         for ii in range(kerdim[0]):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
-                logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
+                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, 100.0*ii/kerdim[0], interm/60.0)
             for jj in range(kerdim[1]):
                 PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj],
                                                        u0left[ii][jj],
@@ -491,7 +520,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         for ii in range(kerdim[0]):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
-                logger.info("Kernel, %d percent complete, %d minutes", 100.0*ii/kerdim[0], interm/60.0)
+                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, 100.0*ii/kerdim[0], interm/60.0)
             for jj in range(kerdim[1]):
                 PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
                                                    l_OC[ii][jj], theta[ii][jj],
@@ -787,5 +816,5 @@ def array_to_geotiff(array, outfilename, referenceVIIRS):
     outdata.SetProjection(proj)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.DEBUG, format='%(levelname)s: %(message)s')
     main()

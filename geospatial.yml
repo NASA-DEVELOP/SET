@@ -9,3 +9,4 @@ dependencies:
 - pip:
   - matplotlib-scalebar
   - playsound
+  - ./skyglow
