@@ -570,9 +570,9 @@ def create_beta(src_lat, rel_long, Chi, azi_view, cen_row, cen_col):
 
     # quadrant corrections
     # lower half (left and right)
-    beta_arr_raw[0:cen_row, :] = pi - beta_arr_raw[0:cen_row, :]
+    beta_arr_raw[cen_row:, :] = pi - beta_arr_raw[cen_row:, :]
     # upper left
-    beta_arr_raw[cen_row:, 0:cen_col] += 2*pi
+    beta_arr_raw[0:cen_row, 0:cen_col] += 2*pi
     # upper right stays the same as original calculation
 
     return beta_arr_raw - azi_view
