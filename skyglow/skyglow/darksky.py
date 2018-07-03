@@ -27,10 +27,8 @@ import json
 import logging
 import sys
 import glob
-import warnings
 from multiprocessing import Pool
 from builtins import range
-warnings.filterwarnings("error")
 logger = logging.getLogger()
 
 
@@ -110,7 +108,12 @@ def main():
             logger.info('CSV file not specified, using default.csv')
             csv_path = project_root + 'default.csv'
         try:
-            sync = bool(sys.argv[5])
+            hem = bool(sys.argv[6])
+        except:
+            logger.info('Not generating kernels for hemispherical visualization')
+            hem = False
+        try:
+            sync = bool(sys.argv[7])
         except:
             sync = False
 
@@ -156,7 +159,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     kerneltiffpath = prop2filein
     # added code to allow for auto opening of kernels based on if they are saved in the current directory or the kernel_lib directory
     if kerneltiffpath == "":
-        # If there is no input from skyglow.py for in input kernel (such as when the program is run through command line) then the default kernel name is used
+        # If there is no input from skyglow.py for an input kernel (such as when the program is run through command line) then the default kernel name is used
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
     if (os.path.isfile(kerneltiffpath) is False) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) is False):
         # If there is no 2d propagation function (kernel), ...
@@ -174,6 +177,12 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 
         logger.info("time for prop function ubreak 10: %s", totaltime)
     else:
+        print(kerneltiffpath)
+        krnbase = ntpath.basename(kerneltiffpath)
+        sgtags = krnbase.split("_")
+        zen_arg = sgtags[3]
+        azi_arg = sgtags[4][:-4]
+        # Put the skyglow basename together
         # If there is a 2d propagation function (kernel) in the current direcotry and not in the kernel_lib subdirectory, ...
         # then read it into an array
         if (os.path.isfile(kerneltiffpath) is True) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) is False):
@@ -204,7 +213,8 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 
     # Produce sky glow raster
     skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
-    skyglowpath = (ntpath.basename(filein)[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
+    skyglowarr = subset_to_200km(skyglowarr, propkernel)
+    skyglowpath = ('skyglow_' + ntpath.basename(filein)[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
                    + str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
     array_to_geotiff(skyglowarr, skyglowpath, filein)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
@@ -271,6 +281,7 @@ def multisgmapper(filein, krnfolder, outfolder):
         print(sgfile)
         # Create skyglow array
         sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
+        sgarr = subset_to_200km(sgarr, krnarr)
         # Write skyglow to a geotiff
         array_to_geotiff(sgarr, sgfile, filein)
         # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
@@ -291,6 +302,7 @@ def multisgmapper(filein, krnfolder, outfolder):
             print(sgfile_flip)
             logger.info("working on " + sgbase_flip)
             sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
+            sgarr_flip = subset_to_200km(sgarr_flip, krnarr_flip)
             array_to_geotiff(sgarr_flip, sgfile_flip, filein)
 
 # Function convolves VIIRS DNB with 2d propagation function
@@ -382,6 +394,14 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # plt.title('Fast FFT Product'), plt.xticks([]), plt.yticks([])
     # plt.show()
     # ##############################################################################
+
+def subset_to_200km(convolved_img, kernel):
+    km200ud = int(ceil(kernel.shape[1]/2))
+    km200lr = int(ceil(kernel.shape[0]/2))
+    print(kernel.shape[0], kernel.shape[1])
+    print(km200ud, km200lr)
+    print(convolved_img.shape[0], convolved_img.shape[1])
+    return convolved_img[km200ud:-km200ud,km200lr:-km200lr]
 
 # Function that creates 2d propagation function
 def fsum_2d(cenlat, k_am, zen, azi, fin):
@@ -598,9 +618,9 @@ def create_beta(src_lat, rel_long, Chi, azi_view, cen_row, cen_col):
 
     # quadrant corrections
     # lower half (left and right)
-    beta_arr_raw[0:cen_row, :] = pi - beta_arr_raw[0:cen_row, :]
+    beta_arr_raw[cen_row:, :] = pi - beta_arr_raw[cen_row:, :]
     # upper left
-    beta_arr_raw[cen_row:, 0:cen_col] += 2*pi
+    beta_arr_raw[0:cen_row, 0:cen_col] += 2*pi
     # upper right stays the same as original calculation
 
     return beta_arr_raw - azi_view

@@ -21,14 +21,15 @@ def main():
     parser.add_argument('-k', '--kernel_file', type=str, help='sgmap_single kernel file path')
 
     parser.add_argument('-ang', '--angles_csv', type=str, default='default.csv', help='kernel_lib angles CSV path (default: default.csv)')
-    parser.add_argument('-s', '--sync', action="store_true", help='Generate kernels concurrently or not')
+    parser.add_argument('-hem', '--hemisphere', action='store_true', help='Generate kernels for hemispherical visualization')
+    parser.add_argument('-s', '--sync', action='store_true', help='Generate kernels concurrently or not')
 
     parser.add_argument('-klib', '--kernel_folder', type=str, help='sgmap_multiple kernel folder path')
     parser.add_argument('-out', '--output_folder', type=str, help='sgmap_multiple output folder path')
 
     parser.add_argument('viirs_file', type=str, nargs='?', help='VIIRS image file path')
 
-    parser.add_argument("--debug", help="increase output verbosity", action="store_true")
+    parser.add_argument('--debug', help='increase output verbosity', action='store_true')
 
     args = parser.parse_args()
     if args.debug:

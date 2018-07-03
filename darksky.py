@@ -108,7 +108,12 @@ def main():
         except:
             logger.info('CSV file not specified, using default.csv')
             csv_path = project_root + 'default.csv'
-
+        if len(sys.argv) < 7:
+            logger.info("Not generating hemispherical kernels")
+        else:
+            hem = sys.argv[6]
+            if hem != 'hemisphere':
+                raise ValueError("Last argument must be 'hemisphere' or blank")
         krnlibber(la, ka, csv_path, fi)
 
     # Produce a set of artificial skyglow maps based an existing library of propagation functions
@@ -119,7 +124,7 @@ def main():
             raise ValueError("Specify input VIIRS image")
         # Get kernel library folder path
         try:
-            krnfolder = os.abspath(sys.argv[3])
+            krnfolder = os.path.abspath(sys.argv[3])
         except:
             logger.info('Kernel folder not specified, using {}'.format(default_kernel_folder))
             krnfolder = default_kernel_folder
@@ -207,7 +212,7 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein):
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
         array_to_geotiff(propkernel, kerneltiffpath, filein)
 
-        logger.info("time for prop function \{{}, {}\} ubreak 10: %s".format(zenith, azimuth), totaltime)
+        logger.info("time for prop function ({}, {}) ubreak 10: {}".format(zenith, azimuth, totaltime))
 
 def multisgmapper(filein, krnfolder, outfolder):
     # read in VIIRS DNB image
@@ -569,9 +574,9 @@ def create_beta(src_lat, rel_long, Chi, azi_view, cen_row, cen_col):
 
     # quadrant corrections
     # lower half (left and right)
-    beta_arr_raw[0:cen_row, :] = pi - beta_arr_raw[0:cen_row, :]
+    beta_arr_raw[cen_row:, :] = pi - beta_arr_raw[cen_row:, :]
     # upper left
-    beta_arr_raw[cen_row:, 0:cen_col] += 2*pi
+    beta_arr_raw[0:cen_row, 0:cen_col] += 2*pi
     # upper right stays the same as original calculation
 
     return beta_arr_raw - azi_view
