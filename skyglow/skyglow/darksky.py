@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from osgeo import gdal
 
-import constants
+import skyglow.constants as constants
 
 import os.path, ntpath
 import time

@@ -3,12 +3,11 @@ import sys
 import logging
 logger = logging.getLogger()
 from multiprocessing import Pool
-from itertools import product
 
 from numpy import loadtxt
 
-import skyglow
-import darksky
+import skyglow.skyglow as skyglow
+import skyglow.darksky as darksky
 
 
 def main():
