@@ -319,6 +319,8 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     logger.debug('dnbarr.shape[1] : {}'.format(dnbarr.shape[1]))
     logger.debug('proparr.shape[0] : {}'.format(proparr.shape[0]))
     logger.debug('proparr.shape[1] : {}'.format(proparr.shape[1]))
+    if dnbarr.shape[0] < proparr.shape[0] or dnbarr.shape[1] < proparr.shape[1]:
+        raise ValueError("VIIRS image is too small for kernel. Study area must have 400km buffer around it.")
 
     # generalized padding of kernel so that fft can run
     pad_left = (dnbarr.shape[0] - proparr.shape[0])//2
