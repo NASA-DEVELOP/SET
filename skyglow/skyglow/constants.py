@@ -29,8 +29,9 @@ INSTR = "Welcome to the Skyglow Estimation Toolbox (SET)!\n" \
         "in the sky.\n" \
         "Azimuth Angle (beta): A horizontal angle measured clockwise from a north base line.\n" \
         "Atmospheric Clarity Parameter (K): Measures the relative importance of aerosols" \
-        " and molecules for scattering light in the V band.\n\n"
-        
+        " and molecules for scattering light in the V band.\n\n" \
+        "INCLUDE A 400 KM BUFFER AROUND THE AREA OF INTEREST.\n\n"
+
 CDIAG = "REF: Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial " \
         "night sky brightness mapped from DMSP satellite Operational Linescan System " \
         "measurements. Mon. Not. R. Astron. Soc. 318. Fig. 6\n"
