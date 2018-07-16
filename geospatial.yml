@@ -3,6 +3,7 @@ dependencies:
 - python>=2.7
 - pip
 - numpy
+- scipy
 - gdal
 - matplotlib
 - pillow

@@ -443,11 +443,13 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
 
     # Assignment of NaNs or null values outside of 200 km
     D_OC[D_OC > 201.0] = NaN
+    # Delete NaN rows and columns
+    D_OC = D_OC[~isnan(D_OC).all(axis=1)]
+    D_OC = D_OC[:, ~isnan(D_OC).all(axis=0)]
 
     # Check of D_OC shape after assigning NaNs outside of 200 km radius
-    # WHAT IS THE POINT OF CHECKING THE SHAPE IF WE DIDN'T CHANGE IT!
-    logger.info('kernel heigth in pixels, trimmed: {}'.format(D_OC.shape[0]))
     logger.info('kernel width in pixels, trimmed: {}'.format(D_OC.shape[1]))
+    logger.info('kernel height in pixels, trimmed: {}'.format(D_OC.shape[0]))
     widthcenter = (D_OC.shape[1] + 1)//2
     heigthcenter = (D_OC.shape[0] + 1)//2
     # reassignment of center value, need to use better method
