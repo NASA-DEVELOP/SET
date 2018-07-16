@@ -52,18 +52,18 @@ def main():
             if not args.latitude:
                 raise ValueError('Latitude is required for kernel_lib')
             if not args.sync:
-                static_args = [(args.latitude, args.clarity, args.viirs_file)]
+                static_args = [(args.latitude, args.clarity, args.viirs_file, args.hemisphere)]
                 with open(args.angles_csv, "rb") as f:
                     angle_list = loadtxt(f, delimiter=",",skiprows=1)
                 # cartesian product of arguments
-                args_product = [(x[0], x[1], y[0], y[1], x[2]) for x in static_args for y in angle_list]
+                args_product = [(x[0], x[1], y[0], y[1], x[2], x[3]) for x in static_args for y in angle_list]
                 p = Pool()
                 try:
-                    p.map_async(darksky.krn_unpack, args_product).get(9999999)
+                    p.map_async(darksky.krn_unpack, args_product).get(999999)
                 except KeyboardInterrupt:
                     p.terminate()
             else:
-                darksky.krnlibber(args.latitude, args.clarity, args.angles_csv, args.viirs_file)
+                darksky.krnlibber(args.latitude, args.clarity, args.angles_csv, args.viirs_file, args.hemisphere)
         elif args.action == 'sgmap_multiple':
             if not args.kernel_folder:
                 raise ValueError('Kernel folder path is required for sgmap_multiple')

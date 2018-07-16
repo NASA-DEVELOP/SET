@@ -12,11 +12,13 @@ from __future__ import division
 from __future__ import print_function
 
 from numpy import *
+from scipy import interpolate
 # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html
 # scipy.signal.fftconvolve
 # from scipy import ndimage
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
+import matplotlib.cm as cm
 from osgeo import gdal
 
 import skyglow.constants as constants
@@ -118,7 +120,7 @@ def main():
             sync = False
 
         if not sync:
-            static_args = [(la, ka, fi)]
+            static_args = [(la, ka, fi, hem)]
             with open(csv_path, "rb") as f:
                 angle_list = loadtxt(f, delimiter=",",skiprows=1)
             # cartesian product of arguments
@@ -129,7 +131,7 @@ def main():
             except KeyboardInterrupt:
                 p.close()
         else:
-            krnlibber(la, ka, csv_path, fi)
+            krnlibber(la, ka, csv_path, fi, hem)
 
     # Produce a set of artificial skyglow maps based an existing library of propagation functions
     elif action == "sgmap_multiple":
@@ -177,7 +179,6 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 
         logger.info("time for prop function ubreak 10: %s", totaltime)
     else:
-        print(kerneltiffpath)
         krnbase = ntpath.basename(kerneltiffpath)
         sgtags = krnbase.split("_")
         zen_arg = sgtags[3]
@@ -221,19 +222,33 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     constants.ding()
 
 def krn_unpack(args):
-    print(args)
     return generate_krn(*args)
 
-def generate_krn(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein):
+def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
     lat_rad = centerlat_arg*(pi/180)
-    zen_rad = zen_arg*(pi/180)
-    azi_rad = azi_arg*(pi/180)
-    propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-    kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
-    array_to_geotiff(propkernel, kerneltiffpath, filein)
-    logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zen_arg, azi_arg), totaltime)
+    zen_rad = zenith*(pi/180)
+    azi_rad = azimuth*(pi/180)
 
-def krnlibber(centerlat_arg, k_am_arg, angles_file, filein):
+    outname = 'kernel_{}_{}_{}_{}.tif'
+    # if hem is False (don't generate hemispherical kernels) just calculate kernel
+    if not hem:
+        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
+    # otherwise find complement angle and flip kernel if it exists
+    else:
+        azimuth_complement = azimuth + 180 if azimuth < 180 else azimuth - 180
+        azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
+        if os.path.isfile(azimuth_complement_outname):
+            logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
+            complement_kernel = gdal.Open(azimuth_complement_outname)
+            data = gdal.ReadAsArray(complement_kernel)
+            propkernel, totaltime = fliplr(flipud(data)), 0
+        else:
+            propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
+    kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
+    array_to_geotiff(propkernel, kerneltiffpath, filein)
+    logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zenith, azimuth), totaltime)
+
+def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
     lat_rad = centerlat_arg*(pi/180)
     with open(angles_file, "rb") as f:
         angle_list = loadtxt(f, delimiter=",",skiprows=1)
@@ -243,8 +258,22 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein):
         zen_rad = zenith*(pi/180)
         azi_rad = azimuth*(pi/180)
 
-        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-        kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
+        outname = 'kernel_{}_{}_{}_{}.tif'
+        # if hem is False (don't generate hemispherical kernels) just calculate kernel
+        if not hem:
+            propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
+        # otherwise find complement angle and flip kernel if it exists
+        else:
+            azimuth_complement = azimuth + 180 if azimuth < 180 else azimuth - 180
+            azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
+            if os.path.isfile(azimuth_complement_outname):
+                logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
+                complement_kernel = gdal.Open(azimuth_complement_outname)
+                data = gdal.ReadAsArray(complement_kernel)
+                propkernel, totaltime = fliplr(flipud(data)), 0
+            else:
+                propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
         logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zenith, azimuth), totaltime)
 
@@ -304,6 +333,89 @@ def multisgmapper(filein, krnfolder, outfolder):
             sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
             sgarr_flip = subset_to_200km(sgarr_flip, krnarr_flip)
             array_to_geotiff(sgarr_flip, sgfile_flip, filein)
+
+def generate_hem(lat, lon, skyglow_folder):
+    zen, azi, vals = [], [], []
+    # list all tiff files in skyglow_folder
+    # open tif, read as array, and extract pixel value
+    skyglow_search = os.path.join(skyglow_folder,'*.tif')
+    skyglow_tifs = glob.glob(skyglow_search)
+    for tif_name in skyglow_tifs:
+        args_split = tif_name.split('_')
+        zenith = float(args_split[3])
+        azimuth = float(args_split[4][:-4])
+        zen.append(zenith)
+        azi.append(azimuth)
+
+        raster = gdal.Open(os.path.join(skyglow_folder, tif_name))
+        transform = raster.GetGeoTransform()
+        data = raster.ReadAsArray()
+        x_origin, y_origin = transform[0], transform[3]
+        px_width, px_height = transform[1], transform[5]
+        row = int((lat - y_origin)/px_height)
+        col = int((lon - x_origin)/px_width)
+        val = data[row][col]
+        vals.append(val)
+
+    print(zen, azi, vals)
+
+    lat = abs(subtract(zen, 90))
+    f = interpolate.interp2d(azi, zen, vals, kind='cubic')
+    azinew = arange(-180, 181, 1)
+    zennew = arange(0, 81, 1)
+    znew = f(azinew, zennew)
+    x_hammer, y_hammer = to_hammer_xy(lat, azi)
+    y_hammer = subtract(abs(subtract(y_hammer, 90)), 10)
+    z_hammer = to_hammer_z(znew)
+
+    # fill in nan values within hemisphere if any exist
+    for row in range(z_hammer.shape[0]):
+        ind = where(~isnan(z_hammer[row]))[0]
+        if ind.size != 0:
+            first, last = ind[0], ind[-1]
+            mask = isnan(z_hammer[row,:])
+            mask[:first] = 0
+            mask[last:] = 0
+            z_hammer[row, mask] = interp(flatnonzero(mask), flatnonzero(~mask), z_hammer[row, ~mask])
+
+    fig = plt.figure(1, figsize=(10, 6), dpi=100)
+    ax = fig.add_subplot(111)
+    ax.set_facecolor('black')
+    cmap = cm.jet
+    cmap.set_bad('black',1)
+    ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
+    ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
+    plt.show()
+
+def to_hammer_xy(lat, lon):
+    lat_rad = abs(multiply(lat, pi/180))
+    lon_rad = multiply(lon, pi/180)
+    denominator = sqrt(1+cos(lat_rad)*cos(divide(lon_rad, 2)))
+    x = divide(2*sqrt(2)*cos(lat_rad)*sin(divide(lon_rad, 2)), denominator)
+    y = divide(sqrt(2)*sin(lat_rad), denominator)
+    return round(multiply(x, 180/pi)), round(multiply(y, 180/pi))
+
+def to_hammer_z(values):
+    vals_shape = values.shape
+    new_values = empty((90,360))
+    new_values[:] = nan
+    for i in range(81):
+        lat_rad = abs(i-90)*pi/180
+        for j in range(361):
+            lon_rad = (j-180)*pi/180
+
+            # project from lat/lon to x/y in Hammer
+            denominator = sqrt(1+cos(lat_rad)*cos(lon_rad/2))
+            x = (2*sqrt(2)*cos(lat_rad)*sin(lon_rad/2))/denominator
+            y = (sqrt(2)*sin(lat_rad))/denominator
+
+            # convert back from rads to degrees
+            x = int(round(x*180/pi)) + 180
+            y = int(abs(round(y*180/pi) - 90))
+
+            # set value in new array in appropriate place
+            new_values[y,x] = values[i,j]
+    return new_values
 
 # Function convolves VIIRS DNB with 2d propagation function
 def convolve_viirs_to_skyglow(dnbarr, proparr):
@@ -400,9 +512,6 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
 def subset_to_200km(convolved_img, kernel):
     km200ud = int(ceil(kernel.shape[1]/2))
     km200lr = int(ceil(kernel.shape[0]/2))
-    print(kernel.shape[0], kernel.shape[1])
-    print(km200ud, km200lr)
-    print(convolved_img.shape[0], convolved_img.shape[1])
     return convolved_img[km200ud:-km200ud,km200lr:-km200lr]
 
 # Function that creates 2d propagation function

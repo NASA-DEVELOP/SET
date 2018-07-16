@@ -60,9 +60,10 @@ class SkyglowEstimationToolbox:
         self.csv_file_var = StringVar()
         self.krn_folder_var = StringVar()
         self.output_folder_var = StringVar()
+        self.sgmap_folder_var = StringVar()
 
         self.krn_ent_var = StringVar()
-        self.krn_var = IntVar()
+        self.krn_var, self.hem_var = IntVar(), IntVar()
         self.img, self.cdiag = None, None
         self.lat_lbl, self.lat_entry = None, None
         self.k_lbl, self.k_entry = None, None
@@ -118,7 +119,7 @@ class SkyglowEstimationToolbox:
 
         btn_width = int(constants.SW/60)
         file_width = int(constants.SW/18)
-        lbl_width = int(constants.SW/120)
+        lbl_width = int(constants.SW/60)
         gen_width = int(constants.SW/42)
         print(btn_width, file_width, lbl_width)
         self.sgmap_single_btn = Radiobutton(self.input_frame, text="Generate Artificial Skyglow Map",
@@ -127,16 +128,20 @@ class SkyglowEstimationToolbox:
         self.krn_lib_btn = Radiobutton(self.input_frame, text="Generate Kernel Library",
                                        width=btn_width, variable=self.action, value='krn',
                                        command=self.krn_popup)
-        self.multi_map_btn = Radiobutton(self.input_frame, text="Generate Map from Multiple Kernels",
+        self.multi_map_btn = Radiobutton(self.input_frame, text="Generate Maps from Multiple Kernels",
                                          width=btn_width, variable=self.action, value='mul',
                                          command=self.mul_popup)
+        self.hem_map_btn = Radiobutton(self.input_frame, text="Generate Hemispherical Visualization",
+                                         width=btn_width, variable=self.action, value='hem',
+                                         command=self.hem_popup)
         #Place widget
         self.sgmap_single_btn.grid(column=0,columnspan=1, row=0)
         self.krn_lib_btn.grid(column=1, columnspan=1, row=0)
         self.multi_map_btn.grid(column=2, columnspan=1, row=0)
+        self.hem_map_btn.grid(column=3, columnspan=1, row=0)
 
         # VIIRS Image Reference File
-        self.file_lbl = Label(self.input_frame, text="Image File:", width=15, anchor=E)
+        self.file_lbl = Label(self.input_frame, text="Image File:", width=lbl_width, anchor=E)
         self.file_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
                          textvariable=self.file_log_var)
         self.browse_btn = Button(self.input_frame, text="Browse", command=self.import_viirs)
@@ -147,7 +152,7 @@ class SkyglowEstimationToolbox:
                          textvariable=self.csv_file_var)
         self.csv_browse_btn = Button(self.input_frame, text="Browse", command=self.import_csv)
 
-        # Multiple Map form Kernel library
+        # Multiple Maps form Kernel library
         self.mul_file_lbl = Label(self.input_frame, text="Kernel Folder:", width=lbl_width, anchor=E)
         self.mul_file_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
                          textvariable=self.krn_folder_var)
@@ -159,15 +164,27 @@ class SkyglowEstimationToolbox:
                  textvariable=self.output_folder_var)
         self.output_btn = Button(self.input_frame, text="Browse", command=self.import_out_folder)
 
+        # Hemisphere Output Location
+        self.sgmap_folder_lbl = Label(self.input_frame, text="Skyglow Map Location:", width=lbl_width, anchor=E)
+        self.sgmap_folder_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
+                 textvariable=self.sgmap_folder_var)
+        self.sgmap_folder_btn = Button(self.input_frame, text="Browse", command=self.import_sgmap_folder)
+
         # Import Kernel Checkbutton
         self.check_lbl = Label(self.input_frame, text="Import Kernel:", width=lbl_width, anchor=E)
 
         self.krn_chk = Checkbutton(self.input_frame, anchor=W, variable=self.krn_var,
                               command=self.checkbtn_val)
 
+        self.hem_chk_lbl = Label(self.input_frame, text="Generate kernels for hemisphere:", width=lbl_width, anchor=E)
+
+        self.hem_chk = Checkbutton(self.input_frame, anchor=W, variable=self.hem_var)
+
         # Region Latitude (deg), Grand Teton National park = 43.7904 degrees N
         self.lat_lbl = Label(self.input_frame, text="Latitude (deg):", width=lbl_width, anchor=E)
         self.lat_entry = Entry(self.input_frame, width=btn_width, bd=2, relief="sunken")
+        self.lon_lbl = Label(self.input_frame, text="Longitude (deg):", width=lbl_width, anchor=E)
+        self.lon_entry = Entry(self.input_frame, width=btn_width, bd=2, relief="sunken")
 
         # Atmospheric Clarity Parameter, REF 2, Eq. 12, p. 645
         self.k_lbl = Label(self.input_frame, text="Atmospheric Clarity Parameter:",
@@ -194,8 +211,12 @@ class SkyglowEstimationToolbox:
         self.gen_krn_btn = Button(self.input_frame, text="Generate Kernel Library",
                                     width=gen_width, command=self.generate_krn)
         # Generate Map of Multiple Kernals(word better later on)
-        self.mul_map_btn = Button(self.input_frame, text="Generate Map from Multiple Kernels",
+        self.mul_map_btn = Button(self.input_frame, text="Generate Maps from Multiple Kernels",
                                     width=gen_width, command=self.generate_mmap)
+        # Generate Hemispherical Visualization Display of Skyglow
+        self.hem_gen_btn = Button(self.input_frame, text="Generate Hemisphere",
+                                    width=gen_width, command=self.generate_hem)
+
 
     # Imports a TIFF file for referencing sky brightness in the region of interest.
     def import_viirs(self):
@@ -250,6 +271,14 @@ class SkyglowEstimationToolbox:
         file_name = filedialog.askopenfilename(initialdir='/', title="Select file", filetypes=file_types)
         self.krn_ent_var.set(file_name)
 
+    # Selects the skyglow map output folder for hemisphere
+    def import_sgmap_folder(self):
+        sgmap_dir = filedialog.askdirectory(initialdir='/', title="Select skyglow map folder")
+        self.sgmap_folder_var.set(sgmap_dir)
+
+        if sgmap_dir is '':
+            print('Directory is empty.')
+
     def sng_popup(self):
         self.remove_all()
 
@@ -295,7 +324,29 @@ class SkyglowEstimationToolbox:
         self.file_log.grid(column=1, columnspan=3, row=2)
         self.browse_btn.grid(column=4, row=2, sticky=W, padx=3)
 
+        self.hem_chk_lbl.grid(column=0, row=4)
+        self.hem_chk.grid(column=1, row=4)
+
         self.gen_krn_btn.grid(column=1, columnspan=3, row=5, sticky=N+S+E+W)
+
+    def hem_popup(self):
+        self.remove_all()
+
+        # Skyglow Map Folder
+        self.sgmap_folder_lbl.grid(column=0, row=1)
+        self.sgmap_folder_log.grid(column=1, columnspan=3, row=1)
+        self.sgmap_folder_btn.grid(column=4, row=1, sticky=W, padx=3)
+
+        # Latitude entry
+        self.lat_lbl.grid(column=0, row=3)
+        self.lat_entry.grid(column=1, row=3)
+
+        # Longitude entry
+        self.lon_lbl.grid(column=2, row=3)
+        self.lon_entry.grid(column=3, row=3)
+
+        # Generate Hemispherical Visualization button
+        self.hem_gen_btn.grid(column=1, columnspan=3, row=4, sticky=N+S+E+W)
 
     def mul_popup(self):
         self.remove_all()
@@ -318,10 +369,11 @@ class SkyglowEstimationToolbox:
         # Generate map from kernel folder
         self.mul_map_btn.grid(column=1, columnspan=3, row=4, sticky=N+S+E+W)
 
-
     def remove_all(self):
         self.check_lbl.grid_remove()
         self.krn_chk.place_forget()
+        self.hem_chk.grid_remove()
+        self.hem_chk_lbl.grid_remove()
         self.file_lbl.grid_remove()
         self.file_log.grid_remove()
         self.browse_btn.grid_remove()
@@ -348,6 +400,11 @@ class SkyglowEstimationToolbox:
         self.output_lbl.grid_remove()
         self.output_log.grid_remove()
         self.output_btn.grid_remove()
+        self.hem_gen_btn.grid_remove()
+        self.lat_lbl.grid_remove()
+        self.lat_entry.grid_remove()
+        self.lon_lbl.grid_remove()
+        self.lon_entry.grid_remove()
 
     # Changes interface based on whether Kernel Checkbutton is selected.
     def checkbtn_val(self):
@@ -496,24 +553,24 @@ class SkyglowEstimationToolbox:
     # Generate Kernels
     def generate_krn(self):
         # Acquires input arguments
-        csv_in, file_in, lat_in, k_in = '', '', 0, 0
+        csv_in, file_in, lat_in, k_in, hem = '', '', 0, 0, False
         csv_in = self.csv_file_var.get()
         file_in = self.file_log_var.get()
         lat_in = float(self.lat_entry.get())
         k_in = float(self.k_entry.get())
+        hem = self.hem_var.get()
 
         self.progress()
 
         # Create new threads to run light propagation model simultaneously.
         p_thread = threading.Thread(target=self.update_progress())
-        static_args = [(lat_in, k_in, file_in)]
         with open(csv_in, "rb") as f:
             angle_list = loadtxt(f, delimiter=",", skiprows=1)
         p_thread.start()
         for angle_set in angle_list:
             t_thread = threading.Thread(target=darksky.generate_krn,
                                         args=(lat_in, k_in, angle_set[0],
-                                              angle_set[1], file_in))
+                                              angle_set[1], file_in, hem))
             t_thread.setDaemon(True)
 
             t_thread.start()
@@ -536,6 +593,13 @@ class SkyglowEstimationToolbox:
         p_thread.start()
         t_thread.start()
 
+    #Generate Hemispherical Visualization of data from Skyglow map folder
+    def generate_hem(self):
+        sgmap_folder_in, lat_in, lon_in, = '', 0, 0
+        sgmap_folder_in = self.sgmap_folder_var.get()
+        lat_in = float(self.lat_entry.get())
+        lon_in = float(self.lon_entry.get())
+        darksky.generate_hem(lat_in, lon_in, sgmap_folder_in)
 
 # Redirects formatted lines from the log file to a widget.
 class LogRedirector(logging.Handler):

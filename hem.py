@@ -34,7 +34,8 @@ def to_hammer_z(values):
             new_values[y,x] = values[i,j]
     return new_values
 
-
+zen = [0, 15, 15, 15, 15, 15, 30, 50, 65, 80]
+azi = [0, -180, -90, 0, 90, 180]
 lat = np.abs(np.subtract(zen, 90))
 vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
         21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
@@ -65,4 +66,3 @@ cmap.set_bad('black',1)
 ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
 ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
 plt.show()
-
