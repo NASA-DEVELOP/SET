@@ -16,6 +16,7 @@ References:
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+# python2
 try:
     from Tkinter import (Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button,
                          Canvas, Scrollbar, Text, Menubutton, Menu, Checkbutton,
@@ -23,11 +24,14 @@ try:
                          StringVar, IntVar, Radiobutton, IntVar)
     import ttk
     import tkFileDialog as filedialog
+    from tkFont import Font
+# python3
 except:
     from tkinter import (Tk, Toplevel, PanedWindow, Frame, Label, Entry, Button,
                          Canvas, Scrollbar, Text, Menubutton, Menu, Checkbutton,
                          BOTH, VERTICAL, HORIZONTAL, CENTER, NE, E, W, Y, N, S,
                          StringVar, IntVar, ttk, filedialog, Radiobutton, IntVar)
+    from tkinter.font import Font
 import matplotlib
 matplotlib.use('TkAgg')
 from PIL import Image, ImageTk, ImageOps
@@ -52,7 +56,7 @@ class SkyglowEstimationToolbox:
     def __init__(self, root):
         self.root = root
 
-        # Radio action buttonz
+        # Radio action buttons
         self.action = None
         self.sgmap_single_btn, self.krn_lib_btn, self.multi_map_btn = None, None, None
 
@@ -104,7 +108,8 @@ class SkyglowEstimationToolbox:
         # Creates help button for link to documentation, instructions, and about.
         self.help_btn = Menubutton(self.input_frame, text="Help", relief="raised",
                                    bd=2, width=8, pady=1)
-        self.help_btn.place(relx=1, rely=0, anchor=NE)
+        #self.help_btn.place(relx=1, rely=0, anchor=NE)
+        self.help_btn.grid(column=4,columnspan=1,row=0)
         self.help_btn_menu = Menu(self.help_btn, tearoff=0)
         doc = 'https://github.com/NASA-DEVELOP'
         self.help_btn_menu.add_command(label="Documentation", command=lambda: self.open_url(doc))
@@ -122,16 +127,17 @@ class SkyglowEstimationToolbox:
         lbl_width = int(constants.SW/60)
         gen_width = int(constants.SW/42)
         print(btn_width, file_width, lbl_width)
-        self.sgmap_single_btn = Radiobutton(self.input_frame, text="Generate Artificial Skyglow Map",
+        radio_font = Font(family='TkDefaultFont', size=13)
+        self.sgmap_single_btn = Radiobutton(self.input_frame, text="Generate Artificial Skyglow Map", font=radio_font,
                                             width=btn_width, variable=self.action, value='sng',
                                             command=self.sng_popup)
-        self.krn_lib_btn = Radiobutton(self.input_frame, text="Generate Kernel Library",
+        self.krn_lib_btn = Radiobutton(self.input_frame, text="Generate Kernel Library", font=radio_font,
                                        width=btn_width, variable=self.action, value='krn',
                                        command=self.krn_popup)
-        self.multi_map_btn = Radiobutton(self.input_frame, text="Generate Maps from Multiple Kernels",
+        self.multi_map_btn = Radiobutton(self.input_frame, text="Generate Maps from Multiple Kernels", font=radio_font,
                                          width=btn_width, variable=self.action, value='mul',
                                          command=self.mul_popup)
-        self.hem_map_btn = Radiobutton(self.input_frame, text="Generate Hemispherical Visualization",
+        self.hem_map_btn = Radiobutton(self.input_frame, text="Generate Hemispherical Visualization", font=radio_font,
                                          width=btn_width, variable=self.action, value='hem',
                                          command=self.hem_popup)
         #Place widget
@@ -283,7 +289,7 @@ class SkyglowEstimationToolbox:
         self.remove_all()
 
         self.check_lbl.grid(column=0, row=2)
-        self.krn_chk.place(relx=.2, rely=.41, anchor=CENTER)
+        self.krn_chk.place(relx=.22, rely=.41, anchor=CENTER)
 
         self.file_lbl.grid(column=0, row=1)
         self.file_log.grid(column=1, columnspan=3, row=1)
@@ -325,7 +331,7 @@ class SkyglowEstimationToolbox:
         self.browse_btn.grid(column=4, row=2, sticky=W, padx=3)
 
         self.hem_chk_lbl.grid(column=0, row=4)
-        self.hem_chk.grid(column=1, row=4)
+        self.hem_chk.place(relx=.21, rely=.69)
 
         self.gen_krn_btn.grid(column=1, columnspan=3, row=5, sticky=N+S+E+W)
 
@@ -372,7 +378,7 @@ class SkyglowEstimationToolbox:
     def remove_all(self):
         self.check_lbl.grid_remove()
         self.krn_chk.place_forget()
-        self.hem_chk.grid_remove()
+        self.hem_chk.place_forget()
         self.hem_chk_lbl.grid_remove()
         self.file_lbl.grid_remove()
         self.file_log.grid_remove()
@@ -421,6 +427,8 @@ class SkyglowEstimationToolbox:
             self.krn_lbl.grid(column=0, row=2)
             self.krn_ent.grid(column=1, columnspan=3, row=2)
             self.krn_btn.grid(column=4, row=2, sticky=W, padx=3)
+            self.krn_chk.place_forget()
+            self.krn_chk.place(relx=0.19, rely=.5)
         # Input parameter widgets when Kernel Checkbuttton is unmarked
         else:
             self.krn_lbl.grid_remove()
@@ -434,6 +442,8 @@ class SkyglowEstimationToolbox:
             self.zen_entry.grid(column=1, row=4)
             self.azi_lbl.grid(column=2, row=4)
             self.azi_entry.grid(column=3, row=4)
+            self.krn_chk.place_forget()
+            self.krn_chk.place(relx=0.22, rely=.41, anchor=CENTER)
     # Simple function for opening URLs.
     @staticmethod
     def open_url(url):
