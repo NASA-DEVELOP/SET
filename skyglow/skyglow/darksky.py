@@ -241,7 +241,7 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
         if os.path.isfile(azimuth_complement_outname):
             logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
             complement_kernel = gdal.Open(azimuth_complement_outname)
-            data = gdal.ReadAsArray(complement_kernel)
+            data = complement_kernel.ReadAsArray()
             propkernel, totaltime = fliplr(flipud(data)), 0
         else:
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
@@ -271,7 +271,7 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
             if os.path.isfile(azimuth_complement_outname):
                 logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
                 complement_kernel = gdal.Open(azimuth_complement_outname)
-                data = gdal.ReadAsArray(complement_kernel)
+                data = complement_kernel.ReadAsArray()
                 propkernel, totaltime = fliplr(flipud(data)), 0
             else:
                 propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
@@ -318,23 +318,23 @@ def multisgmapper(filein, krnfolder, outfolder):
         # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
         cond_angle = sgtags[4]
         cond = float(cond_angle[:-4])
-        if (cond < 180.0) and not (cond == 0.0):
-            # Must undo the scaling factor in convolve_viirs_to_skyglow
-            rescale_factor = 10**-9
-            img_rescale = rescale_factor * imgarr
-            # Flips the current kernel left to right
-            krnarr_flip = fliplr(krnarr)
-            # Creates the corresponding flipped angle
-            flip_azi = 360.0 - cond
-            # Returns the proper file extention onto the tag in order to read as a file
-            sgtags[4] = str(flip_azi) + '.tif'
-            sgbase_flip = sep.join(sgtags)
-            sgfile_flip = os.path.join(outfolder, sgbase_flip)
-            print(sgfile_flip)
-            logger.info("working on " + sgbase_flip)
-            sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
-            sgarr_flip = subset_to_200km(sgarr_flip, krnarr_flip)
-            array_to_geotiff(sgarr_flip, sgfile_flip, filein)
+        # if (cond < 180.0) and not (cond == 0.0):
+        #     # Must undo the scaling factor in convolve_viirs_to_skyglow
+        #     rescale_factor = 10**-9
+        #     img_rescale = rescale_factor * imgarr
+        #     # Flips the current kernel left to right
+        #     krnarr_flip = fliplr(krnarr)
+        #     # Creates the corresponding flipped angle
+        #     flip_azi = 360.0 - cond
+        #     # Returns the proper file extention onto the tag in order to read as a file
+        #     sgtags[4] = str(flip_azi) + '.tif'
+        #     sgbase_flip = sep.join(sgtags)
+        #     sgfile_flip = os.path.join(outfolder, sgbase_flip)
+        #     print(sgfile_flip)
+        #     logger.info("working on " + sgbase_flip)
+        #     sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
+        #     sgarr_flip = subset_to_200km(sgarr_flip, krnarr_flip)
+        #     array_to_geotiff(sgarr_flip, sgfile_flip, filein)
 
 def generate_hem(lat, lon, skyglow_folder):
     zen, azi, vals = [], [], []
@@ -395,7 +395,7 @@ def to_hammer_xy(lat, lon):
     denominator = sqrt(1+cos(lat_rad)*cos(divide(lon_rad, 2)))
     x = divide(2*sqrt(2)*cos(lat_rad)*sin(divide(lon_rad, 2)), denominator)
     y = divide(sqrt(2)*sin(lat_rad), denominator)
-    return round(multiply(x, 180/pi)), round(multiply(y, 180/pi))
+    return rint(multiply(x, 180/pi)), rint(multiply(y, 180/pi))
 
 def to_hammer_z(values):
     vals_shape = values.shape
