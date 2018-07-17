@@ -343,6 +343,7 @@ def generate_hem(lat, lon, skyglow_folder):
     skyglow_search = os.path.join(skyglow_folder,'*.tif')
     skyglow_tifs = glob.glob(skyglow_search)
     for tif_name in skyglow_tifs:
+        tif_name = ntpath.basename(tif_name)
         args_split = tif_name.split('_')
         zenith = float(args_split[3])
         azimuth = float(args_split[4][:-4])
@@ -358,8 +359,6 @@ def generate_hem(lat, lon, skyglow_folder):
         col = int((lon - x_origin)/px_width)
         val = data[row][col]
         vals.append(val)
-
-    print(zen, azi, vals)
 
     lat = abs(subtract(zen, 90))
     f = interpolate.interp2d(azi, zen, vals, kind='cubic')
