@@ -222,6 +222,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     constants.ding()
 
 def krn_unpack(args):
+    print('Generating kernel', args)
     return generate_krn(*args)
 
 def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
@@ -247,6 +248,7 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
     kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
     array_to_geotiff(propkernel, kerneltiffpath, filein)
     logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zenith, azimuth), totaltime)
+    print('Finished kernel', kerneltiffpath)
 
 def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
     lat_rad = centerlat_arg*(pi/180)

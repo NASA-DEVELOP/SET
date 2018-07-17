@@ -126,8 +126,7 @@ class SkyglowEstimationToolbox:
         file_width = int(constants.SW/18)
         lbl_width = int(constants.SW/60)
         gen_width = int(constants.SW/42)
-        print(btn_width, file_width, lbl_width)
-        radio_font = Font(family='TkDefaultFont', size=13)
+        radio_font = Font(family='TkDefaultFont', size=12)
         self.sgmap_single_btn = Radiobutton(self.input_frame, text="Generate Artificial Skyglow Map", font=radio_font,
                                             width=btn_width, variable=self.action, value='sng',
                                             command=self.sng_popup)
