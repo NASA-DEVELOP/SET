@@ -410,6 +410,9 @@ class SkyglowEstimationToolbox:
         self.lat_entry.grid_remove()
         self.lon_lbl.grid_remove()
         self.lon_entry.grid_remove()
+        self.sgmap_folder_lbl.grid_remove()
+        self.sgmap_folder_log.grid_remove()
+        self.sgmap_folder_btn.grid_remove()
 
     # Changes interface based on whether Kernel Checkbutton is selected.
     def checkbtn_val(self):
