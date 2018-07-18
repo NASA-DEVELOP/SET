@@ -236,18 +236,20 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
     # otherwise find complement angle and flip kernel if it exists
     else:
-        azimuth_complement = azimuth + 180 if azimuth < 180 else azimuth - 180
-        azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
-        if os.path.isfile(azimuth_complement_outname):
-            logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
-            complement_kernel = gdal.Open(azimuth_complement_outname)
-            data = complement_kernel.ReadAsArray()
-            propkernel, totaltime = fliplr(flipud(data)), 0
-        else:
-            propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
-    kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zenith) + '_' + str(azimuth) + '.tif'
+        azimuth_complement = -azimuth
+        if abs(azimuth) != 180.0 and azimuth != 0.0:
+            azimuth_complement = -azimuth
+            azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
+            if os.path.isfile(azimuth_complement_outname):
+                logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
+                complement_kernel = gdal.Open(azimuth_complement_outname)
+                data = complement_kernel.ReadAsArray()
+                propkernel, totaltime = fliplr(data), 0
+            else:
+                propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+    kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
     array_to_geotiff(propkernel, kerneltiffpath, filein)
-    logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zenith, azimuth), totaltime)
+    logger.info("time for prop function ({}, {}) ubreak 10: {}".format(zenith, azimuth, totaltime))
     print('Finished kernel', kerneltiffpath)
 
 def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
@@ -266,18 +268,23 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
         # otherwise find complement angle and flip kernel if it exists
         else:
-            azimuth_complement = azimuth + 180 if azimuth < 180 else azimuth - 180
-            azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
-            if os.path.isfile(azimuth_complement_outname):
-                logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
-                complement_kernel = gdal.Open(azimuth_complement_outname)
-                data = complement_kernel.ReadAsArray()
-                propkernel, totaltime = fliplr(flipud(data)), 0
+            azimuth_complement = -azimuth
+            if abs(azimuth) != 180.0 and azimuth != 0.0:
+                azimuth_complement = -azimuth
+                azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
+                if os.path.isfile(azimuth_complement_outname):
+                    logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
+                    complement_kernel = gdal.Open(azimuth_complement_outname)
+                    data = complement_kernel.ReadAsArray()
+                    propkernel, totaltime = fliplr(data), 0
+                else:
+                    propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
             else:
                 propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
-        logger.info("time for prop function ({}, {}) ubreak 10: %s".format(zenith, azimuth), totaltime)
+        logger.info("time for prop function ({}, {}) ubreak 10: {}".format(zenith, azimuth, totaltime))
+        print('Finished kernel', kerneltiffpath)
 
 def multisgmapper(filein, krnfolder, outfolder):
     # read in VIIRS DNB image
@@ -316,8 +323,8 @@ def multisgmapper(filein, krnfolder, outfolder):
         # Write skyglow to a geotiff
         array_to_geotiff(sgarr, sgfile, filein)
         # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
-        cond_angle = sgtags[4]
-        cond = float(cond_angle[:-4])
+        # cond_angle = sgtags[4]
+        # cond = float(cond_angle[:-4])
         # if (cond < 180.0) and not (cond == 0.0):
         #     # Must undo the scaling factor in convolve_viirs_to_skyglow
         #     rescale_factor = 10**-9
@@ -384,7 +391,7 @@ def generate_hem(lat, lon, skyglow_folder):
     ax.set_facecolor('black')
     cmap = cm.jet
     cmap.set_bad('black',1)
-    ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
+    ax.imshow(znew, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
     ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
     plt.show()
 
@@ -608,7 +615,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         for ii in range(kerdim[0]):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
-                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, 100.0*ii/kerdim[0], interm/60.0)
+                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
             for jj in range(kerdim[1]):
                 PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj],
                                                        u0left[ii][jj],
@@ -621,7 +628,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
 
         # Mirror left side of kernel array to the right
-        PropSumArrayright = fliplr(PropSumArrayleft[:,1:])
+        PropSumArrayright = fliplr(PropSumArrayleft[:, 1:])
 
         # Complete 2d propagation function by putting left and right together
         PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
@@ -654,7 +661,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         for ii in range(kerdim[0]):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
-                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, 100.0*ii/kerdim[0], interm/60.0)
+                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
             for jj in range(kerdim[1]):
                 PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
                                                    l_OC[ii][jj], theta[ii][jj],
