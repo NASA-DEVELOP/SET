@@ -247,6 +247,8 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
                 propkernel, totaltime = fliplr(data), 0
             else:
                 propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        else:
+            propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
     kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
     array_to_geotiff(propkernel, kerneltiffpath, filein)
     logger.info("time for prop function ({}, {}) ubreak 10: {}".format(zenith, azimuth, totaltime))
