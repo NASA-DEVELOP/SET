@@ -154,6 +154,23 @@ def main():
 
         multisgmapper(fi, krnfolder, outfolder)
 
+    # Genrate hemisphere from existing skyglow map library
+    elif action == "hemisphere":
+        try:
+            la = float(sys.argv[2])
+        except:
+            raise ValueError("Latitude argument must be a number")
+         try:
+            lon = float(sys.argv[3])
+        except:
+            raise ValueError("Longitude argument must be a number")
+        try:
+            skyglowfolder = os.abspath(sys.argv[3])
+        except:
+            raise ValueError("Skyglow map folder must be specified")
+
+        generate_hem(la, lon, skyglowfolder)
+
     else:
         raise ValueError("No action/incorrect action given. Choose ""sgmap_single"", ""kernel_lib"", or ""sgmap_multiple""")
 
@@ -324,26 +341,6 @@ def multisgmapper(filein, krnfolder, outfolder):
         sgarr = subset_to_200km(sgarr, krnarr)
         # Write skyglow to a geotiff
         array_to_geotiff(sgarr, sgfile, filein)
-        # Tests for an input azimuth angle of between 0 and 180 degrees and does the complimenting kernel as well
-        # cond_angle = sgtags[4]
-        # cond = float(cond_angle[:-4])
-        # if (cond < 180.0) and not (cond == 0.0):
-        #     # Must undo the scaling factor in convolve_viirs_to_skyglow
-        #     rescale_factor = 10**-9
-        #     img_rescale = rescale_factor * imgarr
-        #     # Flips the current kernel left to right
-        #     krnarr_flip = fliplr(krnarr)
-        #     # Creates the corresponding flipped angle
-        #     flip_azi = 360.0 - cond
-        #     # Returns the proper file extention onto the tag in order to read as a file
-        #     sgtags[4] = str(flip_azi) + '.tif'
-        #     sgbase_flip = sep.join(sgtags)
-        #     sgfile_flip = os.path.join(outfolder, sgbase_flip)
-        #     print(sgfile_flip)
-        #     logger.info("working on " + sgbase_flip)
-        #     sgarr_flip = convolve_viirs_to_skyglow(img_rescale, krnarr_flip)
-        #     sgarr_flip = subset_to_200km(sgarr_flip, krnarr_flip)
-        #     array_to_geotiff(sgarr_flip, sgfile_flip, filein)
 
 def generate_hem(lat, lon, skyglow_folder):
     zen, azi, vals = [], [], []

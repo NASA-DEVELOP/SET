@@ -613,6 +613,7 @@ class SkyglowEstimationToolbox:
         lon_in = float(self.lon_entry.get())
         darksky.generate_hem(lat_in, lon_in, sgmap_folder_in)
 
+
 # Redirects formatted lines from the log file to a widget.
 class LogRedirector(logging.Handler):
     def __init__(self, widget):

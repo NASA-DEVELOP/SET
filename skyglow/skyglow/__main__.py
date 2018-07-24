@@ -13,41 +13,57 @@ import skyglow.darksky as darksky
 def main():
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     parser = argparse.ArgumentParser(description='CLI for calculating skyglow')
-    parser.add_argument('action', choices=['sgmap_single', 'kernel_lib', 'sgmap_multiple', 'gui'])
-    parser.add_argument('-l', '--latitude', type=float, help='Site latitude')
+
+    # generic args
+    parser.add_argument('action', choices=['sgmap_single', 'kernel_lib', 'sgmap_multiple', 'gui', 'hemisphere'])
+    parser.add_argument('-l', '--latitude', type=float, help='Site/hemishpere center latitude')
+    parser.add_argument('viirs_file', type=str, nargs='?', help='VIIRS image file path')
+    parser.add_argument('--debug', help='increase output verbosity', action='store_true')
+
+    # sgmap_single specific args
     parser.add_argument('-kam', '--clarity', type=float, default=1, help='Atmospheric clarity ratio (default: 1)')
     parser.add_argument('-z', '--zenith', type=float, default=0, help='Zenith angle (degrees) (default: 0)')
     parser.add_argument('-a', '--azimuth', type=float, default=0, help='Azimuth angle (degrees) (default: 0)')
     parser.add_argument('-k', '--kernel_file', type=str, help='sgmap_single kernel file path')
 
+    # kernel_lib specific args
     parser.add_argument('-ang', '--angles_csv', type=str, default='default.csv', help='kernel_lib angles CSV path (default: default.csv)')
     parser.add_argument('-hem', '--hemisphere', action='store_true', help='Generate kernels for hemispherical visualization')
     parser.add_argument('-s', '--sync', action='store_true', help='Generate kernels concurrently or not')
 
+    # sgmap_multiple specific args
     parser.add_argument('-klib', '--kernel_folder', type=str, help='sgmap_multiple kernel folder path')
     parser.add_argument('-out', '--output_folder', type=str, help='sgmap_multiple output folder path')
 
-    parser.add_argument('viirs_file', type=str, nargs='?', help='VIIRS image file path')
+    # hemisphere specific args
+    parser.add_argument('-sglib', '--skyglow_folder', type=str, help='Hemisphere skyglow map folder path')
+    parser.add_argument('-lon', '--longitude', type=float, help='Hemisphere center longitude')
 
-    parser.add_argument('--debug', help='increase output verbosity', action='store_true')
 
     args = parser.parse_args()
     if args.debug:
         logger.setLevel(logging.DEBUG)
     if args.action == 'gui':
         skyglow.main()
+    elif args.action == 'hemisphere':
+        if not args.latitude:
+          raise ValueError('Latitude is required for hemisphere')
+        if not args.longitude:
+          raise ValueError('Longitude is required for hemisphere')
+        if not args.skyglow_folder:
+          raise ValueError('Skyglow folder path is required for hemisphere')
+        darksky.generate_hem(args.latitude, args.longitude, args.skyglow_folder)
     else:
         if not args.viirs_file:
-            raise ValueError('VIIRS file path is required for command line interface')
+            raise ValueError('VIIRS file path is required for sgmap_single, kernel_lib, sgmap_multiple actions')
 
         if args.action == 'sgmap_single':
-            zen, azi, krn_file = 0, 0, ''
             if not args.latitude:
                 raise ValueError('Latitude is required for sgmap_single')
             if args.kernel_file:
                 print('Using kernel file {} for sgmap_single'.format(args.kernel_file))
                 krn_file = args.kernel_file
-            darksky.sgmapper(args.latitude, args.clarity, zen, azi, args.viirs_file, krn_file)
+            darksky.sgmapper(args.latitude, args.clarity, args.zenith, args.azimuth, args.viirs_file, args.kernel_file)
         elif args.action == 'kernel_lib':
             if not args.latitude:
                 raise ValueError('Latitude is required for kernel_lib')
