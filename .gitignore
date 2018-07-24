@@ -4,3 +4,5 @@ data/*
 *.tif
 *.swp
 *.egg-info
+.floo
+test.csv
