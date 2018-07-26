@@ -13,9 +13,6 @@ from __future__ import print_function
 
 from numpy import *
 from scipy import interpolate
-# https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.fftconvolve.html
-# scipy.signal.fftconvolve
-# from scipy import ndimage
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cm
@@ -160,7 +157,7 @@ def main():
             la = float(sys.argv[2])
         except:
             raise ValueError("Latitude argument must be a number")
-         try:
+        try:
             lon = float(sys.argv[3])
         except:
             raise ValueError("Longitude argument must be a number")
@@ -335,7 +332,6 @@ def multisgmapper(filein, krnfolder, outfolder):
         sep = "_"
         sgbase = sep.join(sgtags)
         sgfile = os.path.join(outfolder, sgbase)
-        print(sgfile)
         # Create skyglow array
         sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
         sgarr = subset_to_200km(sgarr, krnarr)
@@ -593,7 +589,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # simulates what a 180 degrees azimuth input would look like to the program to make sure that rounding errors dont prevent the if statement
     logger.info('azi, {}'.format(azi))
     azi_of_180 = float(180)*pi/180.0
-    if azi in {0.0, azi_of_180}:
+    if azi in {0.0, azi_of_180, -azi_of_180}:
         # Get left arrays to cut processing time in half
         Chileft = Chi[0:, 0:widthcenter]
         u0left = u0[0:, 0:widthcenter]

@@ -7,3 +7,4 @@ data/*
 .floo
 test.csv
 GroundTruth/
+*.tif*
