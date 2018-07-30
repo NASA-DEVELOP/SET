@@ -361,15 +361,19 @@ def generate_hem(lat, lon, skyglow_folder):
         col = int((lon - x_origin)/px_width)
         val = data[row][col]
         vals.append(val)
+        print(zenith, azimuth, val)
 
-    lat = abs(subtract(zen, 90))
-    f = interpolate.interp2d(azi, zen, vals, kind='cubic')
+    # f = interpolate.interp2d(azi, zen, vals, kind='cubic')
+    interpolator = interpolate.Rbf(azi, zen, vals, function='cubic')
     azinew = arange(-180, 181, 1)
     zennew = arange(0, 81, 1)
-    znew = f(azinew, zennew)
+    azi_dense, zen_dense = meshgrid(linspace(-180, 180, 360), linspace(0, 80, 80))
+    z_dense = interpolator(azi_dense, zen_dense)
+
+    lat = abs(subtract(zen, 90))
     x_hammer, y_hammer = to_hammer_xy(lat, azi)
     y_hammer = subtract(abs(subtract(y_hammer, 90)), 10)
-    z_hammer = to_hammer_z(znew)
+    z_hammer = to_hammer_z(z_dense)
 
     # fill in nan values within hemisphere if any exist
     for row in range(z_hammer.shape[0]):
@@ -402,9 +406,9 @@ def to_hammer_z(values):
     vals_shape = values.shape
     new_values = empty((90,360))
     new_values[:] = nan
-    for i in range(81):
+    for i in range(80):
         lat_rad = abs(i-90)*pi/180
-        for j in range(361):
+        for j in range(360):
             lon_rad = (j-180)*pi/180
 
             # project from lat/lon to x/y in Hammer
@@ -521,7 +525,6 @@ def subset_to_200km(convolved_img, kernel, original_viirs_image):
     transform[0] += km200lr*transform[1]
     transform[3] += km200ud*transform[5]
     return subsetted, transform
-
 
 # Function that creates 2d propagation function
 def fsum_2d(cenlat, k_am, zen, azi, fin):
