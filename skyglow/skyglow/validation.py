@@ -1,5 +1,6 @@
 from osgeo import gdal
 from matplotlib import pyplot as plt
+from scipy.stats import spearmanr
 
 import os, glob, ntpath
 
@@ -9,7 +10,6 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
     gt_data = groundtruth_raster.ReadAsArray()
     gt_x_origin, gt_y_origin = gt_transform[0], gt_transform[3]
     gt_px_width, gt_px_height = gt_transform[1], gt_transform[5]
-    print(gt_x_origin, gt_y_origin, gt_px_width, gt_px_height)
 
     gt_vals, vals = [], []
     skyglow_search = os.path.join(skyglow_folder,'*.tif')
@@ -40,8 +40,14 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         vals.append(val)
         print(gt_val, val)
     print(gt_vals, vals)
+    print(spearmanr(gt_vals, vals))
 
-    plt.scatter(x=gt_vals, y=vals, c='r', s=10)
+    fig, ax = plt.subplots()
+    ax.set_axisbelow(True)
+    ax.grid(linestyle='-', linewidth='0.5', color='gray')
+    plt.scatter(x=gt_vals, y=vals, c='r', s=15)
+    plt.xlabel('NPS units')
+    plt.ylabel('SET units')
     plt.show()
 
-validate(30.743749646, -87.26236, 'GroundTruth/anthlightmags_sphere.tif', 'GI_skyglow')
+validate(30.31682, -87.26236, 'GroundTruth/anthlightmags_sphere.tif', 'GI_skyglow')

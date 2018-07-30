@@ -228,10 +228,10 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
 
     # Produce sky glow raster
     skyglowarr = convolve_viirs_to_skyglow(imagearr, propkernel)
-    skyglowarr = subset_to_200km(skyglowarr, propkernel)
+    skyglowarr, new_transform = subset_to_200km(skyglowarr, propkernel, filein)
     skyglowpath = ('skyglow_' + ntpath.basename(filein)[:-4] + '_' + str(centerlat_arg) + '_' + str(ubr_arg) + '_'
                    + str(zen_arg) + '_' + str(azi_arg) + 'convolved.tif')
-    array_to_geotiff(skyglowarr, skyglowpath, filein)
+    array_to_geotiff(skyglowarr, skyglowpath, filein, new_transform)
     logger.info("===============\n***Finished!***\n===============\nSkyglow Map saved as:\n" + skyglowpath)
     constants.ding()
 
@@ -334,9 +334,9 @@ def multisgmapper(filein, krnfolder, outfolder):
         sgfile = os.path.join(outfolder, sgbase)
         # Create skyglow array
         sgarr = convolve_viirs_to_skyglow(imgarr, krnarr)
-        sgarr = subset_to_200km(sgarr, krnarr)
+        sgarr, new_transform = subset_to_200km(sgarr, krnarr, filein)
         # Write skyglow to a geotiff
-        array_to_geotiff(sgarr, sgfile, filein)
+        array_to_geotiff(sgarr, sgfile, filein, new_transform)
 
 def generate_hem(lat, lon, skyglow_folder):
     zen, azi, vals = [], [], []
@@ -386,7 +386,7 @@ def generate_hem(lat, lon, skyglow_folder):
     ax.set_facecolor('black')
     cmap = cm.jet
     cmap.set_bad('black',1)
-    ax.imshow(znew, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
+    ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
     ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
     plt.show()
 
@@ -512,10 +512,16 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # plt.show()
     # ##############################################################################
 
-def subset_to_200km(convolved_img, kernel):
+def subset_to_200km(convolved_img, kernel, original_viirs_image):
     km200ud = int(ceil(kernel.shape[1]/2))
     km200lr = int(ceil(kernel.shape[0]/2))
-    return convolved_img[km200ud:-km200ud,km200lr:-km200lr]
+    subsetted = convolved_img[km200ud:-km200ud,km200lr:-km200lr]
+    imdata = gdal.Open(original_viirs_image)
+    transform = list(imdata.GetGeoTransform())
+    transform[0] += km200lr*transform[1]
+    transform[3] += km200ud*transform[5]
+    return subsetted, transform
+
 
 # Function that creates 2d propagation function
 def fsum_2d(cenlat, k_am, zen, azi, fin):
@@ -922,14 +928,14 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         print('break!')
     return total_sum
 
-def array_to_geotiff(array, outfilename, referenceVIIRS):
+def array_to_geotiff(array, outfilename, referenceVIIRS, new_trans = None):
     imdata = gdal.Open(referenceVIIRS)
 
     # Save out to a GeoTiff
     arr = array
     # First of all, gather some information from VIIRS image
     [cols,rows] = arr.shape
-    trans = imdata.GetGeoTransform()
+    trans = imdata.GetGeoTransform() if not new_trans else new_trans
     proj = imdata.GetProjection()
     nodatav = 0
     outfile = outfilename
