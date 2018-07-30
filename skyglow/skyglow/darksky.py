@@ -185,7 +185,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
         azi_rad = azi_arg*(pi/180)
         zen_rad = zen_arg*(pi/180)
         if abs(centerlat_arg) > 90:
-            raise ValueError("Latitude must be between 0 and 90 degrees")
+            raise ValueError("Latitude must be between -90 and 90 degrees")
         lat_rad = centerlat_arg*(pi/180)
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
@@ -240,6 +240,8 @@ def krn_unpack(args):
     return generate_krn(*args)
 
 def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
+    if abs(centerlat_arg) > 90:
+        raise ValueError("Latitude must be between -90 and 90 degrees")
     lat_rad = centerlat_arg*(pi/180)
     zen_rad = zenith*(pi/180)
     azi_rad = azimuth*(pi/180)
@@ -269,6 +271,8 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
     print('Finished kernel', kerneltiffpath)
 
 def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
+    if abs(centerlat_arg) > 90:
+        raise ValueError("Latitude must be between -90 and 90 degrees")
     lat_rad = centerlat_arg*(pi/180)
     with open(angles_file, "rb") as f:
         angle_list = loadtxt(f, delimiter=",",skiprows=1)
@@ -339,6 +343,8 @@ def multisgmapper(filein, krnfolder, outfolder):
         array_to_geotiff(sgarr, sgfile, filein, new_transform)
 
 def generate_hem(lat, lon, skyglow_folder):
+    if abs(lat) > 90:
+        raise ValueError("Latitude must be between -90 and 90 degrees")
     zen, azi, vals = [], [], []
     # list all tiff files in skyglow_folder
     # open tif, read as array, and extract pixel value
