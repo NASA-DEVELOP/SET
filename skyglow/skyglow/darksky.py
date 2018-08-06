@@ -312,7 +312,7 @@ def multisgmapper(filein, krnfolder, outfolder):
     imgarr = viirsraster.ReadAsArray()
 
     # Get kernel library file list
-    krnsrch = os.path.join(krnfolder,'*.tif')
+    krnsrch = os.path.join(krnfolder,'kernel*.tif')
     krnlist = glob.glob(krnsrch)
 
     ln = 0
@@ -348,7 +348,7 @@ def generate_hem(lat, lon, skyglow_folder):
     zen, azi, vals = [], [], []
     # list all tiff files in skyglow_folder
     # open tif, read as array, and extract pixel value
-    skyglow_search = os.path.join(skyglow_folder,'*.tif')
+    skyglow_search = os.path.join(skyglow_folder,'skyglow*.tif')
     skyglow_tifs = glob.glob(skyglow_search)
     for tif_name in skyglow_tifs:
         tif_name = ntpath.basename(tif_name)
@@ -366,6 +366,8 @@ def generate_hem(lat, lon, skyglow_folder):
         row = int((lat - y_origin)/px_height)
         col = int((lon - x_origin)/px_width)
         val = data[row][col]
+        if azimuth == 180 or azimuth == -180:
+            val = 0
         vals.append(val)
         print(zenith, azimuth, val)
 
@@ -393,11 +395,14 @@ def generate_hem(lat, lon, skyglow_folder):
 
     fig = plt.figure(1, figsize=(10, 6), dpi=100)
     ax = fig.add_subplot(111)
-    ax.set_facecolor('black')
-    cmap = cm.jet
-    cmap.set_bad('black',1)
-    ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
-    ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
+    ax.set_facecolor('white')
+    cmap = cm.rainbow
+    cmap.set_bad('white',1)
+    cax = ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
+    cbar = fig.colorbar(cax, ticks=[nanmin(z_hammer), (nanmax(z_hammer)-nanmin(z_hammer))/2, nanmax(z_hammer)], orientation='horizontal')
+    cbar.set_label('Sky brightness')
+    cbar.ax.set_xticklabels(['Low', 'Medium', 'High'])  # horizontal colorbar
+    # ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
     plt.show()
 
 def to_hammer_xy(lat, lon):
@@ -550,7 +555,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # z, Zenith angle site, REF 2, Fig. 6, p. 648
     logger.info('z, Site zenith (deg): {}'.format(zen*(180/pi)))
 
-    # Beta, Azimuth angle site, REF 2, Fig 6 p. 648
+    # Azimuth angle site, REF 2, Fig 6 p. 648
     logger.info('Beta, Site azimuth as referenced from North (deg): {}'.format(azi*(180/pi)))
 
     # ubr, Length of u for relaxing integration increment
@@ -946,7 +951,7 @@ def array_to_geotiff(array, outfilename, referenceVIIRS, new_trans = None):
     [cols,rows] = arr.shape
     trans = imdata.GetGeoTransform() if not new_trans else new_trans
     proj = imdata.GetProjection()
-    nodatav = 0
+    nodatav = -1000000000
     outfile = outfilename
     logger.info('Saving geotiff {}'.format(outfile))
 

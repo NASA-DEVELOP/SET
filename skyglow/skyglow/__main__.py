@@ -24,7 +24,7 @@ def main():
     parser.add_argument('-kam', '--clarity', type=float, default=1, help='Atmospheric clarity ratio (default: 1)')
     parser.add_argument('-z', '--zenith', type=float, default=0, help='Zenith angle (degrees) (default: 0)')
     parser.add_argument('-a', '--azimuth', type=float, default=0, help='Azimuth angle (degrees) (default: 0)')
-    parser.add_argument('-k', '--kernel_file', type=str, help='sgmap_single kernel file path')
+    parser.add_argument('-k', '--kernel_file', type=str, default='', help='sgmap_single kernel file path')
 
     # kernel_lib specific args
     parser.add_argument('-ang', '--angles_csv', type=str, default='default.csv', help='kernel_lib angles CSV path (default: default.csv)')
