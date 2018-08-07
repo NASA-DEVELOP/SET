@@ -1,2 +1,10 @@
 *.pyc
 *.DS_Store
+data/*
+*.tif
+*.swp
+*.egg-info
+.floo
+test.csv
+GroundTruth/
+*.tif*
