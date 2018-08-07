@@ -416,7 +416,10 @@ def generate_hem(lat, lon, skyglow_folder):
         px_width, px_height = transform[1], transform[5]
         row = int((lat - y_origin)/px_height)
         col = int((lon - x_origin)/px_width)
-        val = data[row][col]
+		try:
+        	val = data[row][col]
+		except:
+			raise ValueError("Latitude/longitude must be within bounds of skyglow map.")
         if azimuth == 180 or azimuth == -180:
             val = 0
         vals.append(val)
