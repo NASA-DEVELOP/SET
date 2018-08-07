@@ -3,6 +3,7 @@
 If you want to work on SET's source code we suggest `pip install -e skyglow/`, so the package tracks code changes.
 Use version control as the project is on Github already.
 Install a PEP8 linter like `pip install pep8ify`. This is a  development dependency and should not be included in `geospatial.yml`, the conda environment file.
+Add unit tests to `skyglow/skyglow/test.py` and test with `python -m unittest skyglow.test` from inside the outer skyglow folder.
 
 ---
 
