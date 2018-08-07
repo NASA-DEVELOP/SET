@@ -1,15 +1,28 @@
-# REFERENCES
-# (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh,
-#   B.A. Portnov, N.A. Rybnikova and R. Furgoni, 2016. The new workd atlas of
-#   artificial night sky brightness. Sci. Adv. 2.
-# (2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The
-#   artificial night sky brightness mapped from DMSP satellite Operational
-#   Linescan System measurements. Mon. Not. R. Astron. Soc. 318.
-# (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites.
-#   Pub. Astron. Soc. Pac. 101.
+"""This module contains functions for estimating light pollution using data from
+NASA and NOAA's Visible Infrared Imaging Radiometer Suite (VIIRS) satellite
+sensor.
+
+References:
+(1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A.
+	  Rybnikov and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness.
+	  Sci. Adv. 2.
+(2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial night sky
+	  brightness mapped from DMSP satellite Operational Linescan System measurements. Mon.
+	  Not. R. Astron. Soc. 318.
+(3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc.
+	  Pac. 101.
+"""
 
 from __future__ import division
 from __future__ import print_function
+import os.path, ntpath
+import time
+import json
+import logging
+import sys
+import glob
+from multiprocessing import Pool
+from builtins import range
 
 from numpy import *
 from scipy import interpolate
@@ -20,14 +33,6 @@ from osgeo import gdal
 
 import skyglow.constants as constants
 
-import os.path, ntpath
-import time
-import json
-import logging
-import sys
-import glob
-from multiprocessing import Pool
-from builtins import range
 logger = logging.getLogger()
 
 
@@ -37,30 +42,28 @@ default_output_folder = os.path.join(os.getcwd(), "skyglow_out")
 # ISSUES
 # check angle fixes ~sgmapper and other
 # check beta array fixes ~line 298
-# continue abstracting prop2d is sgmapper ~line 50
 # still need to get rid of global variables
 # still consider making external variable/function constants file
-# consider whether name "darkskypy" is okay
-# darkskypy mixes spaces and tabs for indentation
 
 PsiZ_cond = 89.5*(pi/180)
 ubr_arg = 10.0
 
-logger.info(sys.version)
 
 def main():
-    """Main entry point if darksky is run from the command line. Calls
-       appropriate action."""
+    """Main entry point if darksky is run from the command line.
+
+    Calls appropriate function for given action.
+    """
 
     if len(sys.argv) < 2:
-        raise ValueError("Usage: python {} <action>. Action can be 'sgmap_single', 'kernel_lib', 'sgmap_multiple'".format(sys.argv[0]))
+        raise ValueError("Usage: python {} <action>. Action can be 'sgmap_single', 'kernel_lib', 'sgmap_multiple', 'hemisphere'".format(sys.argv[0]))
 
     project_root = os.path.join(os.getcwd(), '/'.join(sys.argv[0].split("/")[:-1]))
 
     action = sys.argv[1]
 
     # Estimate a single map of artificial sky brightness with or without
-    # an existing 2d propagation function or "kernel"
+    # an existing 2d propagation function (kernel)
     if action == "sgmap_single":
         try:
             la = float(sys.argv[2])
@@ -84,7 +87,7 @@ def main():
             raise ValueError("Specify input VIIRS image")
         sgmapper(la, ka, ze, az, fi)
 
-    # Estimate a group or "library" of 2d propagation functions or "kernels"
+    # Estimate a group ("library") of 2d propagation functions (kernels)
     elif action == "kernel_lib":
         try:
             la = float(sys.argv[2])
@@ -116,6 +119,8 @@ def main():
         except:
             sync = False
 
+        # if asynchronous mode is specified, map kernel generation tasks to CPU cores
+        # kernels will be generated concurrently
         if not sync:
             static_args = [(la, ka, fi, hem)]
             with open(csv_path, "rb") as f:
@@ -127,6 +132,7 @@ def main():
                 p.map_async(krn_unpack, args_product).get(9999999)
             except KeyboardInterrupt:
                 p.close()
+        # synchronous run
         else:
             krnlibber(la, ka, csv_path, fi, hem)
 
@@ -148,7 +154,6 @@ def main():
         except:
             logger.info('Output folder not specified, using {}'.format(default_output_folder))
             outfolder = default_output_folder
-
         multisgmapper(fi, krnfolder, outfolder)
 
     # Genrate hemisphere from existing skyglow map library
@@ -172,25 +177,32 @@ def main():
         raise ValueError("No action/incorrect action given. Choose ""sgmap_single"", ""kernel_lib"", or ""sgmap_multiple""")
 
 def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
+    """Create a single artificial brightness map.
+
+    centerlat_arg (float): regional latitude in degrees
+    k_am_arg (float): atmospheric clarity ratio
+    zen_arg (float): viewing angle from zenith in degrees
+    azi_arg (float): viewing angle from North (0 degrees)
+    filein (str): VIIRS DNB file path
+    prop2filein (str): path to existing kernel tiff (default "")
+    """
     kerneltiffpath = prop2filein
-    # added code to allow for auto opening of kernels based on if they are saved in the current directory or the kernel_lib directory
+    # try to to find existing kernel in the current directory or the kernel_lib directory
     if kerneltiffpath == "":
-        # If there is no input from skyglow.py for an input kernel (such as when the program is run through command line) then the default kernel name is used
+        # search for default kernel name
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
     if (os.path.isfile(kerneltiffpath) is False) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) is False):
-        # If there is no 2d propagation function (kernel), ...
-        # then estimate the 2d propagation function
+        # If there is no 2d propagation function (kernel), create a new kernel
 
-        # first convert angles in degrees to radians
-        azi_rad = azi_arg*(pi/180)
-        zen_rad = zen_arg*(pi/180)
+        # convert angles in degrees to radians
         if abs(centerlat_arg) > 90:
             raise ValueError("Latitude must be between -90 and 90 degrees")
         lat_rad = centerlat_arg*(pi/180)
+        azi_rad = azi_arg*(pi/180)
+        zen_rad = zen_arg*(pi/180)
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = 'kernel_' + str(centerlat_arg) + '_' +  str(k_am_arg) + '_' + str(zen_arg) + '_' + str(azi_arg) + '.tif'
         array_to_geotiff(propkernel, kerneltiffpath, filein)
-
         logger.info("time for prop function ubreak 10: %s", totaltime)
     else:
         krnbase = ntpath.basename(kerneltiffpath)
@@ -198,17 +210,17 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
         zen_arg = sgtags[3]
         azi_arg = sgtags[4][:-4]
         # Put the skyglow basename together
-        # If there is a 2d propagation function (kernel) in the current direcotry and not in the kernel_lib subdirectory, ...
+        # If there is a 2d propagation function (kernel) in the current direcotry and not in the kernel_lib subdirectory,
         # then read it into an array
         if (os.path.isfile(kerneltiffpath) is True) and (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) is False):
             kerneldata = gdal.Open(kerneltiffpath)
             propkernel = kerneldata.ReadAsArray()
-        # If there is a 2d propagation function (kernel) in the kernel_lib sub directory but not the current directory, ...
+        # If there is a 2d propagation function (kernel) in the kernel_lib sub directory but not the current directory,
         # then read it into an array
         elif (os.path.isfile(os.path.join("kernel_lib", kerneltiffpath)) == True) and (os.path.isfile(kerneltiffpath) == False):
             kerneldata = gdal.Open(os.path.join("kernel_lib", kerneltiffpath))
             propkernel = kerneldata.ReadAsArray()
-        # If there is a 2d propagation function (kernel) in the current directory and subdirectory, ...
+        # If there is a 2d propagation function (kernel) in the current directory and subdirectory,
         # then read the one in the current directory into an array
         elif (os.path.isfile(kerneltiffpath) == True) and (os.path.isfile(os.path.join("kernel_lib",kerneltiffpath)) == True):
             kerneldata = gdal.Open(kerneltiffpath)
@@ -218,7 +230,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     viirsraster = gdal.Open(filein)
     imagearr = viirsraster.ReadAsArray()
 
-    # ADDED DEBUG CODE #
+    # DEBUG CODE
     logger.debug('imagearr shape : {}'.format(imagearr.shape))
     logger.debug('imagearr shape rows : {}'.format(imagearr.shape[0]))
     logger.debug('imagearr shape columns : {}'.format(imagearr.shape[1]))
@@ -236,10 +248,21 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     constants.ding()
 
 def krn_unpack(args):
+    """Unpack arguments for parallelized kernel generation."""
     print('Generating kernel', args)
     return generate_krn(*args)
 
 def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
+    """Generate one kernel for kernel_lib action.
+
+    centerlat_arg (float): regional latitude in degrees
+    k_am_arg (float): atmospheric clarity ratio
+    zenith (float): viewing angle from zenith in degrees
+    azimuth (float): viewing angle from North (0 degrees)
+    filein (str): VIIRS DNB file path
+    hem (bool): mirror kernel for complementary azimuth angle
+    """
+    # convert from degrees to radians
     if abs(centerlat_arg) > 90:
         raise ValueError("Latitude must be between -90 and 90 degrees")
     lat_rad = centerlat_arg*(pi/180)
@@ -250,9 +273,10 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
     # if hem is False (don't generate hemispherical kernels) just calculate kernel
     if not hem:
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
-    # otherwise find complement angle and flip kernel if it exists
+    # otherwise find complement angle and flip kernel if complementary kernel file exists
     else:
         azimuth_complement = -azimuth
+        # complementary kernels do NOT exist for angles 0, 180, and -180
         if abs(azimuth) != 180.0 and azimuth != 0.0:
             azimuth_complement = -azimuth
             azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
@@ -263,6 +287,7 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
                 propkernel, totaltime = fliplr(data), 0
             else:
                 propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        # calculate if complementary does not exist
         else:
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
     kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
@@ -271,6 +296,14 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
     print('Finished kernel', kerneltiffpath)
 
 def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
+    """Create a series of kernels from angle combinations in a csv file.
+
+    centerlat_arg (float): regional latitude in degrees
+    k_am_arg (float): atmospheric clarity ratio
+    angles_file (str): CSV file with angle combinations to create kernels for
+    filein (str): VIIRS DNB file path
+    hem (bool): mirror kernel for complementary azimuth angle
+    """
     if abs(centerlat_arg) > 90:
         raise ValueError("Latitude must be between -90 and 90 degrees")
     lat_rad = centerlat_arg*(pi/180)
@@ -286,9 +319,10 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
         # if hem is False (don't generate hemispherical kernels) just calculate kernel
         if not hem:
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
-        # otherwise find complement angle and flip kernel if it exists
+        # otherwise find complement angle and flip kernel if complementary kernel file exists
         else:
             azimuth_complement = -azimuth
+            # complementary kernels do NOT exist for angles 0, 180, and -180
             if abs(azimuth) != 180.0 and azimuth != 0.0:
                 azimuth_complement = -azimuth
                 azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
@@ -299,6 +333,7 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
                     propkernel, totaltime = fliplr(data), 0
                 else:
                     propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+            # calculate if complementary does not exist
             else:
                 propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
@@ -307,6 +342,12 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
         print('Finished kernel', kerneltiffpath)
 
 def multisgmapper(filein, krnfolder, outfolder):
+    """Create series of artificial brightness maps from kernels in folder.
+
+    filein (str): VIIRS DNB file path
+    krnfolder (str): path to folder with kernel tifs
+    outfolder (str): location to save skyglow maps to
+    """
     # read in VIIRS DNB image
     viirsraster = gdal.Open(filein)
     imgarr = viirsraster.ReadAsArray()
@@ -316,15 +357,12 @@ def multisgmapper(filein, krnfolder, outfolder):
     krnlist = glob.glob(krnsrch)
 
     ln = 0
-
     for krn in krnlist:
         # If the loop has already ran once then rescale imgarr back down to prevent multiple scaling factors being applied
         if ln > 0:
             imgarr *= 10**-9
         ln = 1
 
-        # If there is a 2d propagation function (kernel), ...
-        # then read it into an array
         kh = gdal.Open(krn)
         krnarr = kh.ReadAsArray()
         # Break down kernel filename to get elements for skyglow filename
@@ -343,14 +381,26 @@ def multisgmapper(filein, krnfolder, outfolder):
         array_to_geotiff(sgarr, sgfile, filein, new_transform)
 
 def generate_hem(lat, lon, skyglow_folder):
+    """Generate skyglow hemisphere for observation point within skyglow map.
+
+    Hemisphere is generated from multiple skyglow maps at same region, each map
+    being for a different viewing angle. The value for each angle is taken from
+    a skyglow map and the hemisphere is built by interpolating between the
+    extracted values. There is a minimum number of values (hence maps) that need
+    to exist for proper interpolation.
+
+    lat (float): observation point latitude
+    lon (float): observation point longitude
+    skyglow_folder (str): path to folder with skyglow maps
+    """
     if abs(lat) > 90:
         raise ValueError("Latitude must be between -90 and 90 degrees")
     zen, azi, vals = [], [], []
-    # list all tiff files in skyglow_folder
-    # open tif, read as array, and extract pixel value
+    # list all tiff files in skyglow_folder (that start with skyglow)
     skyglow_search = os.path.join(skyglow_folder,'skyglow*.tif')
     skyglow_tifs = glob.glob(skyglow_search)
     for tif_name in skyglow_tifs:
+        # extract zenith/azimuth from tif name
         tif_name = ntpath.basename(tif_name)
         args_split = tif_name.split('_')
         zenith = float(args_split[3])
@@ -358,6 +408,7 @@ def generate_hem(lat, lon, skyglow_folder):
         zen.append(zenith)
         azi.append(azimuth)
 
+        # open tif, read as array, and extract pixel value
         raster = gdal.Open(os.path.join(skyglow_folder, tif_name))
         transform = raster.GetGeoTransform()
         data = raster.ReadAsArray()
@@ -371,19 +422,20 @@ def generate_hem(lat, lon, skyglow_folder):
         vals.append(val)
         print(zenith, azimuth, val)
 
-    # f = interpolate.interp2d(azi, zen, vals, kind='cubic')
+    # I chose Rbf as the interpolator because of https://stackoverflow.com/a/37872172
     interpolator = interpolate.Rbf(azi, zen, vals, function='cubic')
     azinew = arange(-180, 181, 1)
     zennew = arange(0, 81, 1)
     azi_dense, zen_dense = meshgrid(linspace(-180, 180, 360), linspace(0, 80, 80))
     z_dense = interpolator(azi_dense, zen_dense)
 
+    # convert zenith,azimuth, and values in square grid to Hammer projection
     lat = abs(subtract(zen, 90))
     x_hammer, y_hammer = to_hammer_xy(lat, azi)
     y_hammer = subtract(abs(subtract(y_hammer, 90)), 10)
     z_hammer = to_hammer_z(z_dense)
 
-    # fill in nan values within hemisphere if any exist
+    # fill in nan values within hemisphere (but only inside) if any exist
     for row in range(z_hammer.shape[0]):
         ind = where(~isnan(z_hammer[row]))[0]
         if ind.size != 0:
@@ -393,6 +445,7 @@ def generate_hem(lat, lon, skyglow_folder):
             mask[last:] = 0
             z_hammer[row, mask] = interp(flatnonzero(mask), flatnonzero(~mask), z_hammer[row, ~mask])
 
+    # draw the resulting figure
     fig = plt.figure(1, figsize=(10, 6), dpi=100)
     ax = fig.add_subplot(111)
     ax.set_facecolor('white')
@@ -402,24 +455,38 @@ def generate_hem(lat, lon, skyglow_folder):
     cbar = fig.colorbar(cax, ticks=[nanmin(z_hammer), (nanmax(z_hammer)-nanmin(z_hammer))/2, nanmax(z_hammer)], orientation='horizontal')
     cbar.set_label('Sky brightness')
     cbar.ax.set_xticklabels(['Low', 'Medium', 'High'])  # horizontal colorbar
-    # ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
+    ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
     plt.show()
 
 def to_hammer_xy(lat, lon):
+    """Convert geographic point to Hammer projection.
+
+    Based directly on formulas in https://en.wikipedia.org/wiki/Hammer_projection
+
+    lat (float): latitude of point
+    lon (float): longitude of point
+    """
     lat_rad = abs(multiply(lat, pi/180))
     lon_rad = multiply(lon, pi/180)
-    denominator = sqrt(1+cos(lat_rad)*cos(divide(lon_rad, 2)))
-    x = divide(2*sqrt(2)*cos(lat_rad)*sin(divide(lon_rad, 2)), denominator)
-    y = divide(sqrt(2)*sin(lat_rad), denominator)
+    denominator = sqrt(1+cos(lat_rad)*cos(lon_rad/2))
+    x = (2*sqrt(2)*cos(lat_rad)*sin(lon_rad/2))/denominator
+    y = (sqrt(2)*sin(lat_rad))/denominator
     return rint(multiply(x, 180/pi)), rint(multiply(y, 180/pi))
 
 def to_hammer_z(values):
+    """Convert 2d grid (matrix) to Hammer projection.
+
+    Moves the values within the matrix to make a hemisphere shape.
+    Based directly on formulas in https://en.wikipedia.org/wiki/Hammer_projection
+
+    values (array): 2D numpy array of values
+    """
     vals_shape = values.shape
-    new_values = empty((90,360))
+    new_values = empty(vals_shape)  # create array to fill with values in new places
     new_values[:] = nan
-    for i in range(80):
+    for i in range(vals_shape[0]):
         lat_rad = abs(i-90)*pi/180
-        for j in range(360):
+        for j in range(vals_shape[1]):
             lon_rad = (j-180)*pi/180
 
             # project from lat/lon to x/y in Hammer
@@ -435,8 +502,15 @@ def to_hammer_z(values):
             new_values[y,x] = values[i,j]
     return new_values
 
-# Function convolves VIIRS DNB with 2d propagation function
 def convolve_viirs_to_skyglow(dnbarr, proparr):
+    """Convolve VIIRS DNB with light propagation kernel.
+
+    Convolution happens via multiplication in Fourier space (frequency domain).
+    An explanation: https://en.wikipedia.org/wiki/Convolution_theorem
+
+    dnbarr (array): 2D numpy array of VIIRS DNB data
+    proparr (array): 2D light propagation array
+    """
     # Convert to float 32 for Fourier, scale, and round
     # falchi assumed natural sky brightness to be 174 micro cd/m^2 = 2.547e-11 watt/cm^2/steradian (at 555nm)
     # Not sure if this is correct scaling factor, I assume that this makes the output prop image in units of cd/m^2
@@ -444,11 +518,13 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     dnbarr *= viirs_scaling_factor
     proparr = float32(nan_to_num(proparr))
 
-    # ADDED DEBUG CODE
+    # DEBUG CODE
     logger.debug('dnbarr.shape[0] : {}'.format(dnbarr.shape[0]))
     logger.debug('dnbarr.shape[1] : {}'.format(dnbarr.shape[1]))
     logger.debug('proparr.shape[0] : {}'.format(proparr.shape[0]))
     logger.debug('proparr.shape[1] : {}'.format(proparr.shape[1]))
+
+    # 400km buffer check using kernel size which is supposed to be 400km radius
     if dnbarr.shape[0] < proparr.shape[0] or dnbarr.shape[1] < proparr.shape[1]:
         raise ValueError("VIIRS image is too small for kernel. Study area must have 400km buffer around it.")
 
@@ -463,7 +539,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
         pad_down += 1
     padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
 
-    # ADDED DEBUG CODE
+    # DEBUG CODE
     logger.debug('padded_prop : {}'.format(array(padded_prop).shape))
     logger.debug('padded_prop[0] : {}'.format(array(padded_prop).shape[0]))
     logger.debug('padded_prop[1] : {}'.format(array(padded_prop).shape[1]))
@@ -471,7 +547,6 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     logger.debug('pad_right : {}'.format(array(pad_right)))
     logger.debug('pad_up : {}'.format(array(pad_up)))
     logger.debug('pad_down : {}'.format(array(pad_down)))
-
 
     # propagation function applied via fft must be rotated 180 degrees
     padded_prop = fliplr(flipud(padded_prop))
@@ -486,13 +561,12 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # padded_prop = padded_prop[(prows//2)-subset:(prows//2)+subset, (pcols//2)-subset:(pcols//2)+subset]
     # imagearr = imagearr[(irows//2)-subset:(irows//2)+subset, (icols//2)-subset:(icols//2)+subset]
 
-    # Fourier Transform Method #
-
+    # Fourier Transform Method
     np_dft_prop_im = fft.fft2(padded_prop)
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
 
-    # ADDED DEBUG CODE
+    # DEBUG CODE
     logger.debug('np_dft_prop_im shape : {}'.format(np_dft_prop_im.shape))
     logger.debug('np_dft_kernel_shift shape : {}'.format(np_dft_kernel_shift.shape))
     logger.debug('np_magnitude_spectrum shape : {}'.format(np_magnitude_spectrum.shape))
@@ -514,7 +588,6 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     logger.debug('viirs_inv_shift shape : {}'.format(viirs_inv_shift.shape))
 
     FFT_product_inverse = abs(fft.fftshift(fft.ifft2(kernel_inv_shift * viirs_inv_shift)))
-
     return FFT_product_inverse
 
     # Comparison with Slow Convolution (Make sure to subset first) these give slightly different answers
@@ -528,17 +601,32 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     # ##############################################################################
 
 def subset_to_200km(convolved_img, kernel, original_viirs_image):
+    """Remove 200km from border of skyglow map.
+
+    convolved_img (array): skyglow map
+    kernel (array): light propagation kernel
+    original_viirs_image (array): VIIRS DNB data
+    """
+    # 200km north to south vs east to west may span different number of cells
     km200ud = int(ceil(kernel.shape[1]/2))
     km200lr = int(ceil(kernel.shape[0]/2))
     subsetted = convolved_img[km200ud:-km200ud,km200lr:-km200lr]
+    # make sure to move x and y origin to subsetted corner
     imdata = gdal.Open(original_viirs_image)
     transform = list(imdata.GetGeoTransform())
     transform[0] += km200lr*transform[1]
     transform[3] += km200ud*transform[5]
     return subsetted, transform
 
-# Function that creates 2d propagation function
 def fsum_2d(cenlat, k_am, zen, azi, fin):
+    """Create 2D light propagation function.
+
+    cenlat (float): latitude in radians
+    k_am (float): atmospheric clarity ratio
+    zen (float): zenith angle in radians
+    azi (float): zaimuth angle in radians
+    fin (str): VIIRS DNB file path
+    """
     # Input Variables
     logger.info('**INPUTS**')
 
@@ -556,7 +644,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     logger.info('z, Site zenith (deg): {}'.format(zen*(180/pi)))
 
     # Azimuth angle site, REF 2, Fig 6 p. 648
-    logger.info('Beta, Site azimuth as referenced from North (deg): {}'.format(azi*(180/pi)))
+    logger.info('Site azimuth as referenced from North (deg): {}'.format(azi*(180/pi)))
 
     # ubr, Length of u for relaxing integration increment
     ubr = ubr_arg
@@ -590,6 +678,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Earth angle from source to site, REF 3, p. 308\
     Chi = D_OC/R_T
 
+    # beta angle from source to site
     beta = create_beta(source_lat, rltv_long, Chi, azi, cent_row, cent_col)
 
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
@@ -630,7 +719,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         for ii in range(kerdim[0]):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
-                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
+                logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
+                            zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
             for jj in range(kerdim[1]):
                 PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj],
                                                        u0left[ii][jj],
@@ -676,7 +766,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
         for ii in range(kerdim[0]):
             if mod(ii, ker10per) == 0:
                 interm = time.time() - start
-                logger.info("Kernel (%d, %d), %d percent complete, %d minutes", zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
+                logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
+                            zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
             for jj in range(kerdim[1]):
                 PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
                                                    l_OC[ii][jj], theta[ii][jj],
@@ -691,8 +782,11 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
 
     return PropSumArray, time_kern
 
-# Function to calculate Gaussian Earth radius of curvature as a function of latitude
 def gauss_earth_curvature_radius(center_lat):
+    """Calculate Gaussian Earth radius of curvature as a function of latitude.
+
+    center_lat (float): regional latitude in radians
+    """
     # Earth ellipse semi-major orbit, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
     R_equator = 6378.1370 # km (a)
 
@@ -704,11 +798,15 @@ def gauss_earth_curvature_radius(center_lat):
 
     # NOT USED PRESENTLY: Directional Earth radius of curvature, REF Wikipedia (https://en.wikipedia.org/wiki/Earth_radius)
     # R_T = (R_polar*R_equator**2)/((R_equator*cos((cent_lat_rad+rel_lat_rad/2)))**2+(R_polar*sin((cent_lat_rad+rel_lat_rad/2)))**2)
-
     return R_curve
 
-# Function does initial array sizing and create latitude/longitude arrays
 def create_latlon_arrays(R_curve, center_lat, pix_rad):
+    """Initial array sizing and create latitude/longitude arrays.
+
+    R_curve (float): radius of earth at latitude
+    center_lat (float): regional latitude in radians
+    pix_rad (float): pixel size in radians
+    """
     p_h = R_curve*pix_rad
     p_w = cos(center_lat)*R_curve*pix_rad
 
@@ -739,9 +837,16 @@ def create_latlon_arrays(R_curve, center_lat, pix_rad):
 
     return src_lat, rel_long, center_row, center_col
 
-# Function that creates array of beta angles based on
-# source latitude array, relative longitude array, Earth angle, and input viewing azimuth
 def create_beta(src_lat, rel_long, Chi, azi_view, cen_row, cen_col):
+    """Creates array of beta angles (angle between source and observer)
+
+    src_lat (array): array of latitudes
+    rel_long (array): array of relative longitudes around 0
+    Chi (array): Earth angle from source site
+    azi_view (float): viewing azimuth angle in radians
+    cen_row (int): row number of center row in arrays
+    cen_col (int): column number of center column in arrays
+    """
     # beta array, where beta is horizontal angle from direct line (observer to source, OC)
     # to scatter line (observer to scatter, OQ), REF 2, Fig. 6, p. 648
 
@@ -761,8 +866,10 @@ def create_beta(src_lat, rel_long, Chi, azi_view, cen_row, cen_col):
 
     return beta_arr_raw - azi_view
 
-# Function that takes elements of the arrays of D_OC, Chi, etc. as arguments.
 def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_arg, del_u_farg = .2, lhr_viirs = 1.5):
+    """Calculate total light propagation at an observation site along a viewing
+    angle vector.
+    """
     if isnan(l_OC):
         return nan
 
@@ -943,12 +1050,20 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     return total_sum
 
 def array_to_geotiff(array, outfilename, referenceVIIRS, new_trans = None):
+    """Save numpy array as a geotiff.
+
+    array (array): numpy array to save
+    outfilename (str): output file name
+    referenceVIIRS (str): path to VIIRS DNB tif to extract tif info
+    new_trans (list): GDAL geo transform tuple (in list form) (default None)
+    """
     imdata = gdal.Open(referenceVIIRS)
 
     # Save out to a GeoTiff
     arr = array
-    # First of all, gather some information from VIIRS image
+    # First, gather some information from VIIRS image
     [cols,rows] = arr.shape
+    # set transform to VIIRS transfomr if there is no new transform
     trans = imdata.GetGeoTransform() if not new_trans else new_trans
     proj = imdata.GetProjection()
     nodatav = -1000000000

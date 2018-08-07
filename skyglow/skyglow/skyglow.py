@@ -1,18 +1,5 @@
-"""
-Name: Skyglow Estimation Toolbox
-Authors: Ryan Avery, Dr. Kenton Ross, Stanley Yu
-Description: Python toolbox that generates artificial skyglow maps using data from NASA and NOAA's
-             Visible Infrared Imaging Radiometer Suite (VIIRS) satellite sensor.
-References:
-(1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A.
-	  Rybnikov and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness.
-	  Sci. Adv. 2.
-(2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial night sky
-	  brightness mapped from DMSP satellite Operational Linescan System measurements. Mon.
-	  Not. R. Astron. Soc. 318.
-(3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc.
-	  Pac. 101.
-"""
+"""This module is the GUI frontend for darksky.py."""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -48,11 +35,9 @@ import skyglow.constants as constants
 import skyglow.darksky as darksky
 
 
-# Main class of the software. Establishes GUI.
 class SkyglowEstimationToolbox:
+    """Main class that establishes GUI."""
 
-    ##################################################
-    # Initialization
     def __init__(self, root):
         self.root = root
 
@@ -118,8 +103,8 @@ class SkyglowEstimationToolbox:
         self.help_btn_menu.add_command(label="About", command=self.about)
         self.help_btn["menu"] = self.help_btn_menu
 
-    # Sets up input GUI and image display screen.
     def main_screen(self):
+        """Set up input GUI and image display screen."""
         self.action = IntVar()
 
         btn_width = int(constants.SW/60)
@@ -222,9 +207,8 @@ class SkyglowEstimationToolbox:
         self.hem_gen_btn = Button(self.input_frame, text="Generate Hemisphere",
                                     width=gen_width, command=self.generate_hem)
 
-
-    # Imports a TIFF file for referencing sky brightness in the region of interest.
     def import_viirs(self):
+        """Import a VIIRS DNB file."""
         # Allows user to search through his directory for VIIRS Image file.
         file_types = [('TIFF Files', '*.tif'), ('All files', '*')]
         file_name = filedialog.askopenfilename(initialdir='/', title="Select file", filetypes=file_types)
@@ -245,7 +229,7 @@ class SkyglowEstimationToolbox:
             print('File is empty.')
 
     def import_csv(self):
-        # Allows user to search through his directory for VIIRS Image file.
+        """Import CSV file."""
         file_types = [('CSV Files', '*.csv'), ('All files', '*')]
         file_name = filedialog.askopenfilename(initialdir='/', title="Select file", filetypes=file_types)
         self.csv_file_var.set(file_name)
@@ -254,7 +238,7 @@ class SkyglowEstimationToolbox:
             print('File is empty.')
 
     def import_krn_folder(self):
-        # Allows user to search through his directory for VIIRS Image file.
+        """Import kernel folder."""
         krn_dir = filedialog.askdirectory(initialdir='/', title="Select kernel folder")
         self.krn_folder_var.set(krn_dir)
 
@@ -262,22 +246,21 @@ class SkyglowEstimationToolbox:
             print('Directory is empty.')
 
     def import_out_folder(self):
-        # Allows user to search through his directory for VIIRS Image file.
+        """Import skyglow output folder."""
         output_dir = filedialog.askdirectory(initialdir='/', title="Select output folder")
         self.output_folder_var.set(output_dir)
 
         if output_dir is '':
             print('Directory is empty.')
 
-    # Imports a TIFF file containing the kernel data from previous input parameters.
     def import_krn(self):
-        # Allows user to search through his directory for kernel file.
+        """Import existing kernel tif."""
         file_types = [('TIFF Files', '*.tif'), ('All files', '*')]
         file_name = filedialog.askopenfilename(initialdir='/', title="Select file", filetypes=file_types)
         self.krn_ent_var.set(file_name)
 
-    # Selects the skyglow map output folder for hemisphere
     def import_sgmap_folder(self):
+        """Import skyglow map folder for hemisphere building."""
         sgmap_dir = filedialog.askdirectory(initialdir='/', title="Select skyglow map folder")
         self.sgmap_folder_var.set(sgmap_dir)
 
@@ -285,6 +268,7 @@ class SkyglowEstimationToolbox:
             print('Directory is empty.')
 
     def sng_popup(self):
+        """Single map tab."""
         self.remove_all()
 
         self.check_lbl.grid(column=0, row=2)
@@ -309,6 +293,7 @@ class SkyglowEstimationToolbox:
         self.map_btn.grid(column=1, columnspan=3, row=5, sticky=N+S+E+W)
 
     def krn_popup(self):
+        """Kernel lib tab."""
         self.remove_all()
 
         # latitude
@@ -334,26 +319,8 @@ class SkyglowEstimationToolbox:
 
         self.gen_krn_btn.grid(column=1, columnspan=3, row=5, sticky=N+S+E+W)
 
-    def hem_popup(self):
-        self.remove_all()
-
-        # Skyglow Map Folder
-        self.sgmap_folder_lbl.grid(column=0, row=1)
-        self.sgmap_folder_log.grid(column=1, columnspan=3, row=1)
-        self.sgmap_folder_btn.grid(column=4, row=1, sticky=W, padx=3)
-
-        # Latitude entry
-        self.lat_lbl.grid(column=0, row=3)
-        self.lat_entry.grid(column=1, row=3)
-
-        # Longitude entry
-        self.lon_lbl.grid(column=2, row=3)
-        self.lon_entry.grid(column=3, row=3)
-
-        # Generate Hemispherical Visualization button
-        self.hem_gen_btn.grid(column=1, columnspan=3, row=4, sticky=N+S+E+W)
-
     def mul_popup(self):
+        """Multiple maps tab."""
         self.remove_all()
 
         # Kernel folder location
@@ -374,7 +341,28 @@ class SkyglowEstimationToolbox:
         # Generate map from kernel folder
         self.mul_map_btn.grid(column=1, columnspan=3, row=4, sticky=N+S+E+W)
 
+    def hem_popup(self):
+        """Hemisphere tab."""
+        self.remove_all()
+
+        # Skyglow Map Folder
+        self.sgmap_folder_lbl.grid(column=0, row=1)
+        self.sgmap_folder_log.grid(column=1, columnspan=3, row=1)
+        self.sgmap_folder_btn.grid(column=4, row=1, sticky=W, padx=3)
+
+        # Latitude entry
+        self.lat_lbl.grid(column=0, row=3)
+        self.lat_entry.grid(column=1, row=3)
+
+        # Longitude entry
+        self.lon_lbl.grid(column=2, row=3)
+        self.lon_entry.grid(column=3, row=3)
+
+        # Generate Hemispherical Visualization button
+        self.hem_gen_btn.grid(column=1, columnspan=3, row=4, sticky=N+S+E+W)
+
     def remove_all(self):
+        """Remove all existing GUI elements before opening new tab."""
         self.check_lbl.grid_remove()
         self.krn_chk.place_forget()
         self.hem_chk.place_forget()
@@ -414,8 +402,8 @@ class SkyglowEstimationToolbox:
         self.sgmap_folder_log.grid_remove()
         self.sgmap_folder_btn.grid_remove()
 
-    # Changes interface based on whether Kernel Checkbutton is selected.
     def checkbtn_val(self):
+        """Change interface based on if Import Kernel button is checked."""
         # Import Kernel File widgets when Kernel Checkbutton is marked.
         if self.krn_var.get():
             self.lat_lbl.grid_remove()
@@ -446,13 +434,14 @@ class SkyglowEstimationToolbox:
             self.azi_entry.grid(column=3, row=4)
             self.krn_chk.place_forget()
             self.krn_chk.place(relx=0.22, rely=.41, anchor=CENTER)
-    # Simple function for opening URLs.
+
     @staticmethod
     def open_url(url):
+        """"Open a url"""
         webbrowser.open_new(url)
 
-    # Opens an instruction window that guides the user through the inputs.
     def instructions(self):
+        """Open instructions window."""
         # Instantiates separate Toplevel instruction window.
         instr_window = Toplevel(self.root)
         instr_window.geometry('550x575+25+25')
@@ -481,8 +470,11 @@ class SkyglowEstimationToolbox:
         instr.pack()
         instr_scroll.config(command=instr.yview)
 
-    # Opens an about window that gives authors, SET version number, and icon credit.
     def about(self):
+        """Open an about window.
+
+        Window gives authors, SET version number, and icon credit.
+        """
         # Instantiates a new Toplevel about window.
         about_window = Toplevel(self.root)
         about_window.geometry('350x335+25+25')
@@ -497,8 +489,8 @@ class SkyglowEstimationToolbox:
         about.tag_config("abt", font='Times 10 bold', justify=CENTER)
         about.pack()
 
-    # Constructs a progress window to monitor darkskypy.
     def progress(self):
+        """Construct a progress window to monitor darksky."""
         # Instantiates a new Toplevel window and frame for progress bar and loading log.
         prg_window = Toplevel(self.root)
         prg_window.geometry('650x325+250+250')
@@ -530,17 +522,18 @@ class SkyglowEstimationToolbox:
         sys.stderr = StderrRedirector(self.prg_log)
         prg_lbl_txt.set("Start time: " + str(time.asctime()))
 
-    # Updates progress window to prevent it from freezing.
     def update_progress(self):
+        """Update progress window to prevent it from freezing."""
         self.prg_log.update()
+        # if only one thread exists, stop progress bar
         if len(threading.enumerate()) == 1:
             self.prg_bar.stop()
         else:
             self.prg_bar.start()
         self.root.after(1000, self.update_progress)
 
-    # Generates artificial skyglow map based on VIIRS reference and local parameters.
     def generate_map(self):
+        """Call darksky.sgmapper in background thread."""
         # Acquires input arguments.
         lat_in, k_in, zen_in, azi_in, file_in, krn_file_in = 0, 0, 0, 0, '', ''
         if self.krn_var.get():
@@ -562,8 +555,8 @@ class SkyglowEstimationToolbox:
         p_thread.start()
         t_thread.start()
 
-    # Generate Kernels
     def generate_krn(self):
+        """Start kernel generation in background threads."""
         # Acquires input arguments
         csv_in, file_in, lat_in, k_in, hem = '', '', 0, 0, False
         csv_in = self.csv_file_var.get()
@@ -587,8 +580,8 @@ class SkyglowEstimationToolbox:
 
             t_thread.start()
 
-    # Generate Multi Map from Kernel Library
     def generate_mmap(self):
+        """Start brightness map creation from kernels."""
         # Acquires input arguments
         krn_folder_in, file_in, output_in, = '', '', ''
         krn_folder_in = self.krn_folder_var.get()
@@ -605,8 +598,8 @@ class SkyglowEstimationToolbox:
         p_thread.start()
         t_thread.start()
 
-    #Generate Hemispherical Visualization of data from Skyglow map folder
     def generate_hem(self):
+        """Generate hemisphere."""
         sgmap_folder_in, lat_in, lon_in, = '', 0, 0
         sgmap_folder_in = self.sgmap_folder_var.get()
         lat_in = float(self.lat_entry.get())
@@ -614,8 +607,8 @@ class SkyglowEstimationToolbox:
         darksky.generate_hem(lat_in, lon_in, sgmap_folder_in)
 
 
-# Redirects formatted lines from the log file to a widget.
 class LogRedirector(logging.Handler):
+    """Class that redirects formatted lines from the log file to a widget."""
     def __init__(self, widget):
         logging.Handler.__init__(self)
         self.widget = widget
@@ -628,6 +621,7 @@ class LogRedirector(logging.Handler):
 
 
 class StderrRedirector(object):
+    """Class that redirects errors to a widget."""
     def __init__(self, widget):
         self.widget = widget
 

@@ -1,9 +1,10 @@
 import unittest
 from math import pi
+
 from numpy import array, tile, transpose, array_equal, arcsin, sin, cos, sqrt
 
-from darksky import (gauss_earth_curvature_radius, sgmapper,
-                       create_latlon_arrays, create_beta)
+from skyglow.darksky import (gauss_earth_curvature_radius, sgmapper,
+                             create_latlon_arrays, create_beta)
 
 
 class TestGaussianEarthCurvatureRadius(unittest.TestCase):

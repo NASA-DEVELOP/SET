@@ -1,13 +1,19 @@
-from osgeo import gdal
-from matplotlib import pyplot as plt
-from scipy.stats import spearmanr
-
 import os
 import glob
 import ntpath
 
+from osgeo import gdal
+from matplotlib import pyplot as plt
+from scipy.stats import spearmanr
 
 def validate(lat, lon, groundtruth_file, skyglow_folder):
+    """Validate skyglow map data with NPS ground truth hemispherical data.
+
+    lat (float): NPS data latitude
+    lon (float): NPS data longitude
+    groundtruth_file (str): path to NPS hemisphere data
+    skyglow_folder (str): path to skyglow map folder
+    """
     groundtruth_raster = gdal.Open(groundtruth_file)
     gt_transform = groundtruth_raster.GetGeoTransform()
     gt_data = groundtruth_raster.ReadAsArray()
@@ -17,6 +23,7 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
     gt_vals, vals = [], []
     skyglow_search = os.path.join(skyglow_folder, '*.tif')
     skyglow_tifs = glob.glob(skyglow_search)
+    # extract values at lat/lon point for each angle (determined by map file name)
     for tif_name in skyglow_tifs:
         tif_name = ntpath.basename(tif_name)
         args_split = tif_name.split('_')
@@ -42,9 +49,9 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         val = data[row][col]
         vals.append(val)
         print(gt_val, val)
-    print(gt_vals, vals)
     print(spearmanr(gt_vals, vals))
 
+    # draw correlation scatterplot
     fig, ax = plt.subplots()
     ax.set_axisbelow(True)
     ax.grid(linestyle='-', linewidth='0.5', color='gray')
@@ -52,6 +59,3 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
     plt.xlabel('NPS units')
     plt.ylabel('SET units')
     plt.show()
-
-validate(30.31682, -87.26236, 'GroundTruth/anthlightmags_sphere.tif',
-    'GI_skyglow')
