@@ -420,6 +420,7 @@ def generate_hem(lat, lon, skyglow_folder):
             val = data[row][col]
         except:
             raise ValueError("Latitude/longitude must be within bounds of skyglow map.")
+        # remove anomalous values near azimuth 180 (why is it happening?)
         if azimuth == 180 or azimuth == -180:
             val = 0
         vals.append(val)
@@ -449,6 +450,33 @@ def generate_hem(lat, lon, skyglow_folder):
             z_hammer[row, mask] = interp(flatnonzero(mask), flatnonzero(~mask), z_hammer[row, ~mask])
 
     # draw the resulting figure
+    # UNCOMMENT BELOW TO USE NPS CUSTOM HEMISPHERE COLORMAP (ALSO DELETE CMAP VARIABLE)
+    #RGB values originally from magnitudes.lyr
+    # colormap_file = 'colormap_magnitudeslyr.txt'
+    # mag_start, mag_end, R, G, B = np.loadtxt(colormap_file).T    #RGB in 0-255 scale
+    #
+    # #color positions in 0-1 scale
+    # mag_range = mag_start[-1]-mag_start[0]
+    # mag_percent = (mag_start-mag_start[0])/mag_range
+    #
+    # #RGB values in 0-1 scale
+    # R /= 255.
+    # G /= 255.
+    # B /= 255.
+    #
+    # #color map lists
+    # red = []; green = []; blue = []
+    # for i in range(len(mag_start)):
+    #     red.append((mag_percent[i],R[i],R[i]))
+    #     green.append((mag_percent[i],G[i],G[i]))
+    #     blue.append((mag_percent[i],B[i],B[i]))
+    #
+    # #declare color map setting
+    # cdict = {'red':red,'green':green,'blue':blue}
+    #
+    # #register the color map
+    # plt.register_cmap(name='NPS_mag', data=cdict)
+
     fig = plt.figure(1, figsize=(10, 6), dpi=100)
     ax = fig.add_subplot(111)
     ax.set_facecolor('white')
