@@ -491,12 +491,12 @@ class SkyglowEstimationToolbox:
     def progress(self):
         """Construct a progress window to monitor darksky."""
         # Instantiates a new Toplevel window and frame for progress bar and loading log.
-        prg_window = Toplevel(self.root)
-        prg_window.geometry('650x325+250+250')
-        prg_window.title('Generating Artificial Skyglow Map...')
-        prg_window.iconbitmap(constants.ICO)
-        prg_window.resizable(False, False)
-        prg_frame = Frame(prg_window)
+        self.prg_window = Toplevel(self.root)
+        self.prg_window.geometry('650x325+250+250')
+        self.prg_window.title('Generating Artificial Skyglow Map...')
+        self.prg_window.iconbitmap(constants.ICO)
+        self.prg_window.resizable(False, False)
+        prg_frame = Frame(self.prg_window)
         prg_frame.pack(fill=BOTH)
 
         # Creates Scrollbar, Progressbar, and Label for checking progress..
@@ -521,12 +521,17 @@ class SkyglowEstimationToolbox:
         sys.stderr = StderrRedirector(self.prg_log)
         prg_lbl_txt.set("Start time: " + str(time.asctime()))
 
+        self.no_progress = 0
+
     def update_progress(self):
         """Update progress window to prevent it from freezing."""
         self.prg_log.update()
-        # if only one thread exists, stop progress bar
+        # if only one thread exists, stop progress bar and close window
         if len(threading.enumerate()) == 1:
             self.prg_bar.stop()
+            self.no_progress += 1
+            if self.no_progress == 3:
+                self.prg_window.withdraw()
         else:
             self.prg_bar.start()
         self.root.after(1000, self.update_progress)
