@@ -6,19 +6,15 @@ from osgeo import gdal
 from matplotlib import pyplot as plt
 from scipy.stats import spearmanr
 import numpy as np
-from math import pi, pow
+from math import pi, pow, log10
 from sklearn.metrics import r2_score
 
-def mag_to_nl_dan(m):
-    """
-    Converting brightness from magnitude to nL according to Dan's script
-    Note: this is inconsistent to nL_to_mag()
-    """
-    return 34.08*np.exp(20.7233 - 0.92104 * m)
+def cdm2_to_mag(m):
+    """Convert candelas/m2 to mags/arc-second^2.
 
-def l_to_mcdm2(l):
-    """Convert lambert to microcandela per square meter."""
-    return l*pi*pow(10,8)
+    Formula taken from http://unihedron.com/projects/darksky/magconv.php
+    """
+    return log10(m/108000)/-0.4
 
 def validate(lat, lon, groundtruth_file, skyglow_folder):
     """Validate skyglow map data with NPS ground truth hemispherical data.
@@ -34,7 +30,7 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
     gt_x_origin, gt_y_origin = gt_transform[0], gt_transform[3]
     gt_px_width, gt_px_height = gt_transform[1], gt_transform[5]
 
-    gt_vals, vals = [], []
+    gt_vals, vals, deltas = [], [], []
     skyglow_search = os.path.join(skyglow_folder, '*.tif')
     skyglow_tifs = glob.glob(skyglow_search)
     # extract values at lat/lon point for each angle (determined by map file name)
@@ -45,8 +41,8 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         azimuth = float(args_split[4][:-4])
         altitude = abs(zenith - 90)
         print(zenith, azimuth, altitude)
-        # if zenith == 80 and (azimuth == 180 or azimuth == -180):
-        #     continue
+
+        # get NPS ground truth value
         gt_row = int((altitude - gt_y_origin) / gt_px_height)
         gt_col = int((azimuth - gt_x_origin) / gt_px_width)
         gt_val = gt_data[gt_row][gt_col]
@@ -58,6 +54,7 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         print(gt_val, gt_val_nL, gt_val_mcd)
         gt_vals.append(gt_val_mcd)
 
+        # get SET value
         raster = gdal.Open(os.path.join(skyglow_folder, tif_name))
         transform = raster.GetGeoTransform()
         data = raster.ReadAsArray()
@@ -66,18 +63,27 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         row = int((lat - y_origin) / px_height)
         col = int((lon - x_origin) / px_width)
         val = data[row][col]
-        vals.append(val)
-        print(gt_val_mcd - val)
+        val_cdm2 = val*pow(10,-6)  # convert from microcandelas to candelas
+        val_mag = cdm2_to_mag(val_cdm2)  # convert to mags to compare units
+        vals.append(val_mag)
+
+        delta = gt_val - val_mag
+        deltas.append(delta)
+        print(gt_val, val_mag, delta)
+
+    # goodness of fit scores
     print(spearmanr(gt_vals, vals))
     print('R-Squared result('+str(r2_score(gt_vals, vals))+')')
+    print('Average delta('+str(np.mean(deltas))+')')
 
     # draw correlation scatterplot
     fig, ax = plt.subplots()
     ax.set_axisbelow(True)
     ax.grid(linestyle='-', linewidth='0.5', color='gray')
     plt.scatter(x=gt_vals, y=vals, c='r', s=15)
-    plt.xlabel('NPS units')
-    plt.ylabel('SET units')
+    plt.xlabel('NPS')
+    plt.ylabel('SET')
     plt.show()
 
-validate(30.31682, -87.26236, 'GroundTruth/anthlightmags_sphere.tif', 'GI_skyglow_179/')
+# Validation on Gulf Islands National Seashore example
+# validate(30.31682, -87.26236, 'GroundTruth/anthlightmags_sphere.tif', 'GI_skyglow/')
