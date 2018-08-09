@@ -158,7 +158,20 @@ def main():
 
     # Genrate hemisphere from existing skyglow map library
     elif action == "hemisphere":
-        raise NotImplementedError("Hemisphere feature not passed through code release")
+        try:
+            la = float(sys.argv[2])
+        except:
+            raise ValueError("Latitude argument must be a number")
+        try:
+            lon = float(sys.argv[3])
+        except:
+            raise ValueError("Longitude argument must be a number")
+        try:
+            skyglowfolder = os.abspath(sys.argv[3])
+        except:
+            raise ValueError("Skyglow map folder must be specified")
+
+        generate_hem(la, lon, skyglowfolder)
 
     else:
         raise ValueError("No action/incorrect action given. Choose ""sgmap_single"", ""kernel_lib"", or ""sgmap_multiple""")

@@ -128,7 +128,8 @@ class SkyglowEstimationToolbox:
         self.sgmap_single_btn.grid(column=0,columnspan=1, row=0)
         self.krn_lib_btn.grid(column=1, columnspan=1, row=0)
         self.multi_map_btn.grid(column=2, columnspan=1, row=0)
-        
+        self.hem_map_btn.grid(column=3, columnspan=1, row=0)
+
         # VIIRS Image Reference File
         self.file_lbl = Label(self.input_frame, text="Image File:", width=lbl_width, anchor=E)
         self.file_log = Entry(self.input_frame, width=file_width, bd=2, relief="sunken",
