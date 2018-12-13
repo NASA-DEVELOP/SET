@@ -49,7 +49,10 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         while gt_val < -1000:
             gt_col = gt_col + 1 if azimuth < 0 else gt_col - 1
             gt_val = gt_data[gt_row][gt_col]
-        gt_vals.append(gt_val)
+        gt_val_nL = mag_to_nl_dan(gt_val)
+        gt_val_mcd = l_to_mcdm2(gt_val_nL*pow(10,-9))
+        print(gt_val, gt_val_nL, gt_val_mcd)
+        gt_vals.append(gt_val_mcd)
 
         # get SET value
         raster = gdal.Open(os.path.join(skyglow_folder, tif_name))

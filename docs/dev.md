@@ -1,10 +1,10 @@
 # Development tips
 
-If you want to work on SET's source code we suggest `pip install -e skyglow/`, so the package tracks code changes.
-Use version control as the project is on Github already.
-Install a PEP8 linter like `pip install pep8ify`. This is a  development dependency and should not be included in `geospatial.yml`, the conda environment file.
-Add unit tests to `skyglow/skyglow/test.py` and test with `python -m unittest skyglow.test` from inside the outer skyglow folder.
-To do validation with NPS data, `skyglow/skyglow/validation.py` contains all the functions necessary to convert from SET units (microcandelas/m^2) to NPS units (magnitudes/arc second^2) and do a validation on the datasets. Make sure you've generated skyglow maps for the angles you want to compare. __!!!__ NPS data is in a strange format, so import first into ArcMap and Project Raster (to something like Authalic Sphere). Save that raster as a `.tif` and that's the input for validation.
+- If you want to work on SET's source code we suggest `pip install -e skyglow/`, so the package tracks code changes.
+- Use version control as the project is on Github already.
+- Install a PEP8 linter like `pip install pep8ify`. This is a  development dependency and should not be included in `geospatial.yml`, the conda environment file.
+- Add unit tests to `skyglow/skyglow/test.py` and test with `python -m unittest skyglow.test` from inside the outer skyglow folder.
+- To do validation with NPS data, `skyglow/skyglow/validation.py` contains all the functions necessary to convert from SET units (microcandelas/m^2) to NPS units (magnitudes/arc second^2) and do a validation on the datasets. Make sure you've generated skyglow maps for the angles you want to compare. __!!!__ NPS data is in a strange format, so import first into ArcMap and Project Raster (to something like Authalic Sphere). Save that raster as a `.tif` and that's the input for validation.
 
 ---
 

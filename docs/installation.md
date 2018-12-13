@@ -5,7 +5,7 @@ __Dependencies__:
 - Python >= 2.7
 
 ---
-1. `git clone https://`<span style="color:red">username</span>`@bitbucket.org/usnightskies/set.git`
+1. `git clone https://github.com/NASA-DEVELOP/SET.git`
 2. `cd set`
 3. `conda env create -f geospatial.yml`
 4. `source activate geospatial` or `activate geospatial`

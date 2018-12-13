@@ -46,7 +46,13 @@ def main():
     if args.action == 'gui':
         skyglow.main()
     elif args.action == 'hemisphere':
-        raise NotImplementedError("Hemisphere feature not passed through code release")
+        if not args.latitude:
+          raise ValueError('Latitude is required for hemisphere')
+        if not args.longitude:
+          raise ValueError('Longitude is required for hemisphere')
+        if not args.skyglow_folder:
+          raise ValueError('Skyglow folder path is required for hemisphere')
+        darksky.generate_hem(args.latitude, args.longitude, args.skyglow_folder)
     else:
         if not args.viirs_file:
             raise ValueError('VIIRS file path is required for sgmap_single, kernel_lib, sgmap_multiple actions')

@@ -4,13 +4,13 @@ sensor.
 
 References:
 (1) Falchi, F., P. Cinzano, D. Duriscoe, C.C.M. Kyba, C.D. Elvidge, K. Baugh, B.A. Portnov, N.A.
-	  Rybnikov and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness.
-	  Sci. Adv. 2.
+          Rybnikov and R. Furgoni, 2016. The new workd atlas of artificial night sky brightness.
+          Sci. Adv. 2.
 (2) Cinzano, P., F. Falchi, C.D. Elvidge and  K.E. Baugh, 2000. The artificial night sky
-	  brightness mapped from DMSP satellite Operational Linescan System measurements. Mon.
-	  Not. R. Astron. Soc. 318.
+          brightness mapped from DMSP satellite Operational Linescan System measurements. Mon.
+          Not. R. Astron. Soc. 318.
 (3) Garstang, R.H., 1989. Night-sky brightness at observatories and sites. Pub. Astron. Soc.
-	  Pac. 101.
+          Pac. 101.
 """
 
 from __future__ import division
@@ -158,7 +158,20 @@ def main():
 
     # Genrate hemisphere from existing skyglow map library
     elif action == "hemisphere":
-        raise NotImplementedError("Hemisphere feature not passed through code release")
+        try:
+            la = float(sys.argv[2])
+        except:
+            raise ValueError("Latitude argument must be a number")
+        try:
+            lon = float(sys.argv[3])
+        except:
+            raise ValueError("Longitude argument must be a number")
+        try:
+            skyglowfolder = os.abspath(sys.argv[3])
+        except:
+            raise ValueError("Skyglow map folder must be specified")
+
+        generate_hem(la, lon, skyglowfolder)
 
     else:
         raise ValueError("No action/incorrect action given. Choose ""sgmap_single"", ""kernel_lib"", or ""sgmap_multiple""")
@@ -366,6 +379,159 @@ def multisgmapper(filein, krnfolder, outfolder):
         sgarr, new_transform = subset_to_200km(sgarr, krnarr, filein)
         # Write skyglow to a geotiff
         array_to_geotiff(sgarr, sgfile, filein, new_transform)
+
+def generate_hem(lat, lon, skyglow_folder):
+    """Generate skyglow hemisphere for observation point within skyglow map.
+
+    Hemisphere is generated from multiple skyglow maps at same region, each map
+    being for a different viewing angle. The value for each angle is taken from
+    a skyglow map and the hemisphere is built by interpolating between the
+    extracted values. There is a minimum number of values (hence maps) that need
+    to exist for proper interpolation.
+
+    lat (float): observation point latitude
+    lon (float): observation point longitude
+    skyglow_folder (str): path to folder with skyglow maps
+    """
+    if abs(lat) > 90:
+        raise ValueError("Latitude must be between -90 and 90 degrees")
+    zen, azi, vals = [], [], []
+    # list all tiff files in skyglow_folder (that start with skyglow)
+    skyglow_search = os.path.join(skyglow_folder,'skyglow*.tif')
+    skyglow_tifs = glob.glob(skyglow_search)
+    for tif_name in skyglow_tifs:
+        # extract zenith/azimuth from tif name
+        tif_name = ntpath.basename(tif_name)
+        args_split = tif_name.split('_')
+        zenith = float(args_split[3])
+        azimuth = float(args_split[4][:-4])
+        zen.append(zenith)
+        azi.append(azimuth)
+
+        # open tif, read as array, and extract pixel value
+        raster = gdal.Open(os.path.join(skyglow_folder, tif_name))
+        transform = raster.GetGeoTransform()
+        data = raster.ReadAsArray()
+        x_origin, y_origin = transform[0], transform[3]
+        px_width, px_height = transform[1], transform[5]
+        row = int((lat - y_origin)/px_height)
+        col = int((lon - x_origin)/px_width)
+        try:
+            val = data[row][col]
+        except:
+            raise ValueError("Latitude/longitude must be within bounds of skyglow map.")
+        # remove anomalous values near azimuth 180 (why is it happening?)
+        if azimuth == 180 or azimuth == -180:
+            val = 0
+        vals.append(val)
+        print(zenith, azimuth, val)
+
+    # I chose Rbf as the interpolator because of https://stackoverflow.com/a/37872172
+    interpolator = interpolate.Rbf(azi, zen, vals, function='cubic')
+    azinew = arange(-180, 181, 1)
+    zennew = arange(0, 81, 1)
+    azi_dense, zen_dense = meshgrid(linspace(-180, 180, 360), linspace(0, 80, 80))
+    z_dense = interpolator(azi_dense, zen_dense)
+
+    # convert zenith,azimuth, and values in square grid to Hammer projection
+    lat = abs(subtract(zen, 90))
+    x_hammer, y_hammer = to_hammer_xy(lat, azi)
+    y_hammer = subtract(abs(subtract(y_hammer, 90)), 10)
+    z_hammer = to_hammer_z(z_dense)
+
+    # fill in nan values within hemisphere (but only inside) if any exist
+    for row in range(z_hammer.shape[0]):
+        ind = where(~isnan(z_hammer[row]))[0]
+        if ind.size != 0:
+            first, last = ind[0], ind[-1]
+            mask = isnan(z_hammer[row,:])
+            mask[:first] = 0
+            mask[last:] = 0
+            z_hammer[row, mask] = interp(flatnonzero(mask), flatnonzero(~mask), z_hammer[row, ~mask])
+
+    # draw the resulting figure
+    # UNCOMMENT BELOW TO USE NPS CUSTOM HEMISPHERE COLORMAP (ALSO DELETE CMAP VARIABLE)
+    #RGB values originally from magnitudes.lyr
+    # colormap_file = 'colormap_magnitudeslyr.txt'
+    # mag_start, mag_end, R, G, B = np.loadtxt(colormap_file).T    #RGB in 0-255 scale
+    #
+    # #color positions in 0-1 scale
+    # mag_range = mag_start[-1]-mag_start[0]
+    # mag_percent = (mag_start-mag_start[0])/mag_range
+    #
+    # #RGB values in 0-1 scale
+    # R /= 255.
+    # G /= 255.
+    # B /= 255.
+    #
+    # #color map lists
+    # red = []; green = []; blue = []
+    # for i in range(len(mag_start)):
+    #     red.append((mag_percent[i],R[i],R[i]))
+    #     green.append((mag_percent[i],G[i],G[i]))
+    #     blue.append((mag_percent[i],B[i],B[i]))
+    #
+    # #declare color map setting
+    # cdict = {'red':red,'green':green,'blue':blue}
+    #
+    # #register the color map
+    # plt.register_cmap(name='NPS_mag', data=cdict)
+
+    fig = plt.figure(1, figsize=(10, 6), dpi=100)
+    ax = fig.add_subplot(111)
+    ax.set_facecolor('white')
+    cmap = cm.rainbow
+    cmap.set_bad('white',1)
+    cax = ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
+    cbar = fig.colorbar(cax, ticks=[nanmin(z_hammer), (nanmax(z_hammer)-nanmin(z_hammer))/2, nanmax(z_hammer)], orientation='horizontal')
+    cbar.set_label('Sky brightness')
+    cbar.ax.set_xticklabels(['Low', 'Medium', 'High'])  # horizontal colorbar
+    ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
+    plt.show()
+
+def to_hammer_xy(lat, lon):
+    """Convert geographic point to Hammer projection.
+
+    Based directly on formulas in https://en.wikipedia.org/wiki/Hammer_projection
+
+    lat (float): latitude of point
+    lon (float): longitude of point
+    """
+    lat_rad = abs(multiply(lat, pi/180))
+    lon_rad = multiply(lon, pi/180)
+    denominator = sqrt(1+cos(lat_rad)*cos(lon_rad/2))
+    x = (2*sqrt(2)*cos(lat_rad)*sin(lon_rad/2))/denominator
+    y = (sqrt(2)*sin(lat_rad))/denominator
+    return rint(multiply(x, 180/pi)), rint(multiply(y, 180/pi))
+
+def to_hammer_z(values):
+    """Convert 2d grid (matrix) to Hammer projection.
+
+    Moves the values within the matrix to make a hemisphere shape.
+    Based directly on formulas in https://en.wikipedia.org/wiki/Hammer_projection
+
+    values (array): 2D numpy array of values
+    """
+    vals_shape = values.shape
+    new_values = empty(vals_shape)  # create array to fill with values in new places
+    new_values[:] = nan
+    for i in range(vals_shape[0]):
+        lat_rad = abs(i-90)*pi/180
+        for j in range(vals_shape[1]):
+            lon_rad = (j-180)*pi/180
+
+            # project from lat/lon to x/y in Hammer
+            denominator = sqrt(1+cos(lat_rad)*cos(lon_rad/2))
+            x = (2*sqrt(2)*cos(lat_rad)*sin(lon_rad/2))/denominator
+            y = (sqrt(2)*sin(lat_rad))/denominator
+
+            # convert back from rads to degrees
+            x = int(round(x*180/pi)) + 180
+            y = int(abs(round(y*180/pi) - 90))
+
+            # set value in new array in appropriate place
+            new_values[y,x] = values[i,j]
+    return new_values
 
 def convolve_viirs_to_skyglow(dnbarr, proparr):
     """Convolve VIIRS DNB with light propagation kernel.
