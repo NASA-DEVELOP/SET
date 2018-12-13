@@ -2,7 +2,7 @@
 ### Date Created: 3/10/2017
 ### Date Last Updated: 7/31/2018
 
-The Skyglow Estimation Toolbox (SET) is a command-line tool for estimating artificial skyglow in regions using remote sensing data.
+The Skyglow Estimation Toolbox (SET) is a command-line tool for estimating artificial skyglow in regions using remote sensing data.<br>
 Authors: Charles McClay, Julia Hink, Tyler Jameson, Maximilian Ioffe, Ryan Avery, Stanley Yu, Veronica Warda, Dr. Kenton Ross
 
 [Installation instructions](https://github.com/NASA-DEVELOP/SET/blob/master/docs/installation.md)<br>
