@@ -688,6 +688,12 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Create latitude/longitude arrays
     source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cenlat, p_rad)
 
+    #logger.info('file path: {}'.format(fin))
+    #source_lat_path = 'source_lat_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
+    # array_to_geotiff(source_lat, source_lat_path, fin)
+    # rltv_long_path = 'rltv_long_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
+    # array_to_geotiff(rltv_long, rltv_long_path, fin)
+    
     # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
     # using haversine formula
     D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
