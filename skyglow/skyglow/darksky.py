@@ -731,7 +731,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
 
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
     # l_OC and D_OC are similar as expected
-    l_OC = sqrt(4.0*R_T**2.0*sin(Chi/2.0)**2.0) # km
+    l_OC = sqrt(4.0*(R_T**2.0)*((sin(Chi/2.0))**2.0)) # km
 
     # q1, Intermediate quantity, REF 2, Appendix A (A1), p. 656, **WITH CORRECTION FROM REF 3, eq. 6, p. 308**
     q1 = R_T*(sin(Chi)*sin(zen)*cos(beta) + cos(Chi)*cos(zen) - cos(zen)) # km
@@ -821,11 +821,18 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
             results_packed = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
                                                l_OC[ii][jj], theta[ii][jj],
                                                beta[ii][jj], zen, ubr, k_am)
-            PropSumArray[ii][jj] = results_packed["total_sum"]
-            debug_fsumsingle_max[ii][jj] = results_packed["max"]
-            debug_fsumsingle_min[ii][jj] = results_packed["min"]
-            debug_fsumsingle_u0val[ii][jj] = results_packed["u0_val"]
-            if (ii == 0 and jj==0):
+            if abs(results_packed["total_sum"] - 88888) < 0.1:
+                PropSumArray[ii][jj] = NaN
+                debug_fsumsingle_max[ii][jj] = NaN
+                debug_fsumsingle_min[ii][jj] = NaN
+                debug_fsumsingle_u0val[ii][jj] = NaN
+            else:
+                PropSumArray[ii][jj] = results_packed["total_sum"]
+                debug_fsumsingle_max[ii][jj] = results_packed["max"]
+                debug_fsumsingle_min[ii][jj] = results_packed["min"]
+                debug_fsumsingle_u0val[ii][jj] = results_packed["u0_val"]
+
+            if (ii == kerdim[0]/2 and jj== kerdim[1]/2):
                 print("PropSumArray_val: " + str(PropSumArray[ii][jj]) + "max: " + str(debug_fsumsingle_max[ii][jj]) + "min: " + str(debug_fsumsingle_min[ii][jj]) + "u0_val: " + str(debug_fsumsingle_u0val[ii][jj]))
 
     time_kern = time.time() - start
@@ -932,8 +939,20 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     """Calculate total light propagation at an observation site along a viewing
     angle vector.
     """
-    #if isnan(l_OC):
-    #    return nan
+    return_dict = {
+        "total_sum": 99999,
+        "max": 99999,
+        "min": 99999,
+        "u0_val": 99999
+    }
+
+    if isnan(l_OC):
+        return_dict["total_sum"] = 88888
+        return_dict["max"] = 88888
+        return_dict["min"] = 88888
+        return_dict["max"] = 88888
+        return return_dict
+        #print("L_OC ERROR: R_T:" + str(R_T) + "Chi: " + str(Chi))
 
     # Scattering distance increment for finite integration over u (km)
     del_u0 = del_u_farg
@@ -984,12 +1003,6 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
     # loop counter
     lc = 1
-    return_dict = {
-        "total_sum": 99999,
-        "max": 99999,
-        "min": 99999,
-        "u0_val": 99999
-    }
 
     while u_OQ < 30.0: # df_prop > stability_limit*total_sum:
         # START OF "u" LOOP
