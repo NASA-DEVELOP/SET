@@ -693,7 +693,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # array_to_geotiff(source_lat, source_lat_path, fin)
     # rltv_long_path = 'rltv_long_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
     # array_to_geotiff(rltv_long, rltv_long_path, fin)
-    
+
     # Distance from source (C) to observation site (O) along ellipsoid surface, REF 2, Fig. 6, p. 648
     # using haversine formula
     D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
@@ -759,12 +759,15 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
                 logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
                             zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
             for jj in range(kerdim[1]):
-                PropSumArrayleft[ii][jj] = fsum_single(R_T, Chileft[ii][jj],
+                return1, return2 = fsum_single(R_T, Chileft[ii][jj],
                                                        u0left[ii][jj],
                                                        l_OCleft[ii][jj],
                                                        thetaleft[ii][jj],
                                                        betaleft[ii][jj],
                                                        zen, ubr, k_am)
+                if (ii == 0 and jj==0):
+                    print("return1: " + return1))
+                #PropSumArrayleft[ii][jj]
 
         time_kern = time.time() - start
         logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -806,9 +809,12 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
                 logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
                             zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
             for jj in range(kerdim[1]):
-                PropSumArray[ii][jj] = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
+                return1, return2 = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
                                                    l_OC[ii][jj], theta[ii][jj],
                                                    beta[ii][jj], zen, ubr, k_am)
+            #PropSumArray[ii][jj]
+                if (ii == 0 and jj==0):
+                    print("return1: " + return1))
 
         time_kern = time.time() - start
         logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -1084,7 +1090,11 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         u_OQ += del_u
     if total_sum > 1:
         print('break!')
-    return total_sum
+    test_return = int(8)
+    test_return2 = int(10)
+    #print("test_return_in_fsumsingle:" + str(test_return))
+    #print("total_sum: " + str(total_sum))
+    return test_return1, test_return2
 
 def array_to_geotiff(array, outfilename, referenceVIIRS, new_trans = None):
     """Save numpy array as a geotiff.
