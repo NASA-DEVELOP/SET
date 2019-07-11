@@ -826,7 +826,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
             debug_fsumsingle_min[ii][jj] = results_packed["min"]
             debug_fsumsingle_u0val[ii][jj] = results_packed["u0_val"]
             if (ii == 0 and jj==0):
-                print("return1: " + str(PropSumArray[ii][jj]) + "return2: " + str(debug_fsumsingle_max[ii][jj]))
+                print("PropSumArray_val: " + str(PropSumArray[ii][jj]) + "max: " + str(debug_fsumsingle_max[ii][jj]) + "min: " + str(debug_fsumsingle_min[ii][jj]) + "u0_val: " + str(debug_fsumsingle_u0val[ii][jj]))
 
     time_kern = time.time() - start
     logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -1116,17 +1116,17 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
         #assign debugging values
         #may want to have more values later in the dictionary
-        if return_dict["max"] == 99999:
+        if abs(return_dict["max"]- 99999) < 0.1:
             return_dict["max"] = df_prop
             return_dict["u0_val"] = df_prop
         else:
-            if df_prop > return_dict["max"]:
+            if df_prop*pow(10,14) > (return_dict["max"])*pow(10,14):
                 return_dict["max"] = df_prop
 
-        if return_dict["min"] == 99999:
+        if abs(return_dict["min"] - 99999) < 0.1:
             return_dict["min"] = df_prop
         else:
-            if df_prop < return_dict["min"]:
+            if df_prop*pow(10,14) < (return_dict["min"])*pow(10,14):
                 return_dict["min"] = df_prop
 
     if total_sum > 1:
