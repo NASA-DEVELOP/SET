@@ -275,21 +275,22 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
     # otherwise find complement angle and flip kernel if complementary kernel file exists
     else:
-        azimuth_complement = -azimuth
-        # complementary kernels do NOT exist for angles 0, 180, and -180
-        if abs(azimuth) != 180.0 and azimuth != 0.0:
-            azimuth_complement = -azimuth
-            azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
-            if os.path.isfile(azimuth_complement_outname):
-                logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
-                complement_kernel = gdal.Open(azimuth_complement_outname)
-                data = complement_kernel.ReadAsArray()
-                propkernel, totaltime = fliplr(data), 0
-            else:
-                propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-        # calculate if complementary does not exist
-        else:
-            propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        # azimuth_complement = -azimuth
+        # # complementary kernels do NOT exist for angles 0, 180, and -180
+        # if abs(azimuth) != 180.0 and azimuth != 0.0:
+        #     azimuth_complement = -azimuth
+        #     azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
+        #     if os.path.isfile(azimuth_complement_outname):
+        #         logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
+        #         complement_kernel = gdal.Open(azimuth_complement_outname)
+        #         data = complement_kernel.ReadAsArray()
+        #         propkernel, totaltime = fliplr(data), 0
+        #     else:
+        #         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        # # calculate if complementary does not exist
+        # else:
+        #     propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
     kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
     array_to_geotiff(propkernel, kerneltiffpath, filein)
     logger.info("time for prop function ({}, {}) ubreak 10: {}".format(zenith, azimuth, totaltime))
@@ -321,21 +322,22 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
         # otherwise find complement angle and flip kernel if complementary kernel file exists
         else:
-            azimuth_complement = -azimuth
-            # complementary kernels do NOT exist for angles 0, 180, and -180
-            if abs(azimuth) != 180.0 and azimuth != 0.0:
-                azimuth_complement = -azimuth
-                azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
-                if os.path.isfile(azimuth_complement_outname):
-                    logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
-                    complement_kernel = gdal.Open(azimuth_complement_outname)
-                    data = complement_kernel.ReadAsArray()
-                    propkernel, totaltime = fliplr(data), 0
-                else:
-                    propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
-            # calculate if complementary does not exist
-            else:
-                propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+            # azimuth_complement = -azimuth
+            # # complementary kernels do NOT exist for angles 0, 180, and -180
+            # if abs(azimuth) != 180.0 and azimuth != 0.0:
+            #     azimuth_complement = -azimuth
+            #     azimuth_complement_outname = outname.format(centerlat_arg, k_am_arg, zenith, azimuth_complement)
+            #     if os.path.isfile(azimuth_complement_outname):
+            #         logger.info("Found azimuth complement ({}) kernel, flipping instead of generation".format(azimuth_complement))
+            #         complement_kernel = gdal.Open(azimuth_complement_outname)
+            #         data = complement_kernel.ReadAsArray()
+            #         propkernel, totaltime = fliplr(data), 0
+            #     else:
+            #         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+            # # calculate if complementary does not exist
+            # else:
+            #     propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+            propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
         logger.info("time for prop function ({}, {}) ubreak 10: {}".format(zenith, azimuth, totaltime))
@@ -665,6 +667,11 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     p_deg = .0041666667
     p_rad = p_deg*pi/180.0
 
+    # args in degree form
+    cenlat_deg = cenlat*(180/pi)
+    zen_deg = zen*(180/pi)
+    azi_deg = azi*(180/pi)
+
     # central latitude for estimation of the 2d propagation function
     logger.info('Central latitude (deg): {}'.format(cenlat*(180/pi)))
 
@@ -735,93 +742,105 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # simulates what a 180 degrees azimuth input would look like to the program to make sure that rounding errors dont prevent the if statement
     logger.info('azi, {}'.format(azi))
     azi_of_180 = float(180)*pi/180.0
-    if azi in {0.0, azi_of_180, -azi_of_180}:
-        # Get left arrays to cut processing time in half
-        Chileft = Chi[0:, 0:widthcenter]
-        u0left = u0[0:, 0:widthcenter]
-        l_OCleft = l_OC[0:, 0:widthcenter]
-        thetaleft = theta[0:, 0:widthcenter]
-        betaleft = beta[0:, 0:widthcenter]
-        PropSumArrayleft = zeros_like(l_OCleft)
-        kerdim = l_OCleft.shape
-        ker10per = kerdim[0]//10
+    # if azi in {0.0, azi_of_180, -azi_of_180}:
+    #     # Get left arrays to cut processing time in half
+    #     Chileft = Chi[0:, 0:widthcenter]
+    #     u0left = u0[0:, 0:widthcenter]
+    #     l_OCleft = l_OC[0:, 0:widthcenter]
+    #     thetaleft = theta[0:, 0:widthcenter]
+    #     betaleft = beta[0:, 0:widthcenter]
+    #     PropSumArrayleft = zeros_like(l_OCleft)
+    #     kerdim = l_OCleft.shape
+    #     ker10per = kerdim[0]//10
+    #
+    #     logger.info("Beginning kernel...")
+    #     start = time.time()
+    #
+    #     # 2d iteration for integrating from u0 to infinity to create propagation function for each element
+    #     #for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
+    #     #    p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am)
+    #
+    #     for ii in range(kerdim[0]):
+    #         if mod(ii, ker10per) == 0:
+    #             interm = time.time() - start
+    #             logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
+    #                         zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
+    #         for jj in range(kerdim[1]):
+    #             PropSumArrayleft[ii][jj], return2 = fsum_single(R_T, Chileft[ii][jj],
+    #                                                    u0left[ii][jj],
+    #                                                    l_OCleft[ii][jj],
+    #                                                    thetaleft[ii][jj],
+    #                                                    betaleft[ii][jj],
+    #                                                    zen, ubr, k_am)
+    #             if (ii == 0 and jj==0):
+    #                 print("return1: " + str(PropSumArrayleft[ii][jj]) + "return2: " + str(return2))
+    #
+    #     time_kern = time.time() - start
+    #     logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
+    #
+    #     # Mirror left side of kernel array to the right
+    #     PropSumArrayright = fliplr(PropSumArrayleft[:, 1:])
+    #
+    #     # Complete 2d propagation function by putting left and right together
+    #     PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
+    # else:
+    #     # debug checks for subset arrays
+    #     logger.debug('Problem Index Chi: %s', Chi[523, 470])
+    #     logger.debug('Chi: %s', Chi)
+    #     logger.debug('Problem Index u0: %s', u0[523, 470])
+    #     logger.debug('u0: %s', u0)
+    #     logger.debug('Problem Index l_OC: %s', l_OC[523, 470])
+    #     logger.debug('l_OC: %s', l_OC)
+    #     logger.debug('Problem Index theta: %s', theta[523, 470])
+    #     logger.debug('theta: %s', theta)
+    #     logger.debug('Surrounding Indices beta: %s', beta[522:525, 470])
+    #     logger.debug('Problem Index beta: %s', beta[523, 470])
+    #     logger.debug('beta: %s', beta)
 
-        logger.info("Beginning kernel...")
-        start = time.time()
+    # initialize for 2d iteration
+    PropSumArray = zeros_like(l_OC)
+    debug_fsumsingle_max = zeros_like(l_OC)
+    debug_fsumsingle_min = zeros_like(l_OC)
+    debug_fsumsingle_u0val = zeros_like(l_OC)
+    kerdim = l_OC.shape
+    ker10per = kerdim[0]//10
 
-        # 2d iteration for integrating from u0 to infinity to create propagation function for each element
-        #for p,c,u,l,t in itertools.izip(nditer(PropSumArrayleft, op_flags=['readwrite']),nditer(Chileft, op_flags=['readwrite']),nditer(u0left, op_flags=['readwrite']), nditer(l_OCleft, op_flags=['readwrite']),nditer(thetaleft, op_flags=['readwrite'])):
-        #    p[...] = fsum_single(R_T, c, u, l, t, 0.0, zen, ubr, k_am)
+    logger.info("Beginning kernel...")
+    start = time.time()
 
-        for ii in range(kerdim[0]):
-            if mod(ii, ker10per) == 0:
-                interm = time.time() - start
-                logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
-                            zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
-            for jj in range(kerdim[1]):
-                return1, return2 = fsum_single(R_T, Chileft[ii][jj],
-                                                       u0left[ii][jj],
-                                                       l_OCleft[ii][jj],
-                                                       thetaleft[ii][jj],
-                                                       betaleft[ii][jj],
-                                                       zen, ubr, k_am)
-                if (ii == 0 and jj==0):
-                    print("return1: " + return1))
-                #PropSumArrayleft[ii][jj]
+    # 2d iteration for integrating from u0 to infinity to create propagation function for each element
+    #for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(beta, op_flags=['readwrite'])):
+    #    p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am)
 
-        time_kern = time.time() - start
-        logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
+    for ii in range(kerdim[0]):
+        if mod(ii, ker10per) == 0:
+            interm = time.time() - start
+            logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
+                        zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
+        for jj in range(kerdim[1]):
+            results_packed = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
+                                               l_OC[ii][jj], theta[ii][jj],
+                                               beta[ii][jj], zen, ubr, k_am)
+            PropSumArray[ii][jj] = results_packed["total_sum"]
+            debug_fsumsingle_max[ii][jj] = results_packed["max"]
+            debug_fsumsingle_min[ii][jj] = results_packed["min"]
+            debug_fsumsingle_u0val[ii][jj] = results_packed["u0_val"]
+            if (ii == 0 and jj==0):
+                print("return1: " + str(PropSumArray[ii][jj]) + "return2: " + str(debug_fsumsingle_max[ii][jj]))
 
-        # Mirror left side of kernel array to the right
-        PropSumArrayright = fliplr(PropSumArrayleft[:, 1:])
+    time_kern = time.time() - start
+    logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
 
-        # Complete 2d propagation function by putting left and right together
-        PropSumArray = hstack((PropSumArrayleft, PropSumArrayright))
-    else:
-        # debug checks for subset arrays
-        logger.debug('Problem Index Chi: %s', Chi[523, 470])
-        logger.debug('Chi: %s', Chi)
-        logger.debug('Problem Index u0: %s', u0[523, 470])
-        logger.debug('u0: %s', u0)
-        logger.debug('Problem Index l_OC: %s', l_OC[523, 470])
-        logger.debug('l_OC: %s', l_OC)
-        logger.debug('Problem Index theta: %s', theta[523, 470])
-        logger.debug('theta: %s', theta)
-        logger.debug('Surrounding Indices beta: %s', beta[522:525, 470])
-        logger.debug('Problem Index beta: %s', beta[523, 470])
-        logger.debug('beta: %s', beta)
+    logger.debug('Surrounding Indices PropSumArray: %s', PropSumArray[522:525, 470])
+    logger.debug('Problem Index PropSumArray: %s', PropSumArray[523, 470])
+    logger.debug('PropSumArray: %s', PropSumArray)
 
-        # initialize for 2d iteration
-        PropSumArray = zeros_like(l_OC)
-        kerdim = l_OC.shape
-        ker10per = kerdim[0]//10
-
-        logger.info("Beginning kernel...")
-        start = time.time()
-
-        # 2d iteration for integrating from u0 to infinity to create propagation function for each element
-        #for p,c,u,l,t,b in itertools.izip(nditer(PropSumArray, op_flags=['readwrite']), nditer(Chi, op_flags=['readwrite']), nditer(u0, op_flags=['readwrite']), nditer(l_OC, op_flags=['readwrite']), nditer(theta, op_flags=['readwrite']), nditer(beta, op_flags=['readwrite'])):
-        #    p[...] = fsum_single(R_T, c, u, l, t, b, zen, ubr, k_am)
-
-        for ii in range(kerdim[0]):
-            if mod(ii, ker10per) == 0:
-                interm = time.time() - start
-                logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
-                            zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
-            for jj in range(kerdim[1]):
-                return1, return2 = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
-                                                   l_OC[ii][jj], theta[ii][jj],
-                                                   beta[ii][jj], zen, ubr, k_am)
-            #PropSumArray[ii][jj]
-                if (ii == 0 and jj==0):
-                    print("return1: " + return1))
-
-        time_kern = time.time() - start
-        logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
-
-        logger.debug('Surrounding Indices PropSumArray: %s', PropSumArray[522:525, 470])
-        logger.debug('Problem Index PropSumArray: %s', PropSumArray[523, 470])
-        logger.debug('PropSumArray: %s', PropSumArray)
+    debug_max_path = 'debug_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(debug_fsumsingle_max, debug_max_path, fin)
+    debug_min_path = 'debug_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(debug_fsumsingle_min, debug_min_path, fin)
+    debug_u0val_path = 'debug_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(debug_fsumsingle_u0val, debug_u0val_path, fin)
 
     return PropSumArray, time_kern
 
@@ -913,8 +932,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     """Calculate total light propagation at an observation site along a viewing
     angle vector.
     """
-    if isnan(l_OC):
-        return nan
+    #if isnan(l_OC):
+    #    return nan
 
     # Scattering distance increment for finite integration over u (km)
     del_u0 = del_u_farg
@@ -965,6 +984,12 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
     # loop counter
     lc = 1
+    return_dict = {
+        "total_sum": 99999,
+        "max": 99999,
+        "min": 99999,
+        "u0_val": 99999
+    }
 
     while u_OQ < 30.0: # df_prop > stability_limit*total_sum:
         # START OF "u" LOOP
@@ -1088,13 +1113,29 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         # integrand of propogation function, REF 2, Eq. 3, p. 644
         total_sum += df_prop
         u_OQ += del_u
+
+        #assign debugging values
+        #may want to have more values later in the dictionary
+        if return_dict["max"] == 99999:
+            return_dict["max"] = df_prop
+            return_dict["u0_val"] = df_prop
+        else:
+            if df_prop > return_dict["max"]:
+                return_dict["max"] = df_prop
+
+        if return_dict["min"] == 99999:
+            return_dict["min"] = df_prop
+        else:
+            if df_prop < return_dict["min"]:
+                return_dict["min"] = df_prop
+
     if total_sum > 1:
         print('break!')
-    test_return = int(8)
-    test_return2 = int(10)
-    #print("test_return_in_fsumsingle:" + str(test_return))
-    #print("total_sum: " + str(total_sum))
-    return test_return1, test_return2
+
+    return_dict["total_sum"] = total_sum
+    #print("fsum_single_max:" + str(return_dict["max"]) + "fsum_single_totsum:" + str(return_dict["total_sum"]))
+
+    return return_dict
 
 def array_to_geotiff(array, outfilename, referenceVIIRS, new_trans = None):
     """Save numpy array as a geotiff.
