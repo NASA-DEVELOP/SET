@@ -799,9 +799,23 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
 
     # initialize for 2d iteration
     PropSumArray = zeros_like(l_OC)
-    debug_fsumsingle_max = zeros_like(l_OC)
-    debug_fsumsingle_min = zeros_like(l_OC)
-    debug_fsumsingle_u0val = zeros_like(l_OC)
+
+    Su_max_array = zeros_like(l_OC)
+    Su_min_array = zeros_like(l_OC)
+    Su_u0val_array = zeros_like(l_OC)
+
+    Sd_max_array = zeros_like(l_OC)
+    Sd_min_array = zeros_like(l_OC)
+    Sd_u0val_array = zeros_like(l_OC)
+
+    DS_max_array = zeros_like(l_OC)
+    DS_min_array = zeros_like(l_OC)
+    DS_u0val_array = zeros_like(l_OC)
+
+    ips_max_array = zeros_like(l_OC)
+    ips_min_array = zeros_like(l_OC)
+    ips_u0val_array = zeros_like(l_OC)
+
     kerdim = l_OC.shape
     ker10per = kerdim[0]//10
 
@@ -823,17 +837,52 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
                                                beta[ii][jj], zen, ubr, k_am)
             if abs(results_packed["total_sum"] - 88888) < 0.1:
                 PropSumArray[ii][jj] = NaN
-                debug_fsumsingle_max[ii][jj] = NaN
-                debug_fsumsingle_min[ii][jj] = NaN
-                debug_fsumsingle_u0val[ii][jj] = NaN
+
+                Su_max_array[ii][jj] = NaN
+                Su_min_array[ii][jj] = NaN
+                Su_u0val_array[ii][jj] = NaN
+
+                Sd_max_array[ii][jj] = NaN
+                Sd_min_array[ii][jj] = NaN
+                Sd_u0val_array[ii][jj] = NaN
+
+                DS_max_array[ii][jj] = NaN
+                DS_min_array[ii][jj] = NaN
+                DS_u0val_array[ii][jj] = NaN
+
+                ips_max_array[ii][jj] = NaN
+                ips_min_array[ii][jj] = NaN
+                ips_u0val_array[ii][jj] = NaN
+
             else:
                 PropSumArray[ii][jj] = results_packed["total_sum"]
-                debug_fsumsingle_max[ii][jj] = results_packed["max"]
-                debug_fsumsingle_min[ii][jj] = results_packed["min"]
-                debug_fsumsingle_u0val[ii][jj] = results_packed["u0_val"]
+
+                Su_max_array[ii][jj] = results_packed["Su_max"]
+                Su_min_array[ii][jj] = results_packed["Su_min"]
+                Su_u0val_array[ii][jj] = results_packed["Su_u0_val"]
+
+                Sd_max_array[ii][jj] = results_packed["Sd_max"]
+                Sd_min_array[ii][jj] = results_packed["Sd_min"]
+                Sd_u0val_array[ii][jj] = results_packed["Sd_u0_val"]
+
+                DS_max_array[ii][jj] = results_packed["DS_max"]
+                DS_min_array[ii][jj] = results_packed["DS_min"]
+                DS_u0val_array[ii][jj] = results_packed["DS_u0_val"]
+
+                ips_max_array[ii][jj] = results_packed["ips_max"]
+                ips_min_array[ii][jj] = results_packed["ips_min"]
+                ips_u0val_array[ii][jj] = results_packed["ips_u0_val"]
 
             if (ii == kerdim[0]/2 and jj== kerdim[1]/2):
-                print("PropSumArray_val: " + str(PropSumArray[ii][jj]) + "max: " + str(debug_fsumsingle_max[ii][jj]) + "min: " + str(debug_fsumsingle_min[ii][jj]) + "u0_val: " + str(debug_fsumsingle_u0val[ii][jj]))
+                print("PropSumArray_val: " + str(PropSumArray[ii][jj]))
+                print("Su_max: " + str(Su_max_array[ii][jj]))
+                print("Su_min: " + str(Su_min_array[ii][jj]))
+                print("Sd_max: " + str(Sd_max_array[ii][jj]))
+                print("Sd_min: " + str(Sd_min_array[ii][jj]))
+                print("DS_max: " + str(DS_max_array[ii][jj]))
+                print("DS_min: " + + str(DS_min_array[ii][jj]))
+                print("ips_max: " + str(ips_max_array[ii][jj]))
+                print("ips_min: " + + str(ips_min_array[ii][jj]))
 
     time_kern = time.time() - start
     logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -842,12 +891,37 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     logger.debug('Problem Index PropSumArray: %s', PropSumArray[523, 470])
     logger.debug('PropSumArray: %s', PropSumArray)
 
-    debug_max_path = 'debug_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(debug_fsumsingle_max, debug_max_path, fin)
-    debug_min_path = 'debug_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(debug_fsumsingle_min, debug_min_path, fin)
-    debug_u0val_path = 'debug_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(debug_fsumsingle_u0val, debug_u0val_path, fin)
+    Su_max_path = 'Su_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(Su_max_array, Su_max_path, fin)
+    Su_min_path = 'Su_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(Su_min_array, Su_min_path, fin)
+    Su_u0val_path = 'Su_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(Su_u0val_array, Su_u0val_path, fin)
+    print("Created Su geotiffs")
+
+    Sd_max_path = 'Sd_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(Sd_max_array, Sd_max_path, fin)
+    Sd_min_path = 'Sd_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(Sd_min_array, Sd_min_path, fin)
+    Sd_u0val_path = 'Sd_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(Sd_u0val_array, Sd_u0val_path, fin)
+    print("Created Sd geotiffs")
+
+    DS_max_path = 'DS_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(DS_max_array, DS_max_path, fin)
+    DS_min_path = 'DS_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(DS_min_array, DS_min_path, fin)
+    DS_u0val_path = 'DS_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(DS_u0val_array, DS_u0val_path, fin)
+    print("Created DS geotiffs")
+
+    ips_max_path = 'ips_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(ips_max_array, ips_max_path, fin)
+    ips_min_path = 'ips_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(ips_min_array, ips_min_path, fin)
+    ips_u0val_path = 'ips_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    array_to_geotiff(ips_u0val_array, ips_u0val_path, fin)
+    print("Created ips geotiffs")
 
     return PropSumArray, time_kern
 
@@ -941,16 +1015,22 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     """
     return_dict = {
         "total_sum": 99999,
-        "max": 99999,
-        "min": 99999,
-        "u0_val": 99999
+        "Su_max": 99999,
+        "Su_min": 99999,
+        "Su_u0_val": 99999,
+        "Sd_max": 99999,
+        "Sd_min": 99999,
+        "Sd_u0_val": 99999,
+        "DS_max": 99999,
+        "DS_min": 99999,
+        "DS_u0_val": 99999,
+        "ips_max": 99999,
+        "ips_min": 99999,
+        "ips_u0_val": 99999
     }
 
     if isnan(l_OC):
         return_dict["total_sum"] = 88888
-        return_dict["max"] = 88888
-        return_dict["min"] = 88888
-        return_dict["max"] = 88888
         return return_dict
         #print("L_OC ERROR: R_T:" + str(R_T) + "Chi: " + str(Chi))
 
@@ -1127,20 +1207,63 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         total_sum += df_prop
         u_OQ += del_u
 
-        #assign debugging values
-        #may want to have more values later in the dictionary
-        if abs(return_dict["max"]- 99999) < 0.1:
-            return_dict["max"] = df_prop
-            return_dict["u0_val"] = df_prop
-        else:
-            if df_prop*pow(10,14) > (return_dict["max"])*pow(10,14):
-                return_dict["max"] = df_prop
+        #assign debugging values- may want to have more values later in the dictionary
 
-        if abs(return_dict["min"] - 99999) < 0.1:
-            return_dict["min"] = df_prop
+        #S_u debugging returns
+        if abs(return_dict["Su_max"]- 99999) < 0.1:
+            return_dict["Su_max"] = S_u
+            return_dict["Su_u0_val"] = S_u
         else:
-            if df_prop*pow(10,14) < (return_dict["min"])*pow(10,14):
-                return_dict["min"] = df_prop
+            if S_u > (return_dict["Su_max"]):
+                return_dict["Su_max"] = S_u
+
+        if abs(return_dict["Su_min"] - 99999) < 0.1:
+            return_dict["Su_min"] = S_u
+        else:
+            if S_u < (return_dict["Su_min"]):
+                return_dict["Su_min"] = S_u
+
+        #Sd debugging returns
+        if abs(return_dict["Sd_max"]- 99999) < 0.1:
+            return_dict["Sd_max"] = S_d
+            return_dict["Sd_u0_val"] = S_d
+        else:
+            if S_d > (return_dict["Sd_max"]):
+                return_dict["Sd_max"] = S_d
+
+        if abs(return_dict["Sd_min"] - 99999) < 0.1:
+            return_dict["Sd_min"] = S_d
+        else:
+            if S_d < (return_dict["Sd_min"]):
+                return_dict["Sd_min"] = S_d
+
+        #DS debugging returns
+        if abs(return_dict["DS_max"]- 99999) < 0.1:
+            return_dict["DS_max"] = D_S
+            return_dict["DS_u0_val"] = D_S
+        else:
+            if D_S > (return_dict["DS_max"]):
+                return_dict["DS_max"] = D_S
+
+        if abs(return_dict["DS_min"] - 99999) < 0.1:
+            return_dict["DS_min"] = D_S
+        else:
+            if D_S < (return_dict["DS_min"]):
+                return_dict["DS_min"] = D_S
+
+        #i_ps debugging returns
+        if abs(return_dict["ips_max"]- 99999) < 0.1:
+            return_dict["ips_max"] = i_ps
+            return_dict["ips_u0_val"] = i_ps
+        else:
+            if i_ps > (return_dict["ips_max"]):
+                return_dict["ips_max"] = i_ps
+
+        if abs(return_dict["ips_min"] - 99999) < 0.1:
+            return_dict["ips_min"] = i_ps
+        else:
+            if i_ps < (return_dict["ips_min"]):
+                return_dict["ips_min"] = i_ps
 
     if total_sum > 1:
         print('break!')
