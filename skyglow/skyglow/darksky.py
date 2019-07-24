@@ -1084,7 +1084,10 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     # loop counter
     lc = 1
 
-    while u_OQ < 30.0: # df_prop > stability_limit*total_sum:
+    # Upper limit of integration
+    u_lim = 250.0
+
+    while u_OQ < u_lim: # df_prop > stability_limit*total_sum:
         # START OF "u" LOOP
 
         if u_OQ < ubreak:
