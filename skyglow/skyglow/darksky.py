@@ -423,8 +423,8 @@ def generate_hem(lat, lon, skyglow_folder):
         except:
             raise ValueError("Latitude/longitude must be within bounds of skyglow map.")
         # remove anomalous values near azimuth 180 (why is it happening?)
-        #if azimuth == 180 or azimuth == -180:
-        #    val = 0
+        if azimuth == 180 or azimuth == -180:
+           val = 0
         vals.append(val)
         print(zenith, azimuth, val)
 
@@ -696,8 +696,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cenlat, p_rad)
 
     # DEBUGGING: Printing out latitude and longitude arrays for each park. For each park lat and long arrays should be the same across zenith and azimuths.
-    #logger.info('file path: {}'.format(fin))
-    #source_lat_path = 'source_lat_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
+    # logger.info('file path: {}'.format(fin))
+    # source_lat_path = 'source_lat_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
     # array_to_geotiff(source_lat, source_lat_path, fin)
     # rltv_long_path = 'rltv_long_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
     # array_to_geotiff(rltv_long, rltv_long_path, fin)
@@ -706,8 +706,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # using haversine formula
     D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
 
-    # Assignment of NaNs or null values outside of 200 km
-    D_OC[D_OC > 201.0] = NaN
+    # Assignment of NaNs or null values outside of 205 km
+    D_OC[D_OC > 205.0] = NaN
     # Delete NaN rows and columns
     D_OC = D_OC[~isnan(D_OC).all(axis=1)]
     D_OC = D_OC[:, ~isnan(D_OC).all(axis=0)]
@@ -729,7 +729,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
     u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
     # DEBUGGING: Example of how to print a variable to geotiff format for debugging inspection
-    #array_to_geotiff(u0, "u0asymmetrytest.tif", fin)
+    # array_to_geotiff(u0, "u0asymmetrytest.tif", fin)
 
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
     # l_OC and D_OC are similar as expected
@@ -881,6 +881,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
                 ips_max_array[ii][jj] = results_packed["ips_max"]
                 ips_min_array[ii][jj] = results_packed["ips_min"]
                 ips_u0val_array[ii][jj] = results_packed["ips_u0_val"]
+
             # log print to quickly check kernel value at the center pixel and debugging matrix values
             if (ii == kerdim[0]/2 and jj== kerdim[1]/2):
                 # printing out kernel value at center pixel as a quick check
@@ -935,6 +936,12 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     ips_u0val_path = 'ips_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
     array_to_geotiff(ips_u0val_array, ips_u0val_path, fin)
     print("Created ips geotiffs")
+
+    # Assignment of NaNs or null values outside of 200 km
+    PropSumArray [D_OC > 201.0] = NaN
+    # Delete NaN rows and columns
+    PropSumArray = PropSumArray [~isnan(PropSumArray).all(axis=1)]
+    PropSumArray = PropSumArray [:, ~isnan(PropSumArray).all(axis=0)]
 
     return PropSumArray, time_kern
 
@@ -1090,8 +1097,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     # *End Constants*
 
     # containers for variables that update in loop
-    # DEBUGGING: put in a +0.2 since u_0 seem to be causing the North/South spikes in the kernel values
-    u_OQ = u0 + 0.2 # km
+    # DEBUGGING option to try later: put in a +0.2 since u_0 seem to be causing the North/South spikes in the kernel values
+    u_OQ = u0 # km
     total_sum = 0
     df_prop = 1
 
@@ -1102,10 +1109,10 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     lc = 1
 
     # Upper limit of integration
-    # DEBUGGING: u_lim was originally 30.0 but we are running with 250.0 to test if the longer path of
+    # DEBUGGING option tried: u_lim was originally 30.0 but we tried running with 250.0 to test if the longer path of
     # integration will help with the longer line of sight towards the horizon which could be
-    # influenced by other light sources and atmospheric scattering
-    u_lim = 250.0
+    # influenced by other light sources and atmospheric scattering. Back to 30 km now as we test path forward from flip(0)/180 kernels
+    u_lim = 30.0
 
     # this is where the double summation/integration starts REF 2, pg. 645 equation 9
     while u_OQ < u_lim: # df_prop > stability_limit*total_sum:
