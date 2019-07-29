@@ -423,8 +423,8 @@ def generate_hem(lat, lon, skyglow_folder):
         except:
             raise ValueError("Latitude/longitude must be within bounds of skyglow map.")
         # remove anomalous values near azimuth 180 (why is it happening?)
-        if azimuth == 180 or azimuth == -180:
-            val = 0
+        #if azimuth == 180 or azimuth == -180:
+        #    val = 0
         vals.append(val)
         print(zenith, azimuth, val)
 
@@ -488,7 +488,7 @@ def generate_hem(lat, lon, skyglow_folder):
     cbar = fig.colorbar(cax, ticks=[nanmin(z_hammer), (nanmax(z_hammer)-nanmin(z_hammer))/2, nanmax(z_hammer)], orientation='horizontal')
     cbar.set_label('Sky brightness')
     cbar.ax.set_xticklabels(['Low', 'Medium', 'High'])  # horizontal colorbar
-    ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10)
+    ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10) #the red dots marking out sample points
     plt.show()
 
 def to_hammer_xy(lat, lon):
@@ -695,6 +695,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Create latitude/longitude arrays
     source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cenlat, p_rad)
 
+    # DEBUGGING: Printing out latitude and longitude arrays for each park. For each park lat and long arrays should be the same across zenith and azimuths.
     #logger.info('file path: {}'.format(fin))
     #source_lat_path = 'source_lat_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
     # array_to_geotiff(source_lat, source_lat_path, fin)
@@ -727,6 +728,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
 
     # u0, shortest scattering distance based on curvature of the Earth, REF 2, Eq. 21, p. 647
     u0 = 2.0*R_T*sin(Chi/2.0)**2.0/(sin(zen)*cos(beta)*sin(Chi)+cos(zen)*cos(Chi)) #km
+    # DEBUGGING: Example of how to print a variable to geotiff format for debugging inspection
     #array_to_geotiff(u0, "u0asymmetrytest.tif", fin)
 
     # l, Direct line of sight distance between source and observations site, REF 2, Appendix A (A1), p. 656
@@ -742,6 +744,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # simulates what a 180 degrees azimuth input would look like to the program to make sure that rounding errors dont prevent the if statement
     logger.info('azi, {}'.format(azi))
     azi_of_180 = float(180)*pi/180.0
+    #DEBUGGING: Commented out mirroring in case it was causing problem at 180 azimuth
     # if azi in {0.0, azi_of_180, -azi_of_180}:
     #     # Get left arrays to cut processing time in half
     #     Chileft = Chi[0:, 0:widthcenter]
@@ -797,9 +800,10 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     #     logger.debug('Problem Index beta: %s', beta[523, 470])
     #     logger.debug('beta: %s', beta)
 
-    # initialize for 2d iteration
+    # initialize kernel matrix for 2d iteration
     PropSumArray = zeros_like(l_OC)
 
+    # DEBUGGING: Initializing matrices for debugging fsum_single outputs which feed into fsum_2d
     Su_max_array = zeros_like(l_OC)
     Su_min_array = zeros_like(l_OC)
     Su_u0val_array = zeros_like(l_OC)
@@ -832,12 +836,16 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
             logger.info("Kernel (%d, %d), %d percent complete, %d minutes",
                         zen, azi, ceil(100.0*ii/kerdim[0]), interm/60.0)
         for jj in range(kerdim[1]):
+            # returning a dictionary with value for this pixel of the kernel plus debugging values
             results_packed = fsum_single(R_T, Chi[ii][jj], u0[ii][jj],
                                                l_OC[ii][jj], theta[ii][jj],
                                                beta[ii][jj], zen, ubr, k_am)
+            # unpacking results dictionary to separate kernel values from debugging values
+            # if statements address cases where the kernel value is null due to l_OC being null
             if abs(results_packed["total_sum"] - 88888) < 0.1:
+                # assigning kernel value to kernel output matrix
                 PropSumArray[ii][jj] = NaN
-
+                # DEBUGGING: remainder of this if statement is assigning values to variables for the debugging of fsum_single
                 Su_max_array[ii][jj] = NaN
                 Su_min_array[ii][jj] = NaN
                 Su_u0val_array[ii][jj] = NaN
@@ -855,8 +863,9 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
                 ips_u0val_array[ii][jj] = NaN
 
             else:
+                # assigning kernel value at the pixel to the kernel output matrix for non-NaN values
                 PropSumArray[ii][jj] = results_packed["total_sum"]
-
+                # DEBUGGING: remainder of this if statement is assigning values to variables for the debugging of fsum_single
                 Su_max_array[ii][jj] = results_packed["Su_max"]
                 Su_min_array[ii][jj] = results_packed["Su_min"]
                 Su_u0val_array[ii][jj] = results_packed["Su_u0_val"]
@@ -872,9 +881,11 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
                 ips_max_array[ii][jj] = results_packed["ips_max"]
                 ips_min_array[ii][jj] = results_packed["ips_min"]
                 ips_u0val_array[ii][jj] = results_packed["ips_u0_val"]
-
+            # log print to quickly check kernel value at the center pixel and debugging matrix values
             if (ii == kerdim[0]/2 and jj== kerdim[1]/2):
+                # printing out kernel value at center pixel as a quick check
                 print("PropSumArray_val: " + str(PropSumArray[ii][jj]))
+                #DEBUGGING: printing out debugging values at center for reference
                 print("Su_max: " + str(Su_max_array[ii][jj]))
                 print("Su_min: " + str(Su_min_array[ii][jj]))
                 print("Sd_max: " + str(Sd_max_array[ii][jj]))
@@ -891,6 +902,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     logger.debug('Problem Index PropSumArray: %s', PropSumArray[523, 470])
     logger.debug('PropSumArray: %s', PropSumArray)
 
+    # DEBUGGING: printing out geotiffs of debugging matrices with maximum, minimum, and integration
+    # starting value at each pixel for each potentially problem fsum_single variable
     Su_max_path = 'Su_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
     array_to_geotiff(Su_max_array, Su_max_path, fin)
     Su_min_path = 'Su_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
@@ -1013,8 +1026,11 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     """Calculate total light propagation at an observation site along a viewing
     angle vector.
     """
+    # initializing dictionary of return values for each pixel of the kernels and debugging outputs for variables within this function
     return_dict = {
+        #initializing return variable for kernel pixel value
         "total_sum": 99999,
+        # DEBUGGING: initializing return variable for debugging outputs for variables within this function
         "Su_max": 99999,
         "Su_min": 99999,
         "Su_u0_val": 99999,
@@ -1028,7 +1044,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         "ips_min": 99999,
         "ips_u0_val": 99999
     }
-
+    # if l_OC is null, we can't make this calculation, so return indicator value for null pixels for use in fsum_2d
     if isnan(l_OC):
         return_dict["total_sum"] = 88888
         return return_dict
@@ -1074,7 +1090,8 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     # *End Constants*
 
     # containers for variables that update in loop
-    u_OQ = u0 # km
+    # DEBUGGING: put in a +0.2 since u_0 seem to be causing the North/South spikes in the kernel values
+    u_OQ = u0 + 0.2 # km
     total_sum = 0
     df_prop = 1
 
@@ -1085,8 +1102,12 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     lc = 1
 
     # Upper limit of integration
+    # DEBUGGING: u_lim was originally 30.0 but we are running with 250.0 to test if the longer path of
+    # integration will help with the longer line of sight towards the horizon which could be
+    # influenced by other light sources and atmospheric scattering
     u_lim = 250.0
 
+    # this is where the double summation/integration starts REF 2, pg. 645 equation 9
     while u_OQ < u_lim: # df_prop > stability_limit*total_sum:
         # START OF "u" LOOP
 
@@ -1210,9 +1231,13 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         total_sum += df_prop
         u_OQ += del_u
 
-        #assign debugging values- may want to have more values later in the dictionary
-
-        #S_u debugging returns
+        # DEBUGGING: assign debugging values
+        # for each value we are debugging, we locate the maximum, minimum, and
+        # u_0 starting value. We check each debugging variable to check if it's at
+        # the initializing value of 99999, if so assign the current variable value,
+        # otherwise compare the variable to the existing max or min to see if then
+        # max or min needs to be updated
+        # DEBUGGING: S_u debugging returns
         if abs(return_dict["Su_max"]- 99999) < 0.1:
             return_dict["Su_max"] = S_u
             return_dict["Su_u0_val"] = S_u
@@ -1226,7 +1251,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
             if S_u < (return_dict["Su_min"]):
                 return_dict["Su_min"] = S_u
 
-        #Sd debugging returns
+        # DEBUGGING: Sd debugging returns
         if abs(return_dict["Sd_max"]- 99999) < 0.1:
             return_dict["Sd_max"] = S_d
             return_dict["Sd_u0_val"] = S_d
@@ -1240,7 +1265,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
             if S_d < (return_dict["Sd_min"]):
                 return_dict["Sd_min"] = S_d
 
-        #DS debugging returns
+        # DEBUGGING: DS debugging returns
         if abs(return_dict["DS_max"]- 99999) < 0.1:
             return_dict["DS_max"] = D_S
             return_dict["DS_u0_val"] = D_S
@@ -1254,7 +1279,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
             if D_S < (return_dict["DS_min"]):
                 return_dict["DS_min"] = D_S
 
-        #i_ps debugging returns
+        # DEBUGGING:i_ps debugging returns
         if abs(return_dict["ips_max"]- 99999) < 0.1:
             return_dict["ips_max"] = i_ps
             return_dict["ips_u0_val"] = i_ps
@@ -1270,9 +1295,9 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
     if total_sum > 1:
         print('break!')
-
+    # assign the pixel value for this pixel of the kernel, note that this Value
+    # should be very small, generally in the range of 10^(-16) to 10^(-13)
     return_dict["total_sum"] = total_sum
-    #print("fsum_single_max:" + str(return_dict["max"]) + "fsum_single_totsum:" + str(return_dict["total_sum"]))
 
     return return_dict
 
