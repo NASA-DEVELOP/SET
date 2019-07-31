@@ -21,6 +21,7 @@ import json
 import logging
 import sys
 import glob
+import math #added in debugging for the atan function
 from multiprocessing import Pool
 from builtins import range
 
@@ -438,7 +439,7 @@ def generate_hem(lat, lon, skyglow_folder):
     # convert zenith,azimuth, and values in square grid to Hammer projection
     lat = abs(subtract(zen, 90))
     x_hammer, y_hammer = to_hammer_xy(lat, azi)
-    y_hammer = subtract(abs(subtract(y_hammer, 90)), 10)
+    y_hammer = abs(subtract(y_hammer, 90))
     z_hammer = to_hammer_z(z_dense)
 
     # fill in nan values within hemisphere (but only inside) if any exist
@@ -706,11 +707,11 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # using haversine formula
     D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
 
-    # Assignment of NaNs or null values outside of 205 km
-    D_OC[D_OC > 205.0] = NaN
-    # Delete NaN rows and columns
-    D_OC = D_OC[~isnan(D_OC).all(axis=1)]
-    D_OC = D_OC[:, ~isnan(D_OC).all(axis=0)]
+    # # Assignment of NaNs or null values outside of 205 km
+    # D_OC[D_OC > 205.0] = NaN
+    # # Delete NaN rows and columns
+    # D_OC = D_OC[~isnan(D_OC).all(axis=1)]
+    # D_OC = D_OC[:, ~isnan(D_OC).all(axis=0)]
 
     # Check of D_OC shape after assigning NaNs outside of 200 km radius
     logger.info('kernel width in pixels, trimmed: {}'.format(D_OC.shape[1]))
@@ -940,8 +941,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Assignment of NaNs or null values outside of 200 km
     PropSumArray [D_OC > 201.0] = NaN
     # Delete NaN rows and columns
-    PropSumArray = PropSumArray [~isnan(PropSumArray).all(axis=1)]
-    PropSumArray = PropSumArray [:, ~isnan(PropSumArray).all(axis=0)]
+    # PropSumArray = PropSumArray [~isnan(PropSumArray).all(axis=1)]
+    # PropSumArray = PropSumArray [:, ~isnan(PropSumArray).all(axis=0)]
 
     return PropSumArray, time_kern
 
@@ -1105,17 +1106,22 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     # Total Propagation stable to 3 significant figures
     stability_limit = 0.001
 
+    # # Cylinder of integration parameters to set u_max
+    # h_total = 30.0 # height of cylinder in km
+    # w_total = 201.0 # width of cylinder in km
+    # z_crit = math.atan(w_total/h_total) # critical angle to switch from top of cylinder to side of cylinder
+    # if zen <= z_crit:
+    #     u_max = h_total/cos(zen) # Case of limit of integration being top of cylinder
+    # elif zen > z_crit:
+    #     u_max = w_total/sin(zen) # Case of limit of integration being side of cylinder
+    #logger.info('zenith {}, z_crit {}, u_max {}'.format(zen, z_crit, u_max))
+    u_max = 30.0
+
     # loop counter
     lc = 1
 
-    # Upper limit of integration
-    # DEBUGGING option tried: u_lim was originally 30.0 but we tried running with 250.0 to test if the longer path of
-    # integration will help with the longer line of sight towards the horizon which could be
-    # influenced by other light sources and atmospheric scattering. Back to 30 km now as we test path forward from flip(0)/180 kernels
-    u_lim = 30.0
-
     # this is where the double summation/integration starts REF 2, pg. 645 equation 9
-    while u_OQ < u_lim: # df_prop > stability_limit*total_sum:
+    while u_OQ < u_max: # df_prop > stability_limit*total_sum:
         # START OF "u" LOOP
 
         if u_OQ < ubreak:
