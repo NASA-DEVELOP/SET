@@ -169,6 +169,7 @@ def validate(lat, lon, groundtruth_file, mask_file, skyglow_folder):
             #Adding data to the csv for each skyglow map
             row = str(azimuth) + "," + str(zenith) + "," + str(lat) + "," + str(lon) + "," + str(gt_val) + "," + str(val_unitconverted) + "," + str(delta) + "\n"
             csv.write(row)
+            print(row)
 
     # goodness of fit scores
     #print(spearmanr(gt_vals, vals))
@@ -188,6 +189,8 @@ def validate(lat, lon, groundtruth_file, mask_file, skyglow_folder):
 
 #validate(44.66561, -111.06818, 'GroundTruth/YELL_no_trans_nl_sb_gt.tif', 'Masked_Parks/YELL_mask_nl_prj.tif' ,'Park_Skyglow_Maps/YELL06091418/')
 #validate(38.70301, -109.56808, 'GroundTruth/ARCH_no_trans_nl_sb_gt.tif', 'Masked_Parks/ARCH_mask_nl_prj.tif' ,'Park_Skyglow_Maps/ARCH05101418/')
-validate(41.68272, -87.00682, 'GroundTruth/INDU_no_trans_nl_sb_gt.tif', 'Masked_Parks/INDU_mask_mag_prj.tif' ,'Park_Skyglow_Maps/INDU5101418/')
+#validate(41.68272, -87.00682, 'GroundTruth/INDU_no_trans_nl_sb_gt.tif', 'Masked_Parks/INDU_mask_mag_prj.tif' ,'Park_Skyglow_Maps/INDU5101418/')
 #validate(38.2198, -78.74026, 'GroundTruth/SHEN_no_trans_nl_sb_gt.tif', 'Masked_Parks/SHEN_mask_nl_prj.tif' ,'Park_Skyglow_Maps/SHEN05101418/')
+#validate(38.2198, -78.74026, 'GroundTruth/SHEN_no_trans_nl_sb_gt.tif', 'Masked_Parks/SHEN_250Int_Uo+.2_mask_nl_prj.tif' ,'Park_Skyglow_Maps/SHEN05101418_250Int_uo+0.2/')
+validate(41.83713, -103.7006, 'GroundTruth/SCBL_no_trans_nl_sb_gt.tif', 'Masked_Parks/SCBL_mask_nl_prj.tif' ,'Park_Skyglow_Maps/SCBL_8.1_debugging_masking_larger/')
 

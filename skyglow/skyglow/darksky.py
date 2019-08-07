@@ -47,7 +47,7 @@ default_output_folder = os.path.join(os.getcwd(), "skyglow_out")
 # still consider making external variable/function constants file
 
 PsiZ_cond = 89.5*(pi/180)
-ubr_arg = 10.0
+ubr_arg = 0 #DEBUGGING: experimenting with ubreak zero
 
 
 def main():
@@ -321,7 +321,7 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
         # if hem is False (don't generate hemispherical kernels) just calculate kernel
         if not hem:
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
-        # otherwise find complement angle and flip kernel if complementary kernel file exists
+        # option for hem = True: find complement angle and flip kernel if complementary kernel file exists. Commented out for now.
         else:
             # azimuth_complement = -azimuth
             # # complementary kernels do NOT exist for angles 0, 180, and -180
@@ -429,7 +429,8 @@ def generate_hem(lat, lon, skyglow_folder):
         vals.append(val)
         print(zenith, azimuth, val)
 
-    # I chose Rbf as the interpolator because of https://stackoverflow.com/a/37872172
+    # I chose Rbf as the interpolator because of https://stackoverflow.com/a/37872172.
+    # It's worth exploring other methods, because this one leads to odd behavior above light domes (the light dips down, instead of propagating up).
     interpolator = interpolate.Rbf(azi, zen, vals, function='cubic')
     azinew = arange(-180, 181, 1)
     zennew = arange(0, 81, 1)
@@ -438,6 +439,7 @@ def generate_hem(lat, lon, skyglow_folder):
 
     # convert zenith,azimuth, and values in square grid to Hammer projection
     lat = abs(subtract(zen, 90))
+    # used to locate the red scatterplot dots showing the location of our calculated (as opposed to interpolated) points
     x_hammer, y_hammer = to_hammer_xy(lat, azi)
     y_hammer = abs(subtract(y_hammer, 90))
     z_hammer = to_hammer_z(z_dense)
@@ -696,7 +698,9 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Create latitude/longitude arrays
     source_lat, rltv_long, cent_row, cent_col = create_latlon_arrays(R_T, cenlat, p_rad)
 
-    # DEBUGGING: Printing out latitude and longitude arrays for each park. For each park lat and long arrays should be the same across zenith and azimuths.
+    # DEBUGGING: Use this script to print out any 2-D array variables you are debugging as a TIF, so that you can examine it for any odd behavior.
+    # These lines 1) set a name for the TIF file to be printed, and 2) prints the array out as a TIF
+    # This particular example prints out latitude and longitude arrays for each park. For location, the lat and long arrays should not depend on zenith or azimuth.
     # logger.info('file path: {}'.format(fin))
     # source_lat_path = 'source_lat_asymmetrytest_' + str(cenlat_deg) + '_' +  str(zen) + '_' + str(azi) + '.tif'
     # array_to_geotiff(source_lat, source_lat_path, fin)
@@ -707,13 +711,13 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # using haversine formula
     D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
 
-    # # Assignment of NaNs or null values outside of 205 km
-    # D_OC[D_OC > 205.0] = NaN
-    # # Delete NaN rows and columns
-    # D_OC = D_OC[~isnan(D_OC).all(axis=1)]
-    # D_OC = D_OC[:, ~isnan(D_OC).all(axis=0)]
+    # Assignment of NaNs or null values to D_OC outside of 220 km
+    D_OC[D_OC > 220.0] = NaN
+    # Then, delete the NaN rows and columns to speed up processing
+    D_OC = D_OC[~isnan(D_OC).all(axis=1)]
+    D_OC = D_OC[:, ~isnan(D_OC).all(axis=0)]
 
-    # Check of D_OC shape after assigning NaNs outside of 200 km radius
+    # Check of D_OC shape after assigning NaNs outside of 220 km radius
     logger.info('kernel width in pixels, trimmed: {}'.format(D_OC.shape[1]))
     logger.info('kernel height in pixels, trimmed: {}'.format(D_OC.shape[0]))
     widthcenter = (D_OC.shape[1] + 1)//2
@@ -941,8 +945,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Assignment of NaNs or null values outside of 200 km
     PropSumArray [D_OC > 201.0] = NaN
     # Delete NaN rows and columns
-    # PropSumArray = PropSumArray [~isnan(PropSumArray).all(axis=1)]
-    # PropSumArray = PropSumArray [:, ~isnan(PropSumArray).all(axis=0)]
+    PropSumArray = PropSumArray [~isnan(PropSumArray).all(axis=1)]
+    PropSumArray = PropSumArray [:, ~isnan(PropSumArray).all(axis=0)]
 
     return PropSumArray, time_kern
 
@@ -1099,7 +1103,7 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
 
     # containers for variables that update in loop
     # DEBUGGING option to try later: put in a +0.2 since u_0 seem to be causing the North/South spikes in the kernel values
-    u_OQ = u0 # km
+    u_OQ = u0 + 0.2 # km
     total_sum = 0
     df_prop = 1
 

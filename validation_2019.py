@@ -116,7 +116,7 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         col = int((lon - x_origin) / px_width)
         val = data[row][col]
         val_cdm2 = val*pow(10,-6)  # convert from microcandelas to candelas
-        val_unitconverted = cdm2_to_mag(val_cdm2)  # USE THIS FOR CONVERSION
+        val_unitconverted = cdm2_to_nl(val_cdm2)  # USE THIS FOR CONVERSION
         #we want to convert to nl to compare with the nl version of NPs data since that is not in log form like mag
         vals.append(val_unitconverted)
         print("val_cdm2, ", val_cdm2, val_unitconverted)
@@ -144,4 +144,4 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
     plt.show()
 
 # Validation on Gulf Islands National Seashore example
-validate(38.2198, -78.74026, 'GroundTruth/SHEN_no_trans_mag_sb_gt.tif', 'Park_Skyglow_Maps/SHEN05101418/')
+validate(38.70301, -109.56808, 'GroundTruth/ARCH_no_trans_nl_sb_gt.tif', 'Park_Skyglow_Maps/ARCH_8.5_mask_0.2u0_ubreak0/')
