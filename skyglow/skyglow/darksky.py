@@ -21,7 +21,7 @@ import json
 import logging
 import sys
 import glob
-import math #added in debugging for the atan function
+import math
 from multiprocessing import Pool
 from builtins import range
 
@@ -46,9 +46,12 @@ default_output_folder = os.path.join(os.getcwd(), "skyglow_out")
 # still need to get rid of global variables
 # still consider making external variable/function constants file
 
+# Global Variables
+# DEBUGGING: ubr_arg determines where SET begins integrating at 2 km intervals
+# instead of 0.2km intervals. Original, ubr_arg = 10, but we experimented with
+# ubr_arg = 0 to boost the efficiency of the code while debugging, with no major negative ramifications.
 PsiZ_cond = 89.5*(pi/180)
-ubr_arg = 0 #DEBUGGING: experimenting with ubreak zero
-
+ubr_arg = 0
 
 def main():
     """Main entry point if darksky is run from the command line.
@@ -231,7 +234,7 @@ def sgmapper(centerlat_arg, k_am_arg, zen_arg, azi_arg, filein, prop2filein=""):
     viirsraster = gdal.Open(filein)
     imagearr = viirsraster.ReadAsArray()
 
-    # DEBUG CODE
+    # DEBUGGING: Logger statements
     logger.debug('imagearr shape : {}'.format(imagearr.shape))
     logger.debug('imagearr shape rows : {}'.format(imagearr.shape[0]))
     logger.debug('imagearr shape columns : {}'.format(imagearr.shape[1]))
@@ -272,9 +275,14 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
 
     outname = 'kernel_{}_{}_{}_{}.tif'
     # if hem is False (don't generate hemispherical kernels) just calculate kernel
+    # otherwise find complement angle and flip kernel if complementary kernel file exists
     if not hem:
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
-    # otherwise find complement angle and flip kernel if complementary kernel file exists
+    # DEBUGGING: Because kernels are symmetric across the north-south axis, mirroring across that axis
+    # was introduced to save processing time. Yet we at first were suspicious that mirroring may be amplifying the ghost lights
+    # we were seeing due south and (to a much lesser extent) north. Since mirroring references
+    # those two problem azimuths, we tried commenting out this functionality. However, it does not appear that mirroring
+    # is the root of our problem.
     else:
         # azimuth_complement = -azimuth
         # # complementary kernels do NOT exist for angles 0, 180, and -180
@@ -291,6 +299,7 @@ def generate_krn(centerlat_arg, k_am_arg, zenith, azimuth, filein, hem):
         # # calculate if complementary does not exist
         # else:
         #     propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+        # DEBUGGING: This line was added to directly generate the kernel now that mirroring (above) is not in effect
         propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
     kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
     array_to_geotiff(propkernel, kerneltiffpath, filein)
@@ -319,9 +328,14 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
 
         outname = 'kernel_{}_{}_{}_{}.tif'
         # if hem is False (don't generate hemispherical kernels) just calculate kernel
+        # option for hem = True: find complement angle and flip kernel if complementary kernel file exists.
         if not hem:
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zenith, azimuth, filein)
-        # option for hem = True: find complement angle and flip kernel if complementary kernel file exists. Commented out for now.
+        # DEBUGGING: Because kernels are symmetric across the north-south axis, mirroring across that axis
+        # was introduced to save processing time. Yet we at first were suspicious that mirroring may be amplifying the ghost lights
+        # we were seeing due south and (to a much lesser extent) north. Since mirroring references
+        # those two problem azimuths, we tried commenting out this functionality. However, it does not appear that mirroring
+        # is the root of our problem.
         else:
             # azimuth_complement = -azimuth
             # # complementary kernels do NOT exist for angles 0, 180, and -180
@@ -338,6 +352,7 @@ def krnlibber(centerlat_arg, k_am_arg, angles_file, filein, hem):
             # # calculate if complementary does not exist
             # else:
             #     propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
+            # DEBUGGING: This line was added to directly generate the kernel now that mirroring is not in effect
             propkernel, totaltime = fsum_2d(lat_rad, k_am_arg, zen_rad, azi_rad, filein)
         kerneltiffpath = outname.format(centerlat_arg, k_am_arg, zenith, azimuth)
         array_to_geotiff(propkernel, kerneltiffpath, filein)
@@ -430,7 +445,7 @@ def generate_hem(lat, lon, skyglow_folder):
         print(zenith, azimuth, val)
 
     # I chose Rbf as the interpolator because of https://stackoverflow.com/a/37872172.
-    # It's worth exploring other methods, because this one leads to odd behavior above light domes (the light dips down, instead of propagating up).
+    # DEBUGGING: It's worth exploring other methods, because this one leads to odd behavior above light domes (the light dips down, instead of propagating up).
     interpolator = interpolate.Rbf(azi, zen, vals, function='cubic')
     azinew = arange(-180, 181, 1)
     zennew = arange(0, 81, 1)
@@ -490,7 +505,7 @@ def generate_hem(lat, lon, skyglow_folder):
     cax = ax.imshow(z_hammer, extent=(-180, 180, 80, 0), interpolation='nearest', cmap=cmap)
     cbar = fig.colorbar(cax, ticks=[nanmin(z_hammer), (nanmax(z_hammer)-nanmin(z_hammer))/2, nanmax(z_hammer)], orientation='horizontal')
     cbar.set_label('Sky brightness')
-    cbar.ax.set_xticklabels(['Low', 'Medium', 'High'])  # horizontal colorbar
+    cbar.ax.set_xticklabels(['Low', 'Medium', 'High'])  # horizontal colorbar, defined in relative terms
     ax.scatter(x=x_hammer, y=y_hammer, c='r', s=10) #the red dots marking out sample points
     plt.show()
 
@@ -554,7 +569,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     dnbarr *= viirs_scaling_factor
     proparr = float32(nan_to_num(proparr))
 
-    # DEBUG CODE
+    # DEBUGGING: Logger statements
     logger.debug('dnbarr.shape[0] : {}'.format(dnbarr.shape[0]))
     logger.debug('dnbarr.shape[1] : {}'.format(dnbarr.shape[1]))
     logger.debug('proparr.shape[0] : {}'.format(proparr.shape[0]))
@@ -575,7 +590,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
         pad_down += 1
     padded_prop = pad(proparr,((pad_left,pad_right),(pad_up,pad_down)), 'constant', constant_values = 0)
 
-    # DEBUG CODE
+    # DEBUGGING: Logger statements
     logger.debug('padded_prop : {}'.format(array(padded_prop).shape))
     logger.debug('padded_prop[0] : {}'.format(array(padded_prop).shape[0]))
     logger.debug('padded_prop[1] : {}'.format(array(padded_prop).shape[1]))
@@ -602,7 +617,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     np_dft_kernel_shift = fft.fftshift(np_dft_prop_im)
     np_magnitude_spectrum = 20*log(abs(np_dft_kernel_shift))
 
-    # DEBUG CODE
+    # DEBUGGING: Logger statements
     logger.debug('np_dft_prop_im shape : {}'.format(np_dft_prop_im.shape))
     logger.debug('np_dft_kernel_shift shape : {}'.format(np_dft_kernel_shift.shape))
     logger.debug('np_magnitude_spectrum shape : {}'.format(np_magnitude_spectrum.shape))
@@ -611,7 +626,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     np_dft_viirs_shift = fft.fftshift(np_dft_viirs_im)
     np_magnitude_spectrum_viirs = 20*log(abs(np_dft_viirs_shift))
 
-    # ADDED DEBUG CODE
+    # DEBUGGING: Logger statements
     logger.debug('np_dft_viirs_im shape : {}'.format(np_dft_viirs_im.shape))
     logger.debug('np_dft_viirs_shift shape : {}'.format(np_dft_viirs_shift.shape))
     logger.debug('np_magnitude_spectrum_viirs shape : {}'.format(np_magnitude_spectrum_viirs.shape))
@@ -619,7 +634,7 @@ def convolve_viirs_to_skyglow(dnbarr, proparr):
     kernel_inv_shift = fft.ifftshift(np_dft_kernel_shift)
     viirs_inv_shift = fft.ifftshift(np_dft_viirs_shift)
 
-    # ADDED DEBUG CODE
+    # DEBUGGING: Logger statements
     logger.debug('kernel_inv_shift shape : {}'.format(kernel_inv_shift.shape))
     logger.debug('viirs_inv_shift shape : {}'.format(viirs_inv_shift.shape))
 
@@ -687,7 +702,8 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # Azimuth angle site, REF 2, Fig 6 p. 648
     logger.info('Site azimuth as referenced from North (deg): {}'.format(azi*(180/pi)))
 
-    # ubr, Length of u for relaxing integration increment
+    # ubr is set to the ubr_arg global variable (line 54), which represents the length along u where
+    # we want to begin relaxing/lengthening the integration increment. Currently, this value is zero.
     ubr = ubr_arg
     logger.info('ubr, Length of u for relaxing integration increment (km): {}'.format(ubr))
 
@@ -712,6 +728,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     D_OC = 2.0*R_T*arcsin(sqrt(sin((source_lat - cenlat)/2.0)**2.0 + cos(cenlat)*cos(source_lat)*sin(rltv_long/2.0)**2.0))
 
     # Assignment of NaNs or null values to D_OC outside of 220 km
+    # DEBUGGING: We used to only mask out to 201 km, but extended this because the smaller mask was causing an edge effect
     D_OC[D_OC > 220.0] = NaN
     # Then, delete the NaN rows and columns to speed up processing
     D_OC = D_OC[~isnan(D_OC).all(axis=1)]
@@ -749,7 +766,7 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     # simulates what a 180 degrees azimuth input would look like to the program to make sure that rounding errors dont prevent the if statement
     logger.info('azi, {}'.format(azi))
     azi_of_180 = float(180)*pi/180.0
-    #DEBUGGING: Commented out mirroring in case it was causing problem at 180 azimuth
+    # DEBUGGING: Commented out this simulation/test for code run
     # if azi in {0.0, azi_of_180, -azi_of_180}:
     #     # Get left arrays to cut processing time in half
     #     Chileft = Chi[0:, 0:widthcenter]
@@ -805,25 +822,14 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
     #     logger.debug('Problem Index beta: %s', beta[523, 470])
     #     logger.debug('beta: %s', beta)
 
-    # initialize kernel matrix for 2d iteration
+    # initialize kernel matrix as 2D array so that we can fill it with outputs from fsum_single
     PropSumArray = zeros_like(l_OC)
 
     # DEBUGGING: Initializing matrices for debugging fsum_single outputs which feed into fsum_2d
-    Su_max_array = zeros_like(l_OC)
-    Su_min_array = zeros_like(l_OC)
-    Su_u0val_array = zeros_like(l_OC)
-
-    Sd_max_array = zeros_like(l_OC)
-    Sd_min_array = zeros_like(l_OC)
-    Sd_u0val_array = zeros_like(l_OC)
-
-    DS_max_array = zeros_like(l_OC)
-    DS_min_array = zeros_like(l_OC)
-    DS_u0val_array = zeros_like(l_OC)
-
-    ips_max_array = zeros_like(l_OC)
-    ips_min_array = zeros_like(l_OC)
-    ips_u0val_array = zeros_like(l_OC)
+    # Commented out for now for final SET upload to Github
+    # Su_max_array = zeros_like(l_OC)
+    # Su_min_array = zeros_like(l_OC)
+    # Su_u0val_array = zeros_like(l_OC)
 
     kerdim = l_OC.shape
     ker10per = kerdim[0]//10
@@ -851,55 +857,24 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
                 # assigning kernel value to kernel output matrix
                 PropSumArray[ii][jj] = NaN
                 # DEBUGGING: remainder of this if statement is assigning values to variables for the debugging of fsum_single
-                Su_max_array[ii][jj] = NaN
-                Su_min_array[ii][jj] = NaN
-                Su_u0val_array[ii][jj] = NaN
-
-                Sd_max_array[ii][jj] = NaN
-                Sd_min_array[ii][jj] = NaN
-                Sd_u0val_array[ii][jj] = NaN
-
-                DS_max_array[ii][jj] = NaN
-                DS_min_array[ii][jj] = NaN
-                DS_u0val_array[ii][jj] = NaN
-
-                ips_max_array[ii][jj] = NaN
-                ips_min_array[ii][jj] = NaN
-                ips_u0val_array[ii][jj] = NaN
-
+                # Su_max_array[ii][jj] = NaN
+                # Su_min_array[ii][jj] = NaN
+                # Su_u0val_array[ii][jj] = NaN
             else:
                 # assigning kernel value at the pixel to the kernel output matrix for non-NaN values
                 PropSumArray[ii][jj] = results_packed["total_sum"]
                 # DEBUGGING: remainder of this if statement is assigning values to variables for the debugging of fsum_single
-                Su_max_array[ii][jj] = results_packed["Su_max"]
-                Su_min_array[ii][jj] = results_packed["Su_min"]
-                Su_u0val_array[ii][jj] = results_packed["Su_u0_val"]
-
-                Sd_max_array[ii][jj] = results_packed["Sd_max"]
-                Sd_min_array[ii][jj] = results_packed["Sd_min"]
-                Sd_u0val_array[ii][jj] = results_packed["Sd_u0_val"]
-
-                DS_max_array[ii][jj] = results_packed["DS_max"]
-                DS_min_array[ii][jj] = results_packed["DS_min"]
-                DS_u0val_array[ii][jj] = results_packed["DS_u0_val"]
-
-                ips_max_array[ii][jj] = results_packed["ips_max"]
-                ips_min_array[ii][jj] = results_packed["ips_min"]
-                ips_u0val_array[ii][jj] = results_packed["ips_u0_val"]
+                # Su_max_array[ii][jj] = results_packed["Su_max"]
+                # Su_min_array[ii][jj] = results_packed["Su_min"]
+                # Su_u0val_array[ii][jj] = results_packed["Su_u0_val"]
 
             # log print to quickly check kernel value at the center pixel and debugging matrix values
             if (ii == kerdim[0]/2 and jj== kerdim[1]/2):
                 # printing out kernel value at center pixel as a quick check
                 print("PropSumArray_val: " + str(PropSumArray[ii][jj]))
-                #DEBUGGING: printing out debugging values at center for reference
-                print("Su_max: " + str(Su_max_array[ii][jj]))
-                print("Su_min: " + str(Su_min_array[ii][jj]))
-                print("Sd_max: " + str(Sd_max_array[ii][jj]))
-                print("Sd_min: " + str(Sd_min_array[ii][jj]))
-                print("DS_max: " + str(DS_max_array[ii][jj]))
-                print("DS_min: " + + str(DS_min_array[ii][jj]))
-                print("ips_max: " + str(ips_max_array[ii][jj]))
-                print("ips_min: " + + str(ips_min_array[ii][jj]))
+                # DEBUGGING: printing out debugging values at center for reference
+                # print("Su_max: " + str(Su_max_array[ii][jj]))
+                # print("Su_min: " + str(Su_min_array[ii][jj]))
 
     time_kern = time.time() - start
     logger.info("Time to produce kernel: %d minutes", time_kern/60.0)
@@ -910,39 +885,17 @@ def fsum_2d(cenlat, k_am, zen, azi, fin):
 
     # DEBUGGING: printing out geotiffs of debugging matrices with maximum, minimum, and integration
     # starting value at each pixel for each potentially problem fsum_single variable
-    Su_max_path = 'Su_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(Su_max_array, Su_max_path, fin)
-    Su_min_path = 'Su_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(Su_min_array, Su_min_path, fin)
-    Su_u0val_path = 'Su_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(Su_u0val_array, Su_u0val_path, fin)
-    print("Created Su geotiffs")
+    # Su_max_path = 'Su_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    # array_to_geotiff(Su_max_array, Su_max_path, fin)
+    # Su_min_path = 'Su_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    # array_to_geotiff(Su_min_array, Su_min_path, fin)
+    # Su_u0val_path = 'Su_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
+    # array_to_geotiff(Su_u0val_array, Su_u0val_path, fin)
+    # print("Created Su geotiffs")
 
-    Sd_max_path = 'Sd_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(Sd_max_array, Sd_max_path, fin)
-    Sd_min_path = 'Sd_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(Sd_min_array, Sd_min_path, fin)
-    Sd_u0val_path = 'Sd_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(Sd_u0val_array, Sd_u0val_path, fin)
-    print("Created Sd geotiffs")
-
-    DS_max_path = 'DS_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(DS_max_array, DS_max_path, fin)
-    DS_min_path = 'DS_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(DS_min_array, DS_min_path, fin)
-    DS_u0val_path = 'DS_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(DS_u0val_array, DS_u0val_path, fin)
-    print("Created DS geotiffs")
-
-    ips_max_path = 'ips_max' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(ips_max_array, ips_max_path, fin)
-    ips_min_path = 'ips_min' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(ips_min_array, ips_min_path, fin)
-    ips_u0val_path = 'ips_u0val' + str(cenlat_deg) + '_' +  str(zen_deg) + '_' + str(azi_deg) + '.tif'
-    array_to_geotiff(ips_u0val_array, ips_u0val_path, fin)
-    print("Created ips geotiffs")
-
-    # Assignment of NaNs or null values outside of 200 km
+    # DEBUGGING: At the end, clipped down to 201 km. I should have deleted these lines down through 901,
+    # but neglected to do so. Please remove and test when you have a chance.
+    # Assignment of NaNs or null values outside of 201 km
     PropSumArray [D_OC > 201.0] = NaN
     # Delete NaN rows and columns
     PropSumArray = PropSumArray [~isnan(PropSumArray).all(axis=1)]
@@ -1043,18 +996,9 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         #initializing return variable for kernel pixel value
         "total_sum": 99999,
         # DEBUGGING: initializing return variable for debugging outputs for variables within this function
-        "Su_max": 99999,
-        "Su_min": 99999,
-        "Su_u0_val": 99999,
-        "Sd_max": 99999,
-        "Sd_min": 99999,
-        "Sd_u0_val": 99999,
-        "DS_max": 99999,
-        "DS_min": 99999,
-        "DS_u0_val": 99999,
-        "ips_max": 99999,
-        "ips_min": 99999,
-        "ips_u0_val": 99999
+        # "Su_max": 99999,
+        # "Su_min": 99999,
+        # "Su_u0_val": 99999,
     }
     # if l_OC is null, we can't make this calculation, so return indicator value for null pixels for use in fsum_2d
     if isnan(l_OC):
@@ -1110,7 +1054,10 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
     # Total Propagation stable to 3 significant figures
     stability_limit = 0.001
 
-    # # Cylinder of integration parameters to set u_max
+    # We tried playing with different lengths of integration. Originally, we were integration
+    # only over 30 km, as specified in the u_max definition below this commented section.
+    # However, we also tried making the integration limit depend on the zenith of observation,
+    # which is this commented out section below, which uses a cylinder to define integration parameters and set u_max
     # h_total = 30.0 # height of cylinder in km
     # w_total = 201.0 # width of cylinder in km
     # z_crit = math.atan(w_total/h_total) # critical angle to switch from top of cylinder to side of cylinder
@@ -1255,60 +1202,18 @@ def fsum_single(R_T, Chi, u0, l_OC, theta, beta_farg, zen_farg, ubrk_farg, K_am_
         # otherwise compare the variable to the existing max or min to see if then
         # max or min needs to be updated
         # DEBUGGING: S_u debugging returns
-        if abs(return_dict["Su_max"]- 99999) < 0.1:
-            return_dict["Su_max"] = S_u
-            return_dict["Su_u0_val"] = S_u
-        else:
-            if S_u > (return_dict["Su_max"]):
-                return_dict["Su_max"] = S_u
-
-        if abs(return_dict["Su_min"] - 99999) < 0.1:
-            return_dict["Su_min"] = S_u
-        else:
-            if S_u < (return_dict["Su_min"]):
-                return_dict["Su_min"] = S_u
-
-        # DEBUGGING: Sd debugging returns
-        if abs(return_dict["Sd_max"]- 99999) < 0.1:
-            return_dict["Sd_max"] = S_d
-            return_dict["Sd_u0_val"] = S_d
-        else:
-            if S_d > (return_dict["Sd_max"]):
-                return_dict["Sd_max"] = S_d
-
-        if abs(return_dict["Sd_min"] - 99999) < 0.1:
-            return_dict["Sd_min"] = S_d
-        else:
-            if S_d < (return_dict["Sd_min"]):
-                return_dict["Sd_min"] = S_d
-
-        # DEBUGGING: DS debugging returns
-        if abs(return_dict["DS_max"]- 99999) < 0.1:
-            return_dict["DS_max"] = D_S
-            return_dict["DS_u0_val"] = D_S
-        else:
-            if D_S > (return_dict["DS_max"]):
-                return_dict["DS_max"] = D_S
-
-        if abs(return_dict["DS_min"] - 99999) < 0.1:
-            return_dict["DS_min"] = D_S
-        else:
-            if D_S < (return_dict["DS_min"]):
-                return_dict["DS_min"] = D_S
-
-        # DEBUGGING:i_ps debugging returns
-        if abs(return_dict["ips_max"]- 99999) < 0.1:
-            return_dict["ips_max"] = i_ps
-            return_dict["ips_u0_val"] = i_ps
-        else:
-            if i_ps > (return_dict["ips_max"]):
-                return_dict["ips_max"] = i_ps
-
-        if abs(return_dict["ips_min"] - 99999) < 0.1:
-            return_dict["ips_min"] = i_ps
-        else:
-            if i_ps < (return_dict["ips_min"]):
-                return_dict["ips_min"] = i_ps
+        # if abs(return_dict["Su_max"]- 99999) < 0.1:
+        #     return_dict["Su_max"] = S_u
+        #     return_dict["Su_u0_val"] = S_u
+        # else:
+        #     if S_u > (return_dict["Su_max"]):
+        #         return_dict["Su_max"] = S_u
+        #
+        # if abs(return_dict["Su_min"] - 99999) < 0.1:
+        #     return_dict["Su_min"] = S_u
+        # else:
+        #     if S_u < (return_dict["Su_min"]):
+        #         return_dict["Su_min"] = S_u
 
     if total_sum > 1:
         print('break!')

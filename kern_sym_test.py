@@ -4,6 +4,7 @@ import numpy as np
 from PIL import Image
 #from matplotlib import pyplot as plt
 
+#tests whether north, south kernels match (they should)
 fp000 = "kernel_30.23151_1.0_80.0_0.0.tif"
 fp180 = "kernel_30.23151_1.0_80.0_-180.0.tif"
 

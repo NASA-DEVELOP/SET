@@ -40,15 +40,15 @@ def validate(lat, lon, groundtruth_file, mask_file, skyglow_folder):
     groundtruth_file (str): path to NPS hemisphere data
     skyglow_folder (str): path to skyglow map folder
     """
-    
-  
-    #Reading in masked park file (eliminates no data)
+
+    # Reading in park file with horizon masked so we can figure out which parts of SET image we should exclude
+    # due to topological shielding
     mask = gdal.Open(mask_file)
     mask_data = mask.ReadAsArray()
     mask_transform = mask.GetGeoTransform()
     mask_x_origin, mask_y_origin = mask_transform[0], mask_transform[3] #coordinates of upper left corner, borders of the pixel
     mask_px_width, mask_px_height = mask_transform[1], mask_transform[5]
-    
+
     #Reading in ground truth raster
     groundtruth_raster = gdal.Open(groundtruth_file)
     gt_transform = groundtruth_raster.GetGeoTransform() #get the transformation used to go from pixel units to coordinates
@@ -57,7 +57,7 @@ def validate(lat, lon, groundtruth_file, mask_file, skyglow_folder):
     #http://www2.geog.ucl.ac.uk/~plewis/geogg122_local/geogg122-old/Chapter4_GDAL/GDAL_Python_bindings.html
     gt_x_origin, gt_y_origin = gt_transform[0], gt_transform[3] #coordinates of upper left corner, borders of the pixel
     gt_px_width, gt_px_height = gt_transform[1], gt_transform[5]
-    
+
     gt_vals, vals, deltas = [], [], []
     skyglow_search = os.path.join(skyglow_folder, '*.tif')
     skyglow_tifs = glob.glob(skyglow_search) #gets all skyglow maps
@@ -108,7 +108,7 @@ def validate(lat, lon, groundtruth_file, mask_file, skyglow_folder):
             gt_val = gt_data[gt_row][gt_col]
 
         print("gt_row, col, val:", gt_row, gt_col, gt_val)
-        
+
 
         #get Mask image value to check for no data (trees/land/ground)
         mask_row = int((altitude - mask_y_origin) / mask_px_height)
@@ -131,12 +131,12 @@ def validate(lat, lon, groundtruth_file, mask_file, skyglow_folder):
                 mask_col = mask_col + 1
             mask_val = mask_data[mask_row][mask_col]
 
-        print("mask_row, col, val:", mask_row, mask_col, mask_val)        
+        print("mask_row, col, val:", mask_row, mask_col, mask_val)
 
         #Checking to see if this is a no data region on the masked image
         if(mask_val > 0):
             gt_vals.append(gt_val)
-            
+
             #gt_vals.append(gt_val_mcd)
             #this line above was appending nothing, since gt_val_mcd was not a defined function
 
@@ -193,4 +193,3 @@ def validate(lat, lon, groundtruth_file, mask_file, skyglow_folder):
 #validate(38.2198, -78.74026, 'GroundTruth/SHEN_no_trans_nl_sb_gt.tif', 'Masked_Parks/SHEN_mask_nl_prj.tif' ,'Park_Skyglow_Maps/SHEN05101418/')
 #validate(38.2198, -78.74026, 'GroundTruth/SHEN_no_trans_nl_sb_gt.tif', 'Masked_Parks/SHEN_250Int_Uo+.2_mask_nl_prj.tif' ,'Park_Skyglow_Maps/SHEN05101418_250Int_uo+0.2/')
 validate(41.83713, -103.7006, 'GroundTruth/SCBL_no_trans_nl_sb_gt.tif', 'Masked_Parks/SCBL_mask_nl_prj.tif' ,'Park_Skyglow_Maps/SCBL_8.1_debugging_masking_larger/')
-

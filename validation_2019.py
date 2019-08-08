@@ -10,6 +10,7 @@ import numpy as np
 from math import pi, pow, log10
 #from sklearn.metrics import r2_score
 
+# for comparing against NPS data in units of magnitude
 def cdm2_to_mag(m):
     """Convert candelas/m2 to mags/arc-second^2.
 
@@ -17,6 +18,7 @@ def cdm2_to_mag(m):
     """
     return log10(m/108000)/(-0.4)
 
+# for comparing against NPS data in units of nanolamberts
 def cdm2_to_nl(m):
     """Convert candelas/m2 to nl.
 
@@ -24,6 +26,8 @@ def cdm2_to_nl(m):
     """
     return 0.000314159265358979*m*(1000000000)
 
+# DEBUGGING: We were trying to figure out the proper units for SET and checked microcandelas and W/cm2/sr.
+# the units are microcandelas, so you shouldn't have to use this other function below
 def wcm2sr_to_nl(m):
     """Convert W/cm2/sr (NOAA Elvidge data units) to nl.
 
@@ -31,7 +35,8 @@ def wcm2sr_to_nl(m):
     """
     return m*2145.7077824*(1000000000)
 
-
+# The main validation function that compares NPS ground-truth to SET skyglow maps (NOT the hemisphere,
+# but instead what the hemispheres are built from, ie, hemispheres before the interpolation algorithm)
 def validate(lat, lon, groundtruth_file, skyglow_folder):
     """Validate skyglow map data with NPS ground truth hemispherical data.
 
@@ -45,20 +50,20 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
     gt_data = groundtruth_raster.ReadAsArray() #reads raster into memory
     #GetGeoTransform produces an array which is being called here to locate elements of the raster
     #http://www2.geog.ucl.ac.uk/~plewis/geogg122_local/geogg122-old/Chapter4_GDAL/GDAL_Python_bindings.html
-    gt_x_origin, gt_y_origin = gt_transform[0], gt_transform[3] #coordinates of upper left corner, borders of the pixel
-    gt_px_width, gt_px_height = gt_transform[1], gt_transform[5]
+    gt_x_origin, gt_y_origin = gt_transform[0], gt_transform[3] #coordinates of upper left corner pixel
+    gt_px_width, gt_px_height = gt_transform[1], gt_transform[5] #pixel size in image, ie the step size we'll use to walking through image
 
     gt_vals, vals, deltas = [], [], []
     skyglow_search = os.path.join(skyglow_folder, '*.tif')
     skyglow_tifs = glob.glob(skyglow_search) #gets all skyglow maps
 
     #Setting up csv of the data
-    download_csv = str(lat) + "val710.csv" #where you want the file to be downloaded to, change name for each run
+    download_csv = str(lat) + "_validationOutput.csv" #where you want the file to be downloaded to, change name for each run
     csv = open(download_csv, "w")
     columnTitleRow = "azimuth, zenith, lat, long, gt_val, set_val, delta\n"
     csv.write(columnTitleRow)
 
-    #import first into ArcMap and Project Raster (to something like Authalic Sphere).
+    #import first into ArcMap and Project Raster into a spheroid projection (e.g., GCS_Sphere_EMEP)
     #Save that raster as a .tif and that's the input for validation.
     # extract values at lat/lon point for each angle (determined by map file name)
     for tif_name in skyglow_tifs:
@@ -86,8 +91,11 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         print("gt_data shape:", gt_data.shape)
         gt_val = gt_data[gt_row][gt_col]
         print("gt_val", gt_val) #brightness of the corresponding pixel
-        #This is confusing. Seems like it's checking whether the pixel we're no has an error, and if so going to the next azimuth/pixel.
-        #but then wouldn't the azimuth of the checked image no longer correspond to that of the skyglow image we're checking?
+
+        # Because the NPS camera equipment may be placed at slightly differently angles each time it is used,
+        # the size of the ground-truth image coordinates are sometimes off by a couple pixels
+        # this while loop takes care of situations when we may be pulling a null NPS value by the border, by walking us
+        # back within the borders of the ground-truth image before saving the pixel value for comparison against SET's value.
         while gt_val < -1000:
             if (90 - altitude) < 0.1:
                 gt_row = gt_row + 1
@@ -99,9 +107,6 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
 
         print("gt_row, col, val:", gt_row, gt_col, gt_val)
         gt_vals.append(gt_val)
-
-        #gt_vals.append(gt_val_mcd)
-        #this line above was appending nothing, since gt_val_mcd was not a defined function
 
         # get SET value for each skyglow tiff
         #We only get the brightness values at the lat-long corresponding to that of the in-situ data
@@ -116,8 +121,8 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         col = int((lon - x_origin) / px_width)
         val = data[row][col]
         val_cdm2 = val*pow(10,-6)  # convert from microcandelas to candelas
-        val_unitconverted = cdm2_to_nl(val_cdm2)  # USE THIS FOR CONVERSION
-        #we want to convert to nl to compare with the nl version of NPs data since that is not in log form like mag
+        val_unitconverted = cdm2_to_nl(val_cdm2)  # USE THIS FOR CONVERSION; change to cdm2_to_mag if we're using NPS image in units of magnitudes
+        #we prefer to convert to nl to compare with the nl version of NPs data since that is not in log form like mag
         vals.append(val_unitconverted)
         print("val_cdm2, ", val_cdm2, val_unitconverted)
 
@@ -129,19 +134,15 @@ def validate(lat, lon, groundtruth_file, skyglow_folder):
         row = str(azimuth) + "," + str(zenith) + "," + str(lat) + "," + str(lon) + "," + str(gt_val) + "," + str(val_unitconverted) + "," + str(delta) + "\n"
         csv.write(row)
 
-    # goodness of fit scores
-    #print(spearmanr(gt_vals, vals))
-    #print('R-Squared result('+str(r2_score(gt_vals, vals))+')')
-    #print('Average delta('+str(np.mean(deltas))+')')
-
     # draw correlation scatterplot
     fig, ax = plt.subplots()
     ax.set_axisbelow(True)
     ax.grid(linestyle='-', linewidth='0.5', color='gray')
-    plt.scatter(x=gt_vals, y=vals, c='r', s=15)
-    plt.xlabel('NPS')
-    plt.ylabel('SET')
+    plt.scatter(x=vals, y=gt_vals, c='r', s=15)
+    plt.xlabel('SET')
+    plt.ylabel('NPS')
     plt.show()
 
 # Validation on Gulf Islands National Seashore example
+# Note the last two arguments--to keep file paths simple, we put the NPS and SET images we are comparing in subfolders of SET alongside this validation script
 validate(38.70301, -109.56808, 'GroundTruth/ARCH_no_trans_nl_sb_gt.tif', 'Park_Skyglow_Maps/ARCH_8.5_mask_0.2u0_ubreak0/')
