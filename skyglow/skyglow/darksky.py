@@ -438,9 +438,9 @@ def generate_hem(lat, lon, skyglow_folder):
             val = data[row][col]
         except:
             raise ValueError("Latitude/longitude must be within bounds of skyglow map.")
-        # remove anomalous values near azimuth 180 (why is it happening?)
-        if azimuth == 180 or azimuth == -180:
-           val = 0
+        # After debugging, no longer need to remove anomalous values near azimuth 180!
+        # if azimuth == 180 or azimuth == -180:
+        #    val = 0
         vals.append(val)
         print(zenith, azimuth, val)
 
