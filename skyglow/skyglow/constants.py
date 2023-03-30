@@ -51,4 +51,6 @@ ABOUT = "Skyglow Estimation Toolbox (SET) v0.0.1\n" \
         "==============================================\n\n" \
         "Icon made by Madebyoliver <https://www.flaticon.com/authors/madebyoliver> " \
         "from www.flaticon.com is licensed by CC 3.0 BY <https://creativecommons.org" \
-        "/licenses/by/3.0/>" \
+        "/licenses/by/3.0/>"
+
+
